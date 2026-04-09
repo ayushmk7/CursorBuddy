@@ -5,3 +5,7 @@
 **/playwright-report/
 **/test-results/
 .DS_Store
+cursorbuddy-waitlist.csv
+promptforcsv
+
+
