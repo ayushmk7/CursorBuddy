@@ -1,0 +1,23 @@
+{
+  "name": "cursorbuddy-hero",
+  "version": "1.0.0",
+  "description": "Remotion composition for CursorBuddy hero MP4",
+  "scripts": {
+    "start": "remotion studio src/index.tsx",
+    "studio": "remotion studio src/index.tsx",
+    "compositions": "remotion compositions src/index.tsx",
+    "render": "remotion render src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-demo.mp4 --codec h264 --crf 18",
+    "poster": "remotion still src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-poster.png --frame 30"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "remotion": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.4.5"
+  }
+}

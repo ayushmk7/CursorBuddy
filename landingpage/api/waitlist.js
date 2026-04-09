@@ -9,6 +9,7 @@ const ALLOWED_APPS = new Set([
   "browser",
   "terminal",
   "all-apps",
+  "contribute",
   "other"
 ]);
 

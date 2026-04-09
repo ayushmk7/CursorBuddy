@@ -177,7 +177,7 @@
         setStatus(
           "error",
           "Something went wrong",
-          "Please try again in a moment. If the issue persists, contact hello@cursorbuddy.dev."
+          "Please try again in a moment. If the issue persists, contact contactayushmadhav@gmail.com."
         );
       }
     } finally {

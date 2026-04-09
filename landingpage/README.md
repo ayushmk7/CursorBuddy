@@ -54,21 +54,45 @@ Example JSON payload to `/api/waitlist`:
 }
 ```
 
-Allowed `preferredApp` values: `vscode`, `jetbrains`, `imovie`, `video-editing`, `creative-suite`, `browser`, `terminal`, `all-apps`, `other`.
+Allowed `preferredApp` values: `vscode`, `jetbrains`, `imovie`, `video-editing`, `creative-suite`, `browser`, `terminal`, `all-apps`, `contribute`, `other`.
 
 ## Deploy on Vercel
 
 1. Create a project named **`cursorbuddy`** (or link with `vercel link --project cursorbuddy`) with **root directory** = `landingpage/`.
-2. In Vercel, add **Neon** (or another Postgres) from **Storage** / Marketplace so **`POSTGRES_URL`** (or `DATABASE_URL`) is set for Production (and Preview if you want test DB).
-3. Optional: set **`WAITLIST_EXPORT_SECRET`** to download signups as CSV:
-   - `GET /api/export-waitlist` with header `Authorization: Bearer <WAITLIST_EXPORT_SECRET>`
-   - or `GET /api/export-waitlist?secret=<WAITLIST_EXPORT_SECRET>`
+2. In Vercel, add **Neon** (or another Postgres) from **Storage** / Marketplace so **`POSTGRES_URL`** (or `DATABASE_URL`) is set for Production (and Preview if you want test DB).  
+   **Do not paste that URL into chat or commit it**—only store it in Vercel **Environment Variables** (or a local `.env` for `vercel dev`).
+3. Set **`WAITLIST_EXPORT_SECRET`** to any long random string (e.g. `openssl rand -hex 32`). Without it, CSV export returns 503.
 4. Redeploy. The first waitlist submission creates the `waitlist_signups` table if it does not exist.
 
 Copy `.env.example` for local `vercel dev` if you wire a dev database.
 
+### Download waitlist signups as CSV
+
+After `POSTGRES_URL` / `DATABASE_URL` and `WAITLIST_EXPORT_SECRET` are set and the site is deployed:
+
+1. Replace the placeholders below with your production host and the same secret you set in Vercel.
+
+**Option A — Authorization header (preferred):**
+
+```bash
+curl -fsSL -H "Authorization: Bearer YOUR_WAITLIST_EXPORT_SECRET" \
+  "https://YOUR_DOMAIN.vercel.app/api/export-waitlist" \
+  -o cursorbuddy-waitlist.csv
+```
+
+**Option B — Query string (easier in a browser; avoid sharing the URL):**
+
+```bash
+curl -fsSL "https://YOUR_DOMAIN.vercel.app/api/export-waitlist?secret=YOUR_WAITLIST_EXPORT_SECRET" \
+  -o cursorbuddy-waitlist.csv
+```
+
+The response is a CSV with columns: `email`, `name`, `preferred_app`, `source`, `created_at`.
+
+**Local:** With `vercel dev` from `landingpage/`, use `http://localhost:3000/api/export-waitlist` (or the port Vercel prints) and the same auth as above.
+
 ## Before launch
 
-- Replace `hello@cursorbuddy.dev` with the production contact address
+- Privacy page contact uses the address shown there; update other pages (footer, terms) if you want the same email everywhere
 - For Netlify-only hosting, set `waitlistMode: "netlify"` and keep Netlify Forms enabled
 - Review the legal copy with counsel if you need jurisdiction-specific terms
