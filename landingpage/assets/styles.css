@@ -92,7 +92,7 @@ input {
 
 .page-home .site-header.glass-bar {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr auto;
   align-items: center;
   column-gap: var(--space-md);
   flex-wrap: unset;
@@ -102,10 +102,6 @@ input {
 .page-home .site-header.glass-bar .brand {
   justify-self: start;
   min-width: 0;
-}
-
-.page-home .site-header__waitlist {
-  justify-self: center;
 }
 
 .page-home .site-header.glass-bar .site-nav {
@@ -969,10 +965,6 @@ input:focus-visible {
 
   .page-home .site-header.glass-bar .brand {
     justify-self: start;
-  }
-
-  .page-home .site-header__waitlist {
-    justify-self: center;
   }
 
   .page-home .site-header.glass-bar .site-nav {

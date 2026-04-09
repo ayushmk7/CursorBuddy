@@ -13,7 +13,7 @@ test("landing page waitlist flow works end to end", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page).toHaveTitle(/CursorBuddy/);
-  await expect(page.getByRole("heading", { level: 1, name: "Speak. It shows you the way." })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Speak Follow Learn" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Join the waitlist" }).first()).toBeVisible();
 
   await openWaitlistModal(page);
