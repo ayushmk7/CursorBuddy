@@ -20,7 +20,7 @@ Do these **in order**. Do not skip verification steps.
    - **`width` × `height`:** `1920` × `1080` (or `1600` × `900` — if you change this, state it in README and keep consistent)
    - **`durationInFrames`:** `450` (15 seconds at 30fps). You may use `360–540` (12–18s) if the story needs it; **document the final value** in README and in `Root.tsx` comments.
 
-4. **Implement the mock UI** (React + inline styles or CSS modules — your choice):
+4. **Implement the mock UI** (React + inline styles or CSS modules — your choice). Aim for **very realistic**, screen-recording-grade fidelity (see [Visual realism (very believable UI)](#visual-realism-very-believable-ui)):
    - **Phase A–B:** Generic **dark IDE** (title bar, activity strip, editor area). **No** real logos (see [Trademark and visual fidelity](#trademark-and-visual-fidelity)).
    - **Phase C–D:** **SCM-inspired** view: changed files list, **Message** input, primary button labeled **Commit**.
 
@@ -33,6 +33,7 @@ Do these **in order**. Do not skip verification steps.
 7. **Implement virtual camera** as a **single wrapper** around the full scene graph:
    - Per-frame **`translate` + `scale`** so the viewport tracks a **look-at** point and uses zoom presets **`establishing` (~1.0)**, **`medium` (~1.12–1.18)**, **`tight` (~1.28–1.38)** per [Virtual camera and zoom](#virtual-camera-and-zoom).
    - **Ease** look-at and scale (interpolate or spring). Respect **safe area** and **motion limits** in that section.
+   - Apply **startup-style cinematic pacing**: **punch-in** on each reveal, **hold** on the key UI/callout, **breathe out** between beats — see [Cinematic pacing (startup-style promos)](#cinematic-pacing-startup-style-promos).
 
 8. **Sequence the narrative** with Remotion **`Sequence`** components **or** an explicit frame → phase map in one module (e.g. `timeline.ts`). Phases **A → B → C → D → E** must match [Storyboard (phases A–E)](#storyboard-phases-ae).
 
@@ -61,12 +62,14 @@ Claude Code is **not done** until **all** applicable items are true:
 - [ ] **User** + **agent** cursors behave as specified; agent lag is **8–12 frames** at 30fps.
 - [ ] **Scripted** waveform only — **no** mic APIs.
 - [ ] **Virtual camera** (translate + scale) follows **look-at** and uses **establishing / medium / tight** zoom across beats; no clipping of callouts/cursors inside [Safe area](#safe-area).
+- [ ] **Cinematic pacing**: **punch-in** (slow ease-in-out zoom) on each major beat, **hold** at peak zoom while the important UI is legible, **breathe out** before the next beat — per [Cinematic pacing (startup-style promos)](#cinematic-pacing-startup-style-promos).
 - [ ] Phases **A–E** are all present and ordered; **callout** text is exactly **“Here’s where you commit.”**
 - [ ] **In-animation click** on commit UI is obvious (cursor + press/highlight).
 - [ ] **Loop** is seamless or documented why a 1-frame crossfade is used.
 - [ ] **MP4 file exists** at the path you chose (prefer **`landingpage/assets/cursorbuddy-hero-demo.mp4`**).
 - [ ] **README** in the Remotion package includes the **exact** render command you used (copy-pasteable).
 - [ ] **No** VS Code / Microsoft / Cursor **official** logos or trade-dress screenshots.
+- [ ] **Very realistic** overall look: believable desktop UI (typography, shadows, borders, cursor quality, motion timing) per [Visual realism (very believable UI)](#visual-realism-very-believable-ui) — reads like a **polished screen recording**, not a flat mock.
 
 ---
 
@@ -98,6 +101,7 @@ You are Claude Code working in the CursorBuddy repo. Build a Remotion 4.x TypeSc
 Deliverables:
 - Composition id: HeroDemo, 30fps, 1920x1080 (or 1600x900), duration 12-18s (e.g. 450 frames at 15s).
 - Output file: landingpage/assets/cursorbuddy-hero-demo.mp4 (H.264+AAC). README with exact npx remotion render command.
+- Visual bar: VERY REALISTIC — must look like a high-quality screen recording of a real desktop app (convincing chrome, typography, shadows, borders, crisp cursors, human motion timing, believable waveform). Original/generic UI only — no VS Code/Cursor/Microsoft logos or pixel-perfect copies of their UI.
 
 Narrative (in order):
 A) Dark generic IDE mock (no VS Code/Cursor/Microsoft logos). User cursor moves; agent cursor follows with 8-12 frame delay, styled #0066FF / #5AC8FA.
@@ -106,7 +110,7 @@ C) Transition to SCM-inspired UI: changed files, Message field, Commit button.
 D) Callout: "Here's where you commit." Fake cursor moves and clicks Commit (or message field) with clear press feedback.
 E) Loop seamlessly back to A (match camera zoom, look-at, cursor rest).
 
-Virtual camera: one wrapper transform translate+scale on entire scene; look-at lerps between focal points; zoom presets establishing ~1.0, medium ~1.15, tight ~1.33; ease motion; keep 6-8% safe margins at tight zoom; cap pan/zoom velocity.
+Virtual camera: one wrapper transform translate+scale on entire scene; look-at lerps between focal points; zoom presets establishing ~1.0, medium ~1.15, tight ~1.33; ease-in-out (not linear). Use startup-style pacing: slow punch-in on each beat, brief hold at tight zoom so UI is readable, breathe out before next beat; keep 6-8% safe margins at tight zoom; cap pan/zoom velocity (no whip pans).
 
 Do not add Remotion Player to the landing page or edit index.html unless explicitly asked.
 Verify: npx remotion compositions shows HeroDemo; render produces the mp4.
@@ -122,6 +126,7 @@ Verify: npx remotion compositions shows HeroDemo; render produces the mp4.
 | **No live features** | **No** visitor microphone, **no** `@remotion/player` on the public page for this hero. Waveforms are **fully scripted**. |
 | **Click behavior** | **In-animation only**: a **fake cursor** moves and performs a **press** on the commit UI. No clickable HTML overlay for users on top of the video (unless added separately later). |
 | **Narrative** | Show that CursorBuddy is an **agent cursor** that **follows** the user, react to **speech** with a **waveform**, then **navigate** to a **source-control / commit** view and **call out** where to commit, ending with a **scripted click**. |
+| **Look & realism** | The video must look **very realistic** — like a **high-quality screen recording** of a believable desktop app, not a flat diagram or storyboard sketch. Follow [Visual realism (very believable UI)](#visual-realism-very-believable-ui). |
 
 ---
 
@@ -131,7 +136,24 @@ Verify: npx remotion compositions shows HeroDemo; render produces the mp4.
 - **Do not** reproduce proprietary UI pixel-perfectly. Build a **generic dark IDE mock**: title bar, activity strip, sidebar, editor area, then an **SCM-inspired** panel (changed files, message field, primary action button labeled e.g. “Commit”).
 - **Rationale**: Avoid trademark and trade-dress issues; the video should read as “a desktop code editor” and “version control sidebar,” not a licensed screenshot.
 
+**Important:** “Generic” refers to **original layout and branding**, not low fidelity. The mock should still be **visually convincing** — see the next section.
+
 **Brand alignment (recommended):** Agent accent **#0066FF**, secondary **#5AC8FA** — aligns with landing tokens in `landingpage/assets/styles.css` (`--landing-accent`, `--landing-info`).
+
+---
+
+## Visual realism (very believable UI)
+
+The hero MP4 should feel **very realistic**: a casual viewer should think “that’s a real app,” while staying within [Trademark and visual fidelity](#trademark-and-visual-fidelity).
+
+- **Density & chrome:** Plausible **title bar** (traffic lights or window controls), **separators**, **scrollbars** or list affordances, **input borders**, **hover/pressed states** on the fake click. Avoid oversized flat rectangles with no hierarchy.
+- **Typography:** Use a **system- or IDE-like** sans + **monospace** for code lines; sizes and weights that match real desktop scale at 1080p (not poster-sized UI).
+- **Color & light:** Dark theme with **subtle gradients**, **inner shadows** on inset panels, **1px borders** at ~40–70% opacity — not pure flat fills. Optional **very light** noise/grain (almost invisible) to kill the “vector slide” look.
+- **Cursors:** **Crisp** pointer graphics, **smooth** movement (ease keyframes), **slight** shadow under the cursor; **click** includes a believable **press** (squash, ripple, or button state change).
+- **Motion:** Cursor paths and camera moves should match **human timing** (slight ease, micro-pauses), not robotic linear slides.
+- **Waveform:** Should read like a **real voice meter** (irregular heights, quick falloff), not a perfect sine toy — still **scripted**, not mic-driven.
+
+If anything looks like a **wireframe** or **Figma low-fi**, push fidelity up until it passes as a **polished product demo** recording.
 
 ---
 
@@ -163,6 +185,19 @@ Implement a **2D virtual camera**: one wrapper around the **entire mock UI** (no
 - **Zoom in** when introducing a new idea: speech/waves, SCM layout, commit target.
 - **Zoom out** briefly between major beats or to **match the first frame** for a seamless loop.
 - **Ease** zoom and pan with `interpolate` (e.g. cubic) or a **spring** with low bounce so motion stays professional.
+
+### Cinematic pacing (startup-style promos)
+
+This is the same attention trick you see in polished **product launch** and **SaaS hero** videos: the camera **does not** stay flat — it **punches in** on what matters, **holds** so you can read it, then **breathes out** before the next beat.
+
+- **Punch in (slow dolly-in feel):** Over **~0.6–1.2 s** (18–36 frames at 30fps), ease from **`establishing` → `medium` or `tight`** toward the focal point (waveform, SCM panel, Commit). Use **ease-in-out** (not linear) so acceleration feels intentional, not mechanical.
+- **Hold:** At **`tight`** (or peak **`medium`**), keep zoom **stable for ~0.4–0.8 s** while the important UI or callout is on screen — startups use this beat so the eye finishes reading.
+- **Breathe out:** Before the next major transition, ease **partway back** toward **`establishing` or `medium`** (~0.5–1.0 s) so the viewer resets and the next punch-in lands harder.
+- **One focal point per beat:** Avoid drifting zoom while the cursor is busy; let **cursor motion** or **camera motion** lead per segment, not both fighting.
+- **No whip pans:** Pan and zoom should feel like a **gimbal / slider**, not handheld — match the [Motion limits](#motion-limits-comfort) caps.
+- **Loop discipline:** The final **breathe-out** should land on the same framing as **second 0** so the loop feels like a continuous reel, not a jump cut.
+
+Implement this with your virtual camera’s **scale + look-at** keyframes (or springs with low overshoot). You are imitating **2.5D Ken Burns on UI**, not 3D camera depth.
 
 ### Look-at (follow target)
 

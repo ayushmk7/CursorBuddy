@@ -78,6 +78,18 @@ input {
   padding: 24px 24px 48px;
 }
 
+.hero-first-screen {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 2.5vh, 28px);
+  min-height: calc(100vh - 24px);
+  min-height: calc(100dvh - 24px);
+}
+
+.hero-first-screen .site-header {
+  flex-shrink: 0;
+}
+
 .site-header,
 .site-footer {
   position: relative;
@@ -178,9 +190,19 @@ input {
 }
 
 .hero {
-  min-height: calc(100vh - 92px);
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hero-first-screen .hero {
+  flex: 1;
+  min-height: 0;
+}
+
+.hero-first-screen .section.hero {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .hero__grid {
@@ -191,8 +213,21 @@ input {
   width: 100%;
 }
 
+.hero-first-screen .hero__grid {
+  flex: 1;
+  align-items: center;
+  min-height: 0;
+}
+
 .hero__copy {
-  max-width: 620px;
+  max-width: min(620px, 100%);
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 32px);
+  border-left: 1px solid rgba(26, 26, 26, 0.1);
+  border-right: 1px solid rgba(26, 26, 26, 0.1);
+  box-sizing: border-box;
+  overflow-wrap: break-word;
 }
 
 .headline,
@@ -211,21 +246,13 @@ h3 {
   line-height: 0.94;
 }
 
+.headline--single {
+  max-width: none;
+}
+
 .headline--compact {
   max-width: 100%;
   font-size: clamp(2.6rem, 6vw, 4.8rem);
-}
-
-@media (min-width: 900px) {
-  .headline--single {
-    max-width: none;
-    white-space: nowrap;
-  }
-
-  .eyebrow--single,
-  .subhead--single {
-    white-space: nowrap;
-  }
 }
 
 .subhead {
@@ -841,8 +868,14 @@ input:focus-visible {
 }
 
 @media (max-width: 639px) {
+  .hero-first-screen {
+    min-height: calc(100vh - 24px - env(safe-area-inset-top, 0px));
+    min-height: calc(100dvh - 24px - env(safe-area-inset-top, 0px));
+  }
+
   .hero__copy {
-    max-width: none;
+    max-width: 100%;
+    padding-inline: clamp(12px, 3.5vw, 24px);
   }
 
   .headline {
@@ -853,12 +886,6 @@ input:focus-visible {
 
   .subhead {
     max-width: none;
-  }
-
-  .hero {
-    min-height: auto;
-    padding-top: 16px;
-    padding-bottom: 28px;
   }
 
   .section {
@@ -903,11 +930,6 @@ input:focus-visible {
 }
 
 @media (max-width: 1080px) {
-  .hero {
-    min-height: auto;
-    padding-top: 24px;
-  }
-
   .hero__grid,
   .feature-layout {
     grid-template-columns: 1fr;
