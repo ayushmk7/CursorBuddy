@@ -6,8 +6,8 @@ export const W = 1920;
 export const H = 1080;
 export const TOTAL_FRAMES = 450; // 15 s
 
-// Agent cursor lag: 10 frames behind user cursor at 30 fps
-export const LAG_FRAMES = 10;
+// Agent cursor lag: 6 frames behind user cursor at 30 fps
+export const LAG_FRAMES = 6;
 
 // Phase frame ranges (inclusive start, exclusive end)
 export const PHASES = {

@@ -7,7 +7,7 @@
       name="description"
       content="CursorBuddy is a local voice companion that guides you through real desktop apps so anyone can learn new workflows step by step."
     >
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#000000">
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; media-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https:; font-src 'self' data:; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'"
@@ -24,7 +24,7 @@
       <div class="hero-first-screen">
         <header class="site-header site-header--home glass-bar">
           <a class="brand" href="/" aria-label="CursorBuddy home">
-            <img src="/assets/brand-mark.svg" alt="" width="28" height="28">
+            <img src="/assets/brand-mark-on-dark.svg" alt="" width="28" height="28">
             <span class="brand__name">CursorBuddy</span>
           </a>
           <nav class="site-nav site-nav--compact" aria-label="Primary">
@@ -38,7 +38,7 @@
             <div class="hero__copy glass-panel">
               <h1 class="headline headline--single headline--tagline">Speak. Follow. Learn.</h1>
               <p class="subhead subhead--single">
-                Voice-guided moves in the real desktop UI—local, private, step by step.
+                Voice-guided moves in the real desktop UI, local, private, step by step.
               </p>
               <div class="hero__actions hero__actions--single">
                 <button type="button" class="button button--primary" data-open-waitlist>Join Waitlist</button>
@@ -52,12 +52,15 @@
             <video
               class="hero-demo__video"
               controls
+              autoplay
+              muted
               loop
               playsinline
-              preload="metadata"
+              preload="auto"
+              poster="/assets/cursorbuddy-hero-remotion-poster.png"
               aria-label="Screen recording of CursorBuddy guiding the cursor in an app"
             >
-              <source src="/assets/cursorbuddy-hero-demo.mp4" type="video/mp4">
+              <source src="/assets/cursorbuddy-hero-remotion.mp4" type="video/mp4">
             </video>
           </div>
         </section>
@@ -80,7 +83,7 @@
             <article class="glass-panel step-card">
               <p class="step-card__index">02</p>
               <h3 class="step-card__title">Follow the cursor</h3>
-              <p>On-screen motion points at the real control—no separate chat surface.</p>
+              <p>On-screen motion points at the real control, with no separate chat surface.</p>
             </article>
 
             <article class="glass-panel step-card">
@@ -100,7 +103,7 @@
             <article class="glass-panel feature-card">
               <p class="section-label">Agentic</p>
               <h3 class="feature-card__title">Plans and acts in the UI</h3>
-              <p>Reasons over the live interface, proposes the next control, and moves with you—not a static tutorial.</p>
+              <p>Reasons over the live interface, proposes the next control, and moves with you, not a static tutorial.</p>
             </article>
 
             <article class="glass-panel feature-card tint-blue">
@@ -112,7 +115,7 @@
             <article class="glass-panel feature-card">
               <p class="section-label">Everywhere (soon)</p>
               <h3 class="feature-card__title">Host apps beyond the editor</h3>
-              <p>Same pattern for multiple desktop apps: IDEs, creative tools, browsers—prioritize hosts on the waitlist.</p>
+              <p>Same pattern for multiple desktop apps: IDEs, creative tools, browsers. Prioritize hosts on the waitlist.</p>
             </article>
           </div>
         </section>

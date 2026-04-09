@@ -85,21 +85,21 @@ const KF_LOOK_Y = [
 
 const KF_SCALE = [
   1.00,  // establishing
-  1.15,  // medium — cursors moving
-  1.15,
-  1.15,  // Phase B start
-  1.25,  // punch to waveform (medium→tight)
-  1.28,  // hold
-  1.18,  // breathe out
-  1.10,  // Phase C: wide to see crossfade
-  1.12,
-  1.15,  // medium on SCM panel
-  1.15,
-  1.18,  // Phase D: start zooming
-  1.33,  // tight on commit
-  1.33,  // hold through click
-  1.22,  // breathe out
-  1.10,  // Phase E
+  1.03,  // very subtle drift
+  1.03,
+  1.03,  // Phase B start
+  1.05,  // gentle ease toward waveform
+  1.05,  // hold
+  1.03,  // breathe out
+  1.00,  // Phase C: wide to see crossfade — back to base
+  1.01,
+  1.03,  // settle on SCM panel
+  1.03,
+  1.04,  // Phase D: barely perceptible zoom in
+  1.06,  // tight on commit — still very gentle
+  1.06,  // hold through click
+  1.03,  // breathe out
+  1.01,  // Phase E
   1.00,  // establishing
   1.00,  // matches frame 0
 ];
@@ -112,7 +112,7 @@ if (KF_FRAMES.length !== KF_LOOK_X.length ||
 }
 
 const easingConfig = {
-  easing: Easing.bezier(0.42, 0, 0.58, 1), // cubic ease-in-out
+  easing: Easing.bezier(0.25, 0.1, 0.25, 1.0), // smooth ease (like CSS ease) — no punch
   extrapolateLeft:  "clamp" as const,
   extrapolateRight: "clamp" as const,
 };

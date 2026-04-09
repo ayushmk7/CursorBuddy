@@ -6,8 +6,8 @@
     "start": "remotion studio src/index.tsx",
     "studio": "remotion studio src/index.tsx",
     "compositions": "remotion compositions src/index.tsx",
-    "render": "remotion render src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-demo.mp4 --codec h264 --crf 18",
-    "poster": "remotion still src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-poster.png --frame 30"
+    "render": "remotion render src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-remotion.mp4 --codec h264 --crf 18",
+    "poster": "remotion still src/index.tsx HeroDemo ../landingpage/assets/cursorbuddy-hero-remotion-poster.png --frame 30"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",

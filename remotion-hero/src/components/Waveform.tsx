@@ -4,10 +4,10 @@ import { WAVEFORM_CX, WAVEFORM_CY, WAVEFORM_W, WAVEFORM_H } from "../timeline";
 // Scripted waveform — deterministic, no microphone.
 // Bar heights derived from seeded pseudo-random + layered sine waves.
 
-const NUM_BARS  = 28;
-const BAR_W     = 6;
+const NUM_BARS  = 32;
+const BAR_W     = 7;
 const GAP       = 4;
-const MAX_H     = WAVEFORM_H - 10;
+const MAX_H     = WAVEFORM_H - 4;
 
 // Seeded deterministic "voice" envelope:
 // Amplitude envelope simulating syllable grouping over time.
@@ -65,14 +65,21 @@ export const Waveform: React.FC<Props> = ({ waveFrame, opacity }) => {
   const left = WAVEFORM_CX - totalWidth / 2;
   const baseline = WAVEFORM_CY + WAVEFORM_H / 2; // bars grow upward from baseline
 
+  // Pulsing dot: beat tied to waveFrame so it pulses with the audio envelope
+  const dotPulse = 0.6 + 0.4 * Math.abs(Math.sin(waveFrame * 0.22));
+
+  // Pill container is taller to accommodate the SPEAKING badge above bars
+  const BADGE_H = 22;
+  const containerH = WAVEFORM_H + BADGE_H + 20;
+
   return (
     <div
       style={{
         position: "absolute",
         left: left - 24,
-        top: WAVEFORM_CY - WAVEFORM_H / 2 - 12,
+        top: WAVEFORM_CY - WAVEFORM_H / 2 - BADGE_H - 16,
         width: totalWidth + 48,
-        height: WAVEFORM_H + 24,
+        height: containerH,
         opacity,
       }}
     >
@@ -81,12 +88,55 @@ export const Waveform: React.FC<Props> = ({ waveFrame, opacity }) => {
         style={{
           position: "absolute",
           inset: 0,
-          background: "rgba(0,0,0,0.45)",
-          borderRadius: 12,
-          backdropFilter: "blur(2px)",
-          border: "1px solid rgba(90,200,250,0.12)",
+          background: "rgba(0,0,0,0.50)",
+          borderRadius: 14,
+          border: "1px solid rgba(90,200,250,0.15)",
         }}
       />
+
+      {/* ── SPEAKING badge ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "5px 16px",
+          background: "rgba(90,200,250,0.16)",
+          border: `1.5px solid rgba(90,200,250,${0.4 + 0.25 * dotPulse})`,
+          borderRadius: 24,
+          whiteSpace: "nowrap",
+          boxShadow: `0 0 ${12 * dotPulse}px rgba(90,200,250,0.25)`,
+        }}
+      >
+        {/* Pulsing dot */}
+        <div
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            background: "#5AC8FA",
+            boxShadow: `0 0 ${10 * dotPulse}px #5AC8FA, 0 0 ${4 * dotPulse}px #fff`,
+            opacity: 0.7 + 0.3 * dotPulse,
+          }}
+        />
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: 1.5,
+            color: "#5AC8FA",
+            textTransform: "uppercase" as const,
+            fontFamily: "'Segoe UI', 'SF Pro Text', system-ui, sans-serif",
+            textShadow: `0 0 ${8 * dotPulse}px rgba(90,200,250,0.6)`,
+          }}
+        >
+          Speaking
+        </span>
+      </div>
 
       {/* Bars */}
       {Array.from({ length: NUM_BARS }, (_, b) => {
@@ -106,7 +156,8 @@ export const Waveform: React.FC<Props> = ({ waveFrame, opacity }) => {
             style={{
               position: "absolute",
               left: x - left + 24,
-              top: y - (WAVEFORM_CY - WAVEFORM_H / 2 - 12),
+              // offset from new container top (badge adds BADGE_H + 16 above old top)
+              top: y - (WAVEFORM_CY - WAVEFORM_H / 2 - BADGE_H - 16),
               width: BAR_W,
               height: h,
               background: color,

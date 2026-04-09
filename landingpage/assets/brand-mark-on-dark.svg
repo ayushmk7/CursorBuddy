@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="CursorBuddy">
+  <title>CursorBuddy</title>
+  <rect x="0" y="0" width="180" height="180" rx="22" fill="none" stroke="#f2f2f3" stroke-width="7"/>
+  <line x1="0" y1="34" x2="180" y2="34" stroke="#f2f2f3" stroke-width="5"/>
+  <circle cx="18" cy="17" r="5" fill="#0066ff"/>
+  <path d="M 58 70 Q 130 55 138 125" fill="none" stroke="#0066ff" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="138" cy="125" r="6" fill="#0066ff"/>
+  <path
+    d="M 82 82 Q 80 80 83 81 L 112 96 Q 115 97 112 99 L 100 103 Q 97 104 98 107 L 103 120 Q 104 123 101 124 L 96 125 Q 93 126 92 123 L 87 110 Q 86 107 83 108 L 75 111 Q 72 112 73 108 L 80 84 Q 81 82 82 82 Z"
+    fill="#f2f2f3"
+  />
+</svg>
