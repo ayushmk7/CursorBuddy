@@ -57,6 +57,7 @@
             <video
               class="hero-demo__video"
               controls
+              loop
               playsinline
               preload="metadata"
               aria-label="Screen recording of CursorBuddy guiding the cursor in an app"
@@ -164,12 +165,22 @@
           </div>
 
           <label class="field" for="waitlist-name">
-            <span>Name <em>Optional</em></span>
-            <input id="waitlist-name" name="name" type="text" autocomplete="name" placeholder="Ada Lovelace">
+            <span>Name <abbr class="required-mark" title="required">*</abbr></span>
+            <input
+              id="waitlist-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              placeholder="Ada Lovelace"
+              required
+              maxlength="200"
+              aria-describedby="waitlist-name-hint"
+            >
+            <small class="field-hint" id="waitlist-name-hint" data-name-hint></small>
           </label>
 
           <label class="field" for="waitlist-email">
-            <span>Email</span>
+            <span>Email <abbr class="required-mark" title="required">*</abbr></span>
             <input
               id="waitlist-email"
               name="email"
@@ -178,12 +189,13 @@
               autocomplete="email"
               placeholder="you@company.com"
               required
+              aria-describedby="waitlist-email-hint"
             >
-            <small class="field-hint" data-field-hint></small>
+            <small class="field-hint" id="waitlist-email-hint" data-field-hint></small>
           </label>
 
           <label class="field" for="preferred-app">
-            <span>Where should CursorBuddy go next?</span>
+            <span>Where should CursorBuddy go next? <abbr class="required-mark" title="required">*</abbr></span>
             <select id="preferred-app" name="preferred_app" required data-preferred-app aria-describedby="preferred-app-hint">
               <option value="" disabled selected>Select one</option>
               <option value="vscode">Visual Studio Code (first demo)</option>

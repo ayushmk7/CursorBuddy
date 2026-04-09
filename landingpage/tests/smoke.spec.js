@@ -10,7 +10,7 @@ function waitlistDialog(page) {
 }
 
 test("landing page waitlist flow works end to end", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "load" });
 
   await expect(page).toHaveTitle(/CursorBuddy/);
   await expect(page.getByRole("heading", { level: 1, name: "Speak. It shows you the way." })).toBeVisible();
@@ -20,18 +20,18 @@ test("landing page waitlist flow works end to end", async ({ page }) => {
 
   const dialog = waitlistDialog(page);
   const emailField = dialog.locator("#waitlist-email");
+  await dialog.locator("#waitlist-name").fill("Ada Lovelace");
   await emailField.fill("not-an-email");
   await dialog.getByRole("button", { name: "Join the waitlist" }).click();
   await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
-  await dialog.locator("#waitlist-name").fill("Ada Lovelace");
   await emailField.fill("ada@example.com");
   await dialog.locator("#preferred-app").selectOption("vscode");
   await dialog.getByRole("button", { name: "Join the waitlist" }).click();
   await page.waitForURL("**/thanks/");
   await expect(page.getByRole("heading", { level: 1, name: "You are on the list." })).toBeVisible();
 
-  await page.goto("/", { waitUntil: "networkidle" });
+  await page.goto("/", { waitUntil: "load" });
   await openWaitlistModal(page);
   const dialog2 = waitlistDialog(page);
   await dialog2.locator("#waitlist-name").fill("Ada Lovelace");

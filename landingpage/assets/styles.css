@@ -465,22 +465,24 @@ input:focus-visible {
 .field span {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 0.35em;
   font-family: var(--font-display);
   font-size: 0.96rem;
   font-weight: 800;
   letter-spacing: -0.02em;
 }
 
-.field em {
-  font-family: var(--font-mono);
-  font-style: normal;
-  font-size: 0.74rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--landing-text-tertiary);
+.field .required-mark {
+  margin: 0;
+  padding: 0;
+  font-weight: 800;
+  font-size: 1.05em;
+  line-height: 1;
+  color: #d92d20;
+  text-decoration: none;
+  cursor: help;
 }
 
 .field input {
@@ -513,7 +515,8 @@ input:focus-visible {
   cursor: pointer;
 }
 
-.field input[aria-invalid="true"] {
+.field input[aria-invalid="true"],
+.field select[aria-invalid="true"] {
   border-color: rgba(255, 59, 48, 0.48);
 }
 

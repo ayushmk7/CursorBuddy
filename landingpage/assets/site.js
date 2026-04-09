@@ -7,8 +7,10 @@
   const submitButton = document.querySelector("[data-submit-button]");
   const form = document.querySelector("[data-waitlist-form]");
   const formStatus = document.querySelector("[data-form-status]");
+  const nameField = form ? form.querySelector('input[name="name"]') : null;
   const emailField = form ? form.querySelector('input[name="email"]') : null;
   const preferredField = form ? form.querySelector("[data-preferred-app]") : null;
+  const nameHint = document.querySelector("[data-name-hint]");
   const fieldHint = document.querySelector("[data-field-hint]");
   const appHint = document.querySelector("[data-app-hint]");
   const yearNodes = document.querySelectorAll("[data-year]");
@@ -84,9 +86,16 @@
     openWaitlistDialog();
   }
 
-  if (!form || !submitButton || !formStatus || !emailField) {
+  if (!form || !submitButton || !formStatus || !emailField || !nameField) {
     return;
   }
+
+  nameField.addEventListener("input", () => {
+    nameField.removeAttribute("aria-invalid");
+    if (nameHint) {
+      nameHint.textContent = "";
+    }
+  });
 
   emailField.addEventListener("input", () => {
     emailField.removeAttribute("aria-invalid");
@@ -113,6 +122,15 @@
     const honeypot = String(formData.get("bot-field") || "").trim();
 
     clearStatus();
+
+    if (!name) {
+      nameField.setAttribute("aria-invalid", "true");
+      if (nameHint) {
+        nameHint.textContent = "Enter your name.";
+      }
+      nameField.focus();
+      return;
+    }
 
     if (!isValidEmail(email)) {
       emailField.setAttribute("aria-invalid", "true");
@@ -173,12 +191,20 @@
           "You are already on the list",
           "That email is already queued for updates, so there is nothing else to do."
         );
-      } else {
+      } else if (error instanceof WaitlistError && error.code === "validation") {
+        setStatus("error", "Check your details", error.message);
+      } else if (error && error.name === "AbortError") {
         setStatus(
           "error",
-          "Something went wrong",
-          "Please try again in a moment. If the issue persists, contact contactayushmadhav@gmail.com."
+          "Request timed out",
+          "Your network may be slow or the server is busy. Try again in a moment."
         );
+      } else {
+        const fromServer = error instanceof WaitlistError && error.message ? error.message : "";
+        const detail = fromServer
+          ? `${fromServer} If you still need help, contact contactayushmadhav@gmail.com.`
+          : "Please try again in a moment. If the issue persists, contact contactayushmadhav@gmail.com.";
+        setStatus("error", "Something went wrong", detail);
       }
     } finally {
       setSubmitting(false);
@@ -258,19 +284,31 @@
       window.clearTimeout(timer);
     }
 
+    const responseBody = await readResponseBody(response);
+
     if (response.status === 409) {
       throw new WaitlistError("duplicate", "Duplicate submission.");
     }
 
-    const responseBody = await readResponseBody(response);
     if (!response.ok) {
-      const maybeCode = responseBody && typeof responseBody === "object" ? responseBody.code : "";
-      const maybeError = responseBody && typeof responseBody === "object" ? responseBody.error : "";
+      const bodyObj = responseBody && typeof responseBody === "object" ? responseBody : null;
+      const maybeCode = bodyObj ? bodyObj.code : "";
+      const maybeError = bodyObj ? bodyObj.error : "";
+      const maybeDetail = bodyObj ? bodyObj.detail : "";
+
       if (String(maybeCode).toLowerCase() === "duplicate" || String(maybeError).toLowerCase().includes("duplicate")) {
         throw new WaitlistError("duplicate", "Duplicate submission.");
       }
 
-      throw new WaitlistError("server", "Submission failed.");
+      const serverMessage = [maybeError, maybeDetail].filter(Boolean).join(" ").trim();
+      if (response.status === 400 || String(maybeCode).toLowerCase() === "validation") {
+        throw new WaitlistError("validation", serverMessage || "Check the form and try again.");
+      }
+
+      throw new WaitlistError(
+        "server",
+        serverMessage || "Submission failed. The waitlist service may be misconfigured or temporarily unavailable."
+      );
     }
   }
 

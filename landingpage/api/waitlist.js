@@ -66,6 +66,10 @@ module.exports = async function waitlistHandler(req, res) {
     return res.status(400).json({ error: "Invalid email", code: "validation" });
   }
 
+  if (!name) {
+    return res.status(400).json({ error: "Name is required", code: "validation" });
+  }
+
   if (!preferredApp || !ALLOWED_APPS.has(preferredApp)) {
     return res.status(400).json({ error: "Choose where you want CursorBuddy next.", code: "validation" });
   }
