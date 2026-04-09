@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#FFFFFF">
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; connect-src 'self' https:; font-src 'self' data:; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'"
+      content="default-src 'self'; img-src 'self' data:; media-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https:; font-src 'self' data:; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'"
     >
     <title>CursorBuddy</title>
     <link rel="icon" href="/assets/brand-mark.svg" type="image/svg+xml">
@@ -52,6 +52,20 @@
       </div>
 
       <main>
+        <section class="section hero-demo" aria-label="CursorBuddy demo">
+          <div class="glass-panel hero-demo__panel">
+            <video
+              class="hero-demo__video"
+              controls
+              playsinline
+              preload="metadata"
+              aria-label="Screen recording of CursorBuddy guiding the cursor in an app"
+            >
+              <source src="/assets/cursorbuddy-hero-demo.mp4" type="video/mp4">
+            </video>
+          </div>
+        </section>
+
         <section id="how-it-works" class="section section--tight">
           <div class="section-head">
             <p class="section-label">How it works</p>
