@@ -8,7 +8,7 @@
   "theme_color": "#F2F0ED",
   "icons": [
     {
-      "src": "/assets/favicon.svg",
+      "src": "/assets/brand-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
