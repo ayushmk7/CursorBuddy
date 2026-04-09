@@ -1,12 +1,13 @@
 const { neon } = require("@neondatabase/serverless");
+const { getDatabaseUrl } = require("./db-url");
 
 let sqlRef;
 
 function getSql() {
   if (!sqlRef) {
-    const url = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+    const url = getDatabaseUrl();
     if (!url) {
-      throw new Error("Missing POSTGRES_URL or DATABASE_URL");
+      throw new Error("Missing database URL (POSTGRES_URL, DATABASE_URL, …)");
     }
     sqlRef = neon(url);
   }

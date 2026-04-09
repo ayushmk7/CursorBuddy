@@ -1,4 +1,5 @@
 const { ensureWaitlistSchema, getSql } = require("./lib/waitlist-schema");
+const { getDatabaseUrl } = require("./lib/db-url");
 
 function csvEscape(value) {
   const s = value == null ? "" : String(value);
@@ -37,7 +38,7 @@ module.exports = async function exportWaitlistHandler(req, res) {
     return res.status(401).send("Unauthorized");
   }
 
-  if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+  if (!getDatabaseUrl()) {
     return res.status(503).send("Database not configured.");
   }
 

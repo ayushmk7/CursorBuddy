@@ -1,4 +1,5 @@
 const { ensureWaitlistSchema, getSql } = require("./lib/waitlist-schema");
+const { getDatabaseUrl } = require("./lib/db-url");
 
 const ALLOWED_APPS = new Set([
   "vscode",
@@ -41,11 +42,12 @@ module.exports = async function waitlistHandler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+  if (!getDatabaseUrl()) {
     return res.status(503).json({
       error: "Database not configured",
       code: "db_unavailable",
-      detail: "Connect Neon (or Postgres) in Vercel and set POSTGRES_URL or DATABASE_URL."
+      detail:
+        "Vercel must expose a Postgres URL for this project. In Settings → Environment Variables, set POSTGRES_URL or DATABASE_URL (Neon usually adds DATABASE_URL). Enable it for Production, redeploy, or check Neon → Integrations → Manage that variables are injected."
     });
   }
 
