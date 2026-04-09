@@ -161,20 +161,60 @@ export const IDEFrame: React.FC<IDEFrameProps> = ({ scmActive, children }) => {
         }}
       >
         <TrafficLights />
-        <div
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontSize: 13,
-            color: "rgba(204,204,204,0.9)",
-            letterSpacing: 0.1,
-            fontWeight: 400,
-          }}
-        >
-          Dashboard.tsx — my-app
+
+        {/* ── Command center (VS Code-style pill in title bar) ── */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.11)",
+              borderRadius: 6,
+              padding: "3px 10px 3px 8px",
+              fontSize: 12,
+              color: "rgba(204,204,204,0.85)",
+              height: 22,
+              userSelect: "none",
+            }}
+          >
+            {/* Folder icon */}
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M3 6h7l2 2h9v12H3V6z" stroke="rgba(204,204,204,0.55)" strokeWidth="1.6" strokeLinejoin="round" />
+            </svg>
+            <span style={{ color: "rgba(204,204,204,0.60)" }}>my-app</span>
+            <span style={{ color: "rgba(204,204,204,0.35)", fontSize: 10, margin: "0 1px" }}>›</span>
+            <span>Dashboard.tsx</span>
+            <span style={{ color: "rgba(204,204,204,0.40)", fontSize: 9, marginLeft: 3 }}>▾</span>
+          </div>
         </div>
-        {/* right padding to balance traffic lights */}
-        <div style={{ width: 64 }} />
+
+        {/* ── Layout buttons (right side of title bar) ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 2, paddingRight: 14 }}>
+          {/* Toggle Primary Sidebar */}
+          <div style={{ width: 28, height: 22, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.45, borderRadius: 4 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="18" height="18" rx="1.5" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+              <line x1="9" y1="3" x2="9" y2="21" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+            </svg>
+          </div>
+          {/* Toggle Panel */}
+          <div style={{ width: 28, height: 22, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.45, borderRadius: 4 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="18" height="18" rx="1.5" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+              <line x1="3" y1="16" x2="21" y2="16" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+            </svg>
+          </div>
+          {/* Customize Layout */}
+          <div style={{ width: 28, height: 22, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.45, borderRadius: 4 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="3" width="7.5" height="7.5" rx="1" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+              <rect x="13.5" y="3" width="7.5" height="18" rx="1" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+              <rect x="3" y="13.5" width="7.5" height="7.5" rx="1" stroke="rgba(204,204,204,0.9)" strokeWidth="1.5" />
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* ── Activity bar ── */}

@@ -250,6 +250,17 @@ input {
   letter-spacing: -0.01em;
 }
 
+.button--nav-waitlist {
+  flex-shrink: 0;
+  align-self: center;
+  min-height: 36px;
+  padding: 0 clamp(12px, 3vw, 16px);
+  font-size: clamp(0.68rem, 2.5vw, 0.82rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
 .brand__name {
   white-space: nowrap;
   overflow: hidden;
@@ -534,16 +545,6 @@ h3 {
 
   .page-home .hero-first-screen .hero__copy {
     padding: 10px 12px;
-  }
-
-  .page-home .hero-first-screen .hero__actions {
-    margin-top: 8px;
-  }
-
-  .page-home .hero-first-screen .button {
-    min-height: 40px;
-    padding: 0 16px;
-    font-size: 0.88rem;
   }
 
   .page-home .hero-first-screen {

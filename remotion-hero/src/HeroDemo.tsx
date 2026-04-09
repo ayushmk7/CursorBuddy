@@ -14,7 +14,6 @@ import { IDEFrame }         from "./components/IDEFrame";
 import { FileTreeSidebar }  from "./components/FileTreeSidebar";
 import { SCMSidebar }       from "./components/SCMSidebar";
 import { CodeEditor }       from "./components/CodeEditor";
-import { Waveform }         from "./components/Waveform";
 import { Caption }          from "./components/Caption";
 import { Cursors }          from "./components/Cursors";
 import { Callout }          from "./components/Callout";
@@ -61,16 +60,7 @@ export const HeroDemo: React.FC = () => {
   );
   const fileTreeOpacity = 1 - scmOpacity;
 
-  // ── Waveform (Phase B) ────────────────────────────────────────────────────
-  const waveformOpacity = interpolate(
-    frame,
-    [PHASES.B.start, PHASES.B.start + 12, PHASES.B.end - 12, PHASES.B.end],
-    [0, 1, 1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-  );
-  const waveFrame = Math.max(0, frame - PHASES.B.start);
-
-  // ── Caption (Phase B) ────────────────────────────────────────────────────
+  // ── Caption / speech overlay (Phase B) ──────────────────────────────────
   const captionOpacity = interpolate(
     frame,
     [PHASES.B.start + 8, PHASES.B.start + 22, PHASES.B.end - 12, PHASES.B.end],
@@ -164,14 +154,9 @@ export const HeroDemo: React.FC = () => {
             />
           )}
 
-          {/* ── Waveform ── */}
-          {waveformOpacity > 0.01 && (
-            <Waveform waveFrame={waveFrame} opacity={waveformOpacity} />
-          )}
-
-          {/* ── Caption ── */}
+          {/* ── Speech overlay (mic + waveform + typewriter text) ── */}
           {captionOpacity > 0.01 && (
-            <Caption opacity={captionOpacity} />
+            <Caption opacity={captionOpacity} frame={frame} />
           )}
 
           {/* ── Callout ── */}
