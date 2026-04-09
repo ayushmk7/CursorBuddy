@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: WaveClick Bridge API
+  version: 0.4.0
+  description: |
+    Optional **latency-aware** enterprise bridge for WaveClick (VS Code voice companion). **OpenClaw is required**
+    for all production orchestration. Use this bridge only when policy demands it; otherwise prefer **direct**
+    sidecar→OpenClaw for fewer hops. The bridge authenticates the sidecar and proxies **to OpenClaw**; OpenClaw
+    selects the **fastest** model path (e.g. **Gemini Live** when benchmarked fastest—not mandatory). Bearer JWT for protected routes.
+    Error shape: `{ "error": string, "code"?: string, "details"?: unknown }`.
+
+    **Streaming note:** Binary audio is typically proxied over WebSocket (`wss://`) after session minting;
+    this OpenAPI documents **control-plane** REST endpoints only. Data-plane WebSocket subprotocol
+    is implementation-specific (document in bridge README).
+servers:
+  - url: https://bridge.example.com
+    description: Enterprise bridge (TLS, mTLS optional)
+  - url: http://127.0.0.1:8787
+    description: Local development
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    mtls:
+      type: mutualTLS
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+        code: { type: string }
+        details: {}
+    ClientInfo:
+      type: object
+      required: [vscode_version, extension_version, os, sidecar_version]
+      properties:
+        vscode_version: { type: string, example: "1.99.0" }
+        extension_version: { type: string, example: "0.4.2" }
+        os: { type: string, enum: [darwin, win32, linux] }
+        sidecar_version: { type: string }
+    SessionMintRequest:
+      type: object
+      required: [client, openclaw_workflow, locale]
+      properties:
+        client:
+          $ref: "#/components/schemas/ClientInfo"
+        openclaw_workflow:
+          type: string
+          example: waveclick_session
+        desired_model_tier_hint:
+          type: string
+          enum: [flash, pro]
+          description: Non-binding hint; OpenClaw policy selects the model
+        locale:
+          type: string
+          example: en-US
+    UpstreamWebsocket:
+      type: object
+      required: [type, url]
+      properties:
+        type:
+          type: string
+          enum: [websocket]
+        url:
+          type: string
+          format: uri
+        headers:
+          type: object
+          additionalProperties: { type: string }
+    SessionPolicy:
+      type: object
+      properties:
+        vision_allowed: { type: boolean, default: false }
+        max_session_minutes: { type: integer, minimum: 1, maximum: 480 }
+        fallback_mode:
+          type: string
+          enum: [none, rest]
+    SessionMintResponse:
+      type: object
+      required: [session_id, upstream, expires_at, policy]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        upstream:
+          $ref: "#/components/schemas/UpstreamWebsocket"
+        expires_at:
+          type: string
+          format: date-time
+        policy:
+          $ref: "#/components/schemas/SessionPolicy"
+    TelemetryBatch:
+      type: object
+      required: [session_id, events]
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        events:
+          type: array
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/TelemetryEvent"
+    TelemetryEvent:
+      type: object
+      required: [ts, name]
+      properties:
+        ts:
+          type: string
+          format: date-time
+        name:
+          type: string
+          example: executor.command_ok
+        utterance_id:
+          type: string
+          format: uuid
+        action_id:
+          type: string
+        latency_ms:
+          type: integer
+          minimum: 0
+        attrs:
+          type: object
+          additionalProperties: true
+paths:
+  /v1/healthz:
+    get:
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean, example: true }
+                  version: { type: string }
+        "503":
+          description: Not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/policy:
+    get:
+      summary: Fetch org policy overrides (allowlists, DLP flags)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Policy document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vision_allowed: { type: boolean }
+                  command_alias_overrides:
+                    type: object
+                    additionalProperties: true
+                  dlp_rules_version: { type: string }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/sessions:
+    post:
+      summary: Mint a proxied realtime session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionMintRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionMintResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "429":
+          description: Rate limited
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/sessions/{sessionId}/telemetry:
+    post:
+      summary: Batch upload non-audio metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryBatch"
+      responses:
+        "204":
+          description: Accepted
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /v1/auth/refresh:
+    post:
+      summary: Rotate JWT (refresh token flow)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: New token
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [access_token, expires_in]
+                properties:
+                  access_token: { type: string }
+                  expires_in: { type: integer }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"

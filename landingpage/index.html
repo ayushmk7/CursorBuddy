@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="CursorBuddy is a voice-guided cursor companion that runs on your machine. Join the waitlist."
+    >
+    <meta name="theme-color" content="#F2F0ED">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; connect-src 'self' https:; font-src 'self' data:; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'"
+    >
+    <title>CursorBuddy | Speak. It shows you the way.</title>
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/assets/site.webmanifest">
+    <link rel="stylesheet" href="/assets/styles.css">
+    <script src="/assets/config.js" defer></script>
+    <script src="/assets/site.js" defer></script>
+  </head>
+  <body class="page page-home">
+    <div class="canvas-shell">
+      <header class="site-header glass-bar">
+        <a class="brand" href="/" aria-label="CursorBuddy home">
+          <img src="/assets/brand-mark.svg" alt="" width="28" height="28">
+          <span>CursorBuddy</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <a href="#how-it-works">How it works</a>
+          <button type="button" class="link-button" data-open-waitlist>Waitlist</button>
+          <a href="/privacy/">Privacy</a>
+          <a href="/terms/">Terms</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="section hero">
+          <div class="hero__grid">
+            <div class="hero__copy">
+              <p class="eyebrow eyebrow--single">Local voice companion for desktop apps</p>
+              <h1 class="headline headline--single">Speak. It shows you the way.</h1>
+              <p class="subhead subhead--single">
+                Follow-along cursor until you hand off, then guided motion in the real UI.
+              </p>
+              <div class="hero__actions">
+                <button type="button" class="button button--primary" data-open-waitlist>Join the waitlist</button>
+                <a class="button button--ghost" href="#how-it-works">How it works</a>
+              </div>
+            </div>
+
+            <div class="hero__stack">
+              <article class="glass-panel hero-visual" aria-labelledby="hero-visual-title">
+                <div class="hero-visual__glow" aria-hidden="true"></div>
+                <div class="hero-orb" aria-hidden="true">
+                  <svg class="hero-orb__svg" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="cb-grad" x1="40" y1="40" x2="280" y2="280" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#0066FF" stop-opacity="0.35"/>
+                        <stop offset="1" stop-color="#5AC8FA" stop-opacity="0.12"/>
+                      </linearGradient>
+                    </defs>
+                    <circle class="hero-orb__ring hero-orb__ring--a" cx="160" cy="160" r="118" stroke="url(#cb-grad)" stroke-width="1.2"/>
+                    <circle class="hero-orb__ring hero-orb__ring--b" cx="160" cy="160" r="92" stroke="rgba(0,102,255,0.22)" stroke-width="1"/>
+                    <circle class="hero-orb__ring hero-orb__ring--c" cx="160" cy="160" r="64" stroke="rgba(0,102,255,0.35)" stroke-width="1.4"/>
+                    <path
+                      class="hero-orb__wave"
+                      d="M52 200c36-48 88-72 140-72s104 24 140 72"
+                      stroke="#0066FF"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-opacity="0.5"
+                    />
+                    <path
+                      class="hero-orb__wave hero-orb__wave--lag"
+                      d="M64 168c32-40 78-60 124-60s92 20 124 60"
+                      stroke="#0066FF"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-opacity="0.28"
+                    />
+                  </svg>
+                </div>
+
+                <div class="hero-visual__header">
+                  <div>
+                    <p class="section-label">Follow, then go</p>
+                    <h2 id="hero-visual-title">Hand off, then guided motion.</h2>
+                  </div>
+                  <p class="hero-visual__meta">Voice in · motion · optional speech</p>
+                </div>
+
+                <div class="hero-visual__surface glass-inset" aria-hidden="true">
+                  <div class="hero-visual__chrome">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <div class="hero-visual__body">
+                    <div class="hero-visual__rail">
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                    <div class="hero-visual__editor glass-inset glass-inset--nested">
+                      <p class="hero-visual__prompt">“Where do I commit and push?”</p>
+                      <div class="hero-visual__cursor-trail">
+                        <span class="hero-visual__cursor-dot"></span>
+                        <span class="hero-visual__cursor-path"></span>
+                      </div>
+                      <div class="hero-visual__wave">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                      <div class="hero-visual__steps">
+                        <p>Source control</p>
+                        <p>Commit field</p>
+                        <p>Sync explained</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="how-it-works" class="section section--tight">
+          <div class="section-head">
+            <p class="section-label">How it works</p>
+            <h2>Speak once. Get a real move.</h2>
+          </div>
+
+          <div class="step-grid">
+            <article class="glass-panel step-card">
+              <p class="step-card__index">01</p>
+              <h3>Say what you want</h3>
+              <p>Plain language in; companion listens while a secondary cursor follows.</p>
+            </article>
+
+            <article class="glass-panel step-card">
+              <p class="step-card__index">02</p>
+              <h3>Hand off</h3>
+              <p>Your shortcut triggers planning and motion toward the right control.</p>
+            </article>
+
+            <article class="glass-panel step-card">
+              <p class="step-card__index">03</p>
+              <h3>Stays local</h3>
+              <p>VS Code first; same pattern can extend to other desktop apps.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section features">
+          <div class="section-head">
+            <p class="section-label">Why</p>
+            <h2>Motion in the app, not another chat panel.</h2>
+          </div>
+
+          <div class="feature-layout feature-layout--minimal">
+            <article class="glass-panel feature-card feature-card--large tint-blue">
+              <p class="section-label">Local</p>
+              <h3>Your app stays the source of truth.</h3>
+              <p>Context on device. Real UI state from the host.</p>
+            </article>
+
+            <article class="glass-panel feature-card feature-card--offset">
+              <p class="section-label">Beyond one editor</p>
+              <h3>VS Code first, not only.</h3>
+              <p>Tell us which host you care about on the waitlist.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section--tight">
+          <div class="glass-panel signal-panel">
+            <div>
+              <p class="section-label">Early access</p>
+              <h2>Join the list.</h2>
+            </div>
+            <button type="button" class="button button--primary" data-open-waitlist>Join waitlist</button>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer glass-bar glass-bar--footer">
+        <p>© <span data-year></span> CursorBuddy</p>
+        <div class="site-footer__links">
+          <a href="/privacy/">Privacy</a>
+          <a href="/terms/">Terms</a>
+          <a href="mailto:hello@cursorbuddy.dev">Contact</a>
+        </div>
+      </footer>
+    </div>
+
+    <dialog class="waitlist-dialog" data-waitlist-dialog aria-labelledby="waitlist-dialog-title">
+      <div class="waitlist-dialog__panel glass-panel">
+        <button type="button" class="waitlist-dialog__close" data-close-waitlist aria-label="Close waitlist dialog">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+        <p class="section-label">Early access</p>
+        <h2 id="waitlist-dialog-title">Join the waitlist</h2>
+        <p class="waitlist__copy">
+          Launch updates and your pick for the next host app.
+        </p>
+
+        <form
+          class="waitlist-form"
+          name="cursorbuddy-waitlist"
+          method="post"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          data-waitlist-form
+          novalidate
+        >
+          <input type="hidden" name="form-name" value="cursorbuddy-waitlist">
+
+          <div class="honeypot" aria-hidden="true">
+            <label for="bot-field">Leave this field empty</label>
+            <input id="bot-field" name="bot-field" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <label class="field" for="waitlist-name">
+            <span>Name <em>Optional</em></span>
+            <input id="waitlist-name" name="name" type="text" autocomplete="name" placeholder="Ada Lovelace">
+          </label>
+
+          <label class="field" for="waitlist-email">
+            <span>Email</span>
+            <input
+              id="waitlist-email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="you@company.com"
+              required
+            >
+            <small class="field-hint" data-field-hint></small>
+          </label>
+
+          <label class="field" for="preferred-app">
+            <span>Where should CursorBuddy go next?</span>
+            <select id="preferred-app" name="preferred_app" required data-preferred-app aria-describedby="preferred-app-hint">
+              <option value="" disabled selected>Select one</option>
+              <option value="vscode">Visual Studio Code (first demo)</option>
+              <option value="jetbrains">JetBrains IDEs</option>
+              <option value="imovie">iMovie</option>
+              <option value="video-editing">Other video editing (DaVinci, Premiere, Final Cut…)</option>
+              <option value="creative-suite">Creative suite (Photoshop, After Effects, Blender…)</option>
+              <option value="browser">Browser / web apps</option>
+              <option value="terminal">Terminal / CLI workflows</option>
+              <option value="all-apps">All of the above (universal)</option>
+              <option value="other">Other (tell us when we email)</option>
+            </select>
+            <small class="field-hint" id="preferred-app-hint" data-app-hint></small>
+          </label>
+
+          <button class="button button--primary button--submit" type="submit" data-submit-button>
+            Join the waitlist
+          </button>
+
+          <div class="form-status" data-form-status aria-live="polite"></div>
+        </form>
+      </div>
+    </dialog>
+  </body>
+</html>

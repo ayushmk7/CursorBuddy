@@ -1,0 +1,15 @@
+{
+  "name": "cursorbuddy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CursorBuddy public landing page and smoke tests",
+  "scripts": {
+    "test:smoke": "playwright test --config playwright.config.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2"
+  }
+}
