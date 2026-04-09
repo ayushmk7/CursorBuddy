@@ -360,7 +360,7 @@
 
   function setSubmitting(isSubmitting) {
     submitButton.disabled = isSubmitting;
-    submitButton.textContent = isSubmitting ? "Saving your spot..." : "Join the waitlist";
+    submitButton.textContent = isSubmitting ? "Saving your spot..." : "Join Waitlist";
   }
 
   function clearStatus() {

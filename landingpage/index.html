@@ -7,7 +7,7 @@
       name="description"
       content="CursorBuddy is a local voice companion that guides you through real desktop apps so anyone can learn new workflows step by step."
     >
-    <meta name="theme-color" content="#FFFFFF">
+    <meta name="theme-color" content="#ffffff">
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; img-src 'self' data:; media-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https:; font-src 'self' data:; base-uri 'self'; form-action 'self' https:; frame-ancestors 'none'; object-src 'none'"
@@ -22,28 +22,26 @@
   <body class="page page-home">
     <div class="canvas-shell">
       <div class="hero-first-screen">
-        <header class="site-header glass-bar">
+        <header class="site-header site-header--home glass-bar">
           <a class="brand" href="/" aria-label="CursorBuddy home">
             <img src="/assets/brand-mark.svg" alt="" width="28" height="28">
-            <span>CursorBuddy</span>
+            <span class="brand__name">CursorBuddy</span>
           </a>
-          <nav class="site-nav" aria-label="Primary">
-            <a href="/privacy/">Privacy</a>
+          <nav class="site-nav site-nav--compact" aria-label="Primary">
             <a href="/terms/">Terms</a>
+            <a href="/privacy/">Privacy</a>
           </nav>
         </header>
 
         <section class="section hero">
           <div class="hero__grid">
-            <div class="hero__copy">
-              <p class="eyebrow eyebrow--single">Local voice companion for desktop apps</p>
-              <h1 class="headline headline--single">Speak Follow Learn</h1>
+            <div class="hero__copy glass-panel">
+              <h1 class="headline headline--single headline--tagline">Speak. Follow. Learn.</h1>
               <p class="subhead subhead--single">
-                Learn how to use real desktop apps by speaking a goal and following on-screen guidance. Step-by-step, in the actual interface, so beginners and experts alike can pick up new tools without getting lost in menus or manuals.
+                Voice-guided moves in the real desktop UI—local, private, step by step.
               </p>
-              <div class="hero__actions">
-                <button type="button" class="button button--primary" data-open-waitlist>Join the waitlist</button>
-                <a class="button button--ghost" href="#how-it-works">How it works</a>
+              <div class="hero__actions hero__actions--single">
+                <button type="button" class="button button--primary" data-open-waitlist>Join Waitlist</button>
               </div>
             </div>
           </div>
@@ -69,46 +67,52 @@
         <section id="how-it-works" class="section section--tight">
           <div class="section-head">
             <p class="section-label">How it works</p>
-            <h2>Speak once. Get a real move.</h2>
+            <h2 class="section-headline--nowrap">Watch once. Three moves to trust it.</h2>
           </div>
 
           <div class="step-grid">
             <article class="glass-panel step-card">
               <p class="step-card__index">01</p>
-              <h3>Say what you want</h3>
-              <p>Plain language in; companion listens while a secondary cursor follows.</p>
+              <h3 class="step-card__title">Say the outcome</h3>
+              <p>Speak a goal in plain language; the companion maps it to the live window.</p>
             </article>
 
             <article class="glass-panel step-card">
               <p class="step-card__index">02</p>
-              <h3>Hand off</h3>
-              <p>Your shortcut triggers planning and motion toward the right control.</p>
+              <h3 class="step-card__title">Follow the cursor</h3>
+              <p>On-screen motion points at the real control—no separate chat surface.</p>
             </article>
 
             <article class="glass-panel step-card">
               <p class="step-card__index">03</p>
-              <h3>Stays local</h3>
-              <p>VS Code first; same pattern can extend to other desktop apps.</p>
+              <h3 class="step-card__title">Confirm in-app</h3>
+              <p>You stay inside the host app so affordances and shortcuts stay accurate.</p>
             </article>
           </div>
         </section>
 
         <section class="section features">
           <div class="section-head">
-            <h2>Motion in the app, not another chat panel.</h2>
+            <h2 class="section-headline--nowrap">Fully agentic, local, built for real workflows.</h2>
           </div>
 
-          <div class="feature-layout feature-layout--minimal">
-            <article class="glass-panel feature-card feature-card--large tint-blue">
-              <p class="section-label">Local</p>
-              <h3>Your app stays the source of truth.</h3>
-              <p>Context on device. Real UI state from the host.</p>
+          <div class="feature-layout feature-layout--triple">
+            <article class="glass-panel feature-card">
+              <p class="section-label">Agentic</p>
+              <h3 class="feature-card__title">Plans and acts in the UI</h3>
+              <p>Reasons over the live interface, proposes the next control, and moves with you—not a static tutorial.</p>
             </article>
 
-            <article class="glass-panel feature-card feature-card--offset">
-              <p class="section-label">Beyond one editor</p>
-              <h3>VS Code first, not only.</h3>
-              <p>Tell us which host you care about on the waitlist.</p>
+            <article class="glass-panel feature-card tint-blue">
+              <p class="section-label">Private</p>
+              <h3 class="feature-card__title">Stays on your machine</h3>
+              <p>Your desktop context stays local so guidance matches what you see, without shipping screen content to a model farm.</p>
+            </article>
+
+            <article class="glass-panel feature-card">
+              <p class="section-label">Everywhere (soon)</p>
+              <h3 class="feature-card__title">Host apps beyond the editor</h3>
+              <p>Same pattern for multiple desktop apps: IDEs, creative tools, browsers—prioritize hosts on the waitlist.</p>
             </article>
           </div>
         </section>
@@ -119,14 +123,14 @@
               <p class="section-label">Early access</p>
               <h2>Join the list.</h2>
             </div>
-            <button type="button" class="button button--primary" data-open-waitlist>Join waitlist</button>
+            <button type="button" class="button button--primary" data-open-waitlist>Join Waitlist</button>
           </div>
         </section>
       </main>
 
-      <footer class="site-footer">
-        <p>© <span data-year></span> CursorBuddy</p>
-        <div class="site-footer__links">
+      <footer class="site-footer glass-bar glass-bar--footer">
+        <p class="site-footer__meta">© <span data-year></span> CursorBuddy</p>
+        <div class="site-footer__links site-footer__links--legal">
           <a href="/privacy/">Privacy</a>
           <a href="/terms/">Terms</a>
           <a href="mailto:hello@cursorbuddy.dev">Contact</a>
@@ -142,7 +146,7 @@
           </svg>
         </button>
         <p class="section-label">Early access</p>
-        <h2 id="waitlist-dialog-title">Join the waitlist</h2>
+        <h2 id="waitlist-dialog-title">Join Waitlist</h2>
         <p class="waitlist__copy">
           Launch updates and your pick for the next host app.
         </p>
@@ -212,7 +216,7 @@
           </label>
 
           <button class="button button--primary button--submit" type="submit" data-submit-button>
-            Join the waitlist
+            Join Waitlist
           </button>
 
           <div class="form-status" data-form-status aria-live="polite"></div>

@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
 async function openWaitlistModal(page) {
-  await page.getByRole("button", { name: "Join the waitlist" }).first().click();
-  await expect(page.getByRole("heading", { name: "Join the waitlist" })).toBeVisible();
+  await page.getByRole("button", { name: "Join Waitlist" }).first().click();
+  await expect(page.getByRole("heading", { name: "Join Waitlist" })).toBeVisible();
 }
 
 function waitlistDialog(page) {
@@ -13,8 +13,8 @@ test("landing page waitlist flow works end to end", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 
   await expect(page).toHaveTitle(/CursorBuddy/);
-  await expect(page.getByRole("heading", { level: 1, name: "Speak Follow Learn" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Join the waitlist" }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Speak. Follow. Learn." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Join Waitlist" }).first()).toBeVisible();
 
   await openWaitlistModal(page);
 
@@ -22,12 +22,12 @@ test("landing page waitlist flow works end to end", async ({ page }) => {
   const emailField = dialog.locator("#waitlist-email");
   await dialog.locator("#waitlist-name").fill("Ada Lovelace");
   await emailField.fill("not-an-email");
-  await dialog.getByRole("button", { name: "Join the waitlist" }).click();
+  await dialog.getByRole("button", { name: "Join Waitlist" }).click();
   await expect(page.getByText("Enter a valid email address.")).toBeVisible();
 
   await emailField.fill("ada@example.com");
   await dialog.locator("#preferred-app").selectOption("vscode");
-  await dialog.getByRole("button", { name: "Join the waitlist" }).click();
+  await dialog.getByRole("button", { name: "Join Waitlist" }).click();
   await page.waitForURL("**/thanks/");
   await expect(page.getByRole("heading", { level: 1, name: "You are on the list." })).toBeVisible();
 
@@ -37,7 +37,7 @@ test("landing page waitlist flow works end to end", async ({ page }) => {
   await dialog2.locator("#waitlist-name").fill("Ada Lovelace");
   await dialog2.locator("#waitlist-email").fill("ada@example.com");
   await dialog2.locator("#preferred-app").selectOption("vscode");
-  await dialog2.getByRole("button", { name: "Join the waitlist" }).click();
+  await dialog2.getByRole("button", { name: "Join Waitlist" }).click();
   await expect(page.getByText("You are already on the list")).toBeVisible();
 });
 

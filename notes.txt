@@ -1,11 +1,15 @@
-- shoudnt be a vs code extension, see other ways so this can run outside vs code on other apps as well
-- frotnend is a MESS, fix it , make the landing page animated, the waitlist should be a pop up and use svgs and animations on the landing page
-- make sure that the waitlist feature is connected to a postgres backend to a csv file so that i can send emails later on
-- waitlist should also ask questions like what app would u like to see this work on next: imovie, video editing software, or all apps and add other optios as well
+diagram for landing page should look like
 
-- understand the context of this project
-its an agentic cursor that follows ur cursor around until say u press the function button or a combination of buttons
-then the extra cursor following the main cursor moves on its own and takes u to the place u want to once u prompt it
-an example for this could be on vs code i say where can i commit and push and the cursor moves itself and takes me there and then the cursor turns into text itself and explains it 
-it can also talk if prompted to talk 
-for this demo we can focus on it working only on vs code but it can work on other software as well and basically any app 
+1st page 
+Cursor Buddy                Terms Privacy
+    Speak. Follow. Learn. 
+    [ Caption ]
+    [ Join Waitlist ]
+
+
+2nd page 
+
+Embedded video 
+3 things shown and make those boxes below the video: any three points shown in the video, this is the how it works so make sure these three points are good, doesnt need big boxes but needs to be pointers to show how it works
+
+3rd page use cases and features, show how its fully agentic, stays local so is private and has use cases across multiple desktop apps , soon

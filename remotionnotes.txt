@@ -1,0 +1,5 @@
+could be smoother
+use the identical black cursor but in blue
+make sure the blue cursor exactly follows the black cursor
+make zoom animations smoother and lesser
+make the actual UI of the app more realistic and exactly 
