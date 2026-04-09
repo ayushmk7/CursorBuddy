@@ -1,5 +1,31 @@
-could be smoother
-use the identical black cursor but in blue
-make sure the blue cursor exactly follows the black cursor
-make zoom animations smoother and lesser
-make the actual UI of the app more realistic and exactly 
+# Prompt for Claude — Remotion / motion polish
+
+You are refining a Remotion (or similar) video that shows a realistic VS Code–style UI and cursor-driven storytelling. Apply everything below; prioritize **very smooth, readable motion** so the audience can **see exactly what is happening** at each step—no abrupt cuts or ambiguous transitions unless the script demands a hard beat.
+
+## Cursor treatment
+- Use the **same cursor design** as the black cursor, but **in blue** where that dual-cursor conceit applies.
+- The **blue cursor must track the black cursor precisely**—same path, same timing, no drift or lag that reads as a mistake.
+
+## Speaking + “Where do I commit?” moment
+- When the line **“Where do I commit?”** is spoken (or when that VO beat plays), show a **voice-wave / speaking** animation so it’s obvious someone is asking—sync **start and end to that audio** so it doesn’t hang past the line.
+- Place the wave **where it reads cleanly in the frame** (e.g. near the speaker / chat / status area—match the rest of the composition).
+
+## Commit flow: one continuous cursor
+- The caret in the editor and the caret in the **commit message** field must read as **one continuous cursor**, not two separate layers.
+- **Animate a smooth transition**: the logical cursor **extends or moves into** the commit input (morph, guided move, slight stretch, or a single masked line—whatever fits the pipeline)—**not** a pop-in second blink block floating beside the box.
+- This transition should feel **as smooth as the rest of the piece**; the viewer should instantly understand: *focus moved from editor → commit message box*.
+
+## Camera / zoom
+- **Zoom animations**: smoother, **less aggressive**, and **not abrupt**. Ease in and out; keep motion **natural** so emphasis guides the eye without jarring.
+
+## UI fidelity
+- Make the **app UI fully realistic** and aligned with **VS Code**—layout, panels, typography, and density should feel like the real product, not a generic “code window.”
+
+## Success criteria (check before done)
+- [ ] Motion is smooth throughout; no jarring zooms.
+- [ ] Blue/black cursors stay locked in behavior and style.
+- [ ] “Where do I commit?” has a clear, synced speaking indicator.
+- [ ] Commit message focus reads as **one cursor story**, not disconnected graphics.
+- [ ] The UI reads as authentic VS Code at a glance.
+
+Implement or adjust compositions, keyframes, and assets to satisfy the above. If something is ambiguous in the project files, infer from existing scenes and keep choices consistent with prior shots.
