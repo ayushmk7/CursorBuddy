@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { AssistantEnvelopeV1Schema, loadCommandMap, resolveAlias } from '@waveclick/shared';
+import type { CommandEntry } from '@waveclick/shared';
 
 export async function executeEnvelope(
   rawPayload: unknown,
@@ -15,13 +16,19 @@ export async function executeEnvelope(
   const envelope = result.data;
 
   // Step 2: Load command map
-  const map = loadCommandMap(vscode.version, ctx.mapsDir);
+  let map: ReturnType<typeof loadCommandMap>;
+  try {
+    map = loadCommandMap(vscode.version, ctx.mapsDir);
+  } catch (err) {
+    ctx.log('failed to load command map: ' + String(err));
+    return;
+  }
 
   // Step 3: Execute each action
   for (const action of envelope.actions) {
     switch (action.type) {
       case 'execute_command': {
-        let entry;
+        let entry: CommandEntry;
         try {
           entry = resolveAlias(map, action.alias);
         } catch {

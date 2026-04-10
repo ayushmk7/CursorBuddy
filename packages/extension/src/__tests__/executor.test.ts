@@ -17,6 +17,9 @@ function makeEnvelope(actions: unknown[]): unknown {
   };
 }
 
+// Alias for clarity in multi-action tests
+const buildEnvelope = makeEnvelope;
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -125,5 +128,31 @@ describe('empty actions array', () => {
     await executeEnvelope(payload, { mapsDir: MAPS_DIR, log });
     expect(log).toHaveBeenCalledWith(expect.stringContaining('invalid envelope'));
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+  });
+});
+
+// Test 9: loadCommandMap throws (missing mapsDir) -> logs error, returns early
+describe('loadCommandMap error handling', () => {
+  it('logs error and returns when mapsDir is missing', async () => {
+    const log = vi.fn();
+    const payload = makeEnvelope([
+      { id: 'a1', type: 'execute_command', alias: 'open_scm', risk: 'low' },
+    ]);
+    await executeEnvelope(payload, { mapsDir: '/nonexistent/does-not-exist', log });
+    expect(log).toHaveBeenCalledWith(expect.stringContaining('failed to load command map'));
+    expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+  });
+});
+
+// Test 10: Multi-action envelope with unknown alias first, valid alias second
+describe('multi-action envelope', () => {
+  it('continues processing actions after unknown alias', async () => {
+    const log = vi.fn();
+    const payload = buildEnvelope([
+      { type: 'execute_command', alias: 'nonexistent_alias_xyz', risk: 'low', id: 'a1' },
+      { type: 'execute_command', alias: 'open_scm', risk: 'low', id: 'a2' },
+    ]);
+    await executeEnvelope(payload, { mapsDir: MAPS_DIR, log });
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('workbench.view.scm');
   });
 });
