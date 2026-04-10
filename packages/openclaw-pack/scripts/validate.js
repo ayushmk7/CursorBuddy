@@ -26,7 +26,7 @@ for (const rel of REQUIRED) {
 }
 
 // Basic YAML syntax check (no deps — just look for tab indentation which breaks YAML)
-const yamls = REQUIRED.filter((f) => f.endsWith(".yaml"));
+const yamls = REQUIRED.filter((f) => f.endsWith(".yaml") && fs.existsSync(path.join(root, f)));
 for (const rel of yamls) {
   const content = fs.readFileSync(path.join(root, rel), "utf8");
   const lines = content.split("\n");
