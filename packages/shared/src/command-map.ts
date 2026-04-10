@@ -1,5 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
+import { z } from "zod";
+import { RiskSchema } from "./envelope";
 
 export interface CommandEntry {
   commands: string[];
@@ -12,6 +14,17 @@ export interface CommandMap {
   aliases: Record<string, CommandEntry>;
 }
 
+const CommandEntrySchema = z.object({
+  commands: z.array(z.string().min(1)).min(1),
+  risk: RiskSchema,
+  description: z.string().optional(),
+});
+
+const CommandMapSchema = z.object({
+  version: z.string(),
+  aliases: z.record(z.string(), CommandEntrySchema),
+});
+
 export class CommandNotAllowed extends Error {
   constructor(alias: string) {
     super(`CommandNotAllowed: alias "${alias}" is not in the command map`);
@@ -23,6 +36,7 @@ export class CommandNotAllowed extends Error {
  * Load the command map for the given VS Code version.
  * Selects the map file with the highest version <= vsCodeVersion.
  * Throws if no suitable map exists.
+ * @remarks Reads from disk synchronously. Call once at startup and cache the result.
  */
 export function loadCommandMap(vsCodeVersion: string, mapsDir: string): CommandMap {
   const files = fs.readdirSync(mapsDir).filter((f) => f.startsWith("command-map.vscode-") && f.endsWith(".json"));
@@ -54,7 +68,8 @@ export function loadCommandMap(vsCodeVersion: string, mapsDir: string): CommandM
   }
 
   const chosen = path.join(mapsDir, candidates[0].file);
-  return JSON.parse(fs.readFileSync(chosen, "utf8")) as CommandMap;
+  const raw = JSON.parse(fs.readFileSync(chosen, "utf8"));
+  return CommandMapSchema.parse(raw) as CommandMap;
 }
 
 /**

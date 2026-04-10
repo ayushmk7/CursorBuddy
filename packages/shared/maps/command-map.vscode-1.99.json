@@ -35,6 +35,11 @@
       "commands": ["git.sync"],
       "risk": "high",
       "description": "Sync (pull + push) current branch"
+    },
+    "git_push": {
+      "commands": ["git.push"],
+      "risk": "high",
+      "description": "Push commits to remote (1.99+)"
     }
   }
 }

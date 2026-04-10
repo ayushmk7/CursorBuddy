@@ -17,9 +17,9 @@ describe("loadCommandMap", () => {
   });
 
   it("falls back to nearest lower version when exact version missing", () => {
-    // 1.100.0 doesn't exist, should fall back to 1.99
     const map = loadCommandMap("1.100.0", MAPS_DIR);
     expect(map).toBeDefined();
+    expect(map.version).toBe("1.99");
   });
 
   it("throws when no maps available at all for very old version", () => {
