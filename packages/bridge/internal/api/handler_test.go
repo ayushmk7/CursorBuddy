@@ -21,6 +21,8 @@ func newTestHandler() *api.Handler {
 		JWTSecret:           testSecret,
 		OpenClawUpstreamURL: "wss://openclaw.test",
 		MaxSessionMinutes:   30,
+		Listen:              "127.0.0.1:8787",
+		PublicHost:          "127.0.0.1:8787",
 	})
 }
 
@@ -89,6 +91,12 @@ func TestCreateSession(t *testing.T) {
 	}
 	if resp.Upstream.Type != "websocket" {
 		t.Errorf("upstream.type = %q want websocket", resp.Upstream.Type)
+	}
+	if resp.Upstream.URL == "" {
+		t.Error("upstream.url is empty")
+	}
+	if !strings.HasPrefix(resp.Upstream.URL, "wss://") {
+		t.Errorf("upstream.url = %q; want wss:// prefix", resp.Upstream.URL)
 	}
 	if resp.Policy.MaxSessionMinutes != 30 {
 		t.Errorf("max_session_minutes = %d want 30", resp.Policy.MaxSessionMinutes)

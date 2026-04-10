@@ -50,6 +50,7 @@ func (h *Handler) Policy(w http.ResponseWriter, r *http.Request) {
 
 // CreateSession handles POST /v1/sessions — mints a proxied upstream connection.
 func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	var req SessionMintRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_json", err.Error())
@@ -64,7 +65,9 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 	sessionID := uuid.NewString()
 	expiresAt := time.Now().UTC().Add(time.Duration(h.cfg.MaxSessionMinutes) * time.Minute)
 
-	ephemeralToken, err := auth.MintToken(h.cfg.JWTSecret, sessionID, "bridge", 35*time.Minute)
+	// 5-minute buffer over MaxSessionMinutes for clock-skew tolerance
+	ephemeralTTL := time.Duration(h.cfg.MaxSessionMinutes)*time.Minute + 5*time.Minute
+	ephemeralToken, err := auth.MintToken(h.cfg.JWTSecret, sessionID, "bridge", ephemeralTTL)
 	if err != nil {
 		slog.Error("failed to mint ephemeral token", "err", err)
 		writeError(w, http.StatusInternalServerError, "token_error", "could not mint session token")
@@ -75,7 +78,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		SessionID: sessionID,
 		Upstream: UpstreamWebsocket{
 			Type: "websocket",
-			URL:  fmt.Sprintf("wss://%s/v1/stream/%s", r.Host, sessionID),
+			URL:  fmt.Sprintf("wss://%s/v1/stream/%s", h.cfg.PublicHost, sessionID),
 			Headers: map[string]string{
 				"Authorization": "Bearer " + ephemeralToken,
 			},
@@ -94,6 +97,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 
 // Telemetry handles POST /v1/sessions/{sessionId}/telemetry.
 func (h *Handler) Telemetry(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	var batch TelemetryBatch
 	if err := json.NewDecoder(r.Body).Decode(&batch); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_json", err.Error())
@@ -117,7 +121,8 @@ func (h *Handler) AuthRefresh(w http.ResponseWriter, r *http.Request) {
 	const ttl = 60 * time.Minute
 	newToken, err := auth.MintToken(h.cfg.JWTSecret, claims.Sub, claims.Org, ttl)
 	if err != nil {
-		writeError(w, http.StatusInternalServerError, "token_error", err.Error())
+		slog.Error("failed to mint refresh token", "err", err)
+		writeError(w, http.StatusInternalServerError, "token_error", "could not mint refresh token")
 		return
 	}
 	writeJSON(w, http.StatusOK, AuthRefreshResponse{

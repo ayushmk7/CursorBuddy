@@ -9,6 +9,7 @@ import (
 // Config holds all bridge runtime configuration loaded from environment variables.
 type Config struct {
 	Listen               string // BRIDGE_LISTEN, default 127.0.0.1:8787
+	PublicHost           string // BRIDGE_PUBLIC_HOST; used for WSS URL construction; defaults to Listen
 	OpenClawUpstreamURL  string // OPENCLAW_UPSTREAM_URL, required
 	OpenClawServiceToken string // OPENCLAW_SERVICE_TOKEN, required
 	RedisURL             string // REDIS_URL, default redis://localhost:6379
@@ -29,6 +30,7 @@ func Load() (*Config, error) {
 		MaxSessionMinutes: getEnvIntOrDefault("MAX_SESSION_MINUTES", 30),
 		Version:           getEnvOrDefault("BRIDGE_VERSION", "dev"),
 	}
+	c.PublicHost = getEnvOrDefault("BRIDGE_PUBLIC_HOST", c.Listen)
 
 	var missing []string
 	c.OpenClawUpstreamURL = os.Getenv("OPENCLAW_UPSTREAM_URL")

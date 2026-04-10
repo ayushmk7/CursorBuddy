@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 )
@@ -47,5 +48,6 @@ func ContextWithClaims(ctx context.Context, c *Claims) context.Context {
 func writeUnauthorized(w http.ResponseWriter, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = w.Write([]byte(`{"error":"` + msg + `","code":"E_AUTH"}`))
+	b, _ := json.Marshal(map[string]string{"error": msg, "code": "E_AUTH"})
+	w.Write(b)
 }
