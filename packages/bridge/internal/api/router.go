@@ -2,8 +2,10 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/cursorbuddy/bridge/internal/auth"
+	"github.com/cursorbuddy/bridge/internal/proxy"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -16,17 +18,30 @@ func NewRouter(h *Handler) http.Handler {
 	r.Use(middleware.Recoverer)
 
 	bearer := auth.BearerMiddleware(h.Validator())
+	p := proxy.New(proxy.Config{IdleTimeout: 120 * time.Second})
 
 	// Public
 	r.Get("/v1/healthz", h.Health)
 
-	// Protected
+	// Protected REST
 	r.Group(func(r chi.Router) {
 		r.Use(bearer)
 		r.Get("/v1/policy", h.Policy)
 		r.Post("/v1/sessions", h.CreateSession)
 		r.Post("/v1/sessions/{sessionId}/telemetry", h.Telemetry)
 		r.Post("/v1/auth/refresh", h.AuthRefresh)
+	})
+
+	// WebSocket stream proxy (authenticated via Bearer)
+	r.Group(func(r chi.Router) {
+		r.Use(bearer)
+		r.Get("/v1/stream/{sessionId}", func(w http.ResponseWriter, r *http.Request) {
+			sessionID := chi.URLParam(r, "sessionId")
+			upstreamURL := h.cfg.OpenClawUpstreamURL + "/sessions/" + sessionID
+			p.ServeWS(w, r, upstreamURL, http.Header{
+				"Authorization": []string{"Bearer " + h.cfg.OpenClawServiceToken},
+			})
+		})
 	})
 
 	return r
