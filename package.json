@@ -3,7 +3,9 @@
   "private": true,
   "workspaces": [
     "packages/openclaw-pack",
-    "packages/shared"
+    "packages/shared",
+    "packages/sidecar",
+    "packages/extension"
   ],
   "scripts": {
     "test:shared": "npm test --workspace=packages/shared",
