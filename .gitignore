@@ -14,12 +14,7 @@ packages/bridge/dist/
 *.test.bin
 
 # Node
-node_modules/
 packages/*/node_modules/
 packages/*/dist/
-
-# Env
-.env
-.env.local
 
 # macOS
