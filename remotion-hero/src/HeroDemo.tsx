@@ -26,10 +26,10 @@ const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 // y = EDITOR_CONTENT_Y(62) + breadcrumb(22) + 11*lineH(24) + lineH/2 = 62+22+264+12 = 360
 const EDITOR_CARET = { x: 620, y: 360 };
 
-// Commit message box caret: top-left of textarea text area
-// x = SIDEBAR_X(48) + sectionPad(12) + boxPadL(10) = 70
-// y = SCM.msgBoxY(440) + boxPadT(8) + 8 = 456
-const COMMIT_CARET = { x: 70, y: 456 };
+// Commit message box caret: inside the textarea (now near panel top)
+// x = SIDEBAR_X(48) + sectionPad(10) + boxPadL(8) = 66
+// y = SCM.msgBoxY(75) + boxPadT(6) + halfFontSize(7) = 88
+const COMMIT_CARET = { x: 66, y: 88 };
 
 // Frame range for the caret travel animation
 const CARET_START   = PHASES.C.start;       // 195 — begin transitioning
@@ -154,9 +154,9 @@ export const HeroDemo: React.FC = () => {
             />
           )}
 
-          {/* ── Speech overlay (mic + waveform + typewriter text) ── */}
+          {/* ── Speech overlay (cursor-anchored capsule with mini waveform) ── */}
           {captionOpacity > 0.01 && (
-            <Caption opacity={captionOpacity} frame={frame} />
+            <Caption opacity={captionOpacity} frame={frame} cursorPos={userPos} />
           )}
 
           {/* ── Callout ── */}

@@ -72,12 +72,12 @@ const KF_LOOK_Y = [
   WAVEFORM_CY - 30,  // breathe
   editorMidY,        // 530 — wide as SCM crossfades in
   400,
-  SCM.filesStartY + SCM.fileRowH,  // ~168 — SCM files list
-  SCM.commitBtnCY - 60,            // ~559
-  SCM.commitBtnCY,                 // 619 — Phase D: commit button
+  SCM.filesStartY - SCM.fileRowH,  // ~219 — pan down to show full SCM panel
+  SCM.commitBtnCY - 40,            // ~155 — settle between msg box and button
+  SCM.commitBtnCY,                 // 195 — Phase D: commit button
   SCM.commitBtnCY,
   SCM.commitBtnCY,    // hold through click
-  SCM.commitBtnCY - 30,
+  SCM.commitBtnCY - 20,
   editorMidY,         // Phase E
   editorMidY,
   editorMidY,         // matches frame 0
