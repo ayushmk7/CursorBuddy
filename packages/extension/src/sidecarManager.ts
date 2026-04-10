@@ -47,10 +47,46 @@ export class SidecarManager {
     this.log = log;
   }
 
-  async start(): Promise<void> {
+  private autoRestart(): void {
+    const delay = this.restartDelay;
+    this.restartDelay = Math.min(this.restartDelay * 2, BACKOFF_MAX_MS);
+    this.log(`[sidecar] restarting in ${delay}ms`);
+    setTimeout(() => {
+      if (!this.stopped) {
+        this.autoRestart_spawn().catch((err) => {
+          this.log(`[sidecar] restart failed: ${err}`);
+        });
+      }
+    }, delay);
+  }
+
+  private async autoRestart_spawn(): Promise<void> {
+    // same as start() but does NOT reset restartDelay
     this.stopped = false;
     this.receivedFirstMessage = false;
 
+    if (this.child) {
+      this.child.kill();
+      this.child = null;
+    }
+
+    return this._spawn();
+  }
+
+  async start(): Promise<void> {
+    this.stopped = false;
+    this.receivedFirstMessage = false;
+    this.restartDelay = BACKOFF_INITIAL_MS;
+
+    if (this.child) {
+      this.child.kill();
+      this.child = null;
+    }
+
+    return this._spawn();
+  }
+
+  private async _spawn(): Promise<void> {
     const child = spawn('node', [this.sidecarPath], {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env, ...this.env },
@@ -103,8 +139,17 @@ export class SidecarManager {
       this.log(`[sidecar stderr] ${line}`);
     });
 
+    // Suppress write errors on stdin — already handled per-request in the write callback
+    child.stdin!.on('error', () => {
+      // write errors are already handled per-request in the write callback
+    });
+
     // Handle exit with backoff restart
     child.on('exit', (code, signal) => {
+      rl.close();
+      stderrRl.close();
+      this.child = null;
+
       this.log(`[sidecar] exited (code=${code}, signal=${signal})`);
 
       // Reject all pending requests
@@ -118,16 +163,7 @@ export class SidecarManager {
         return;
       }
 
-      const delay = this.restartDelay;
-      this.restartDelay = Math.min(this.restartDelay * 2, BACKOFF_MAX_MS);
-      this.log(`[sidecar] restarting in ${delay}ms`);
-      setTimeout(() => {
-        if (!this.stopped) {
-          this.start().catch((err) => {
-            this.log(`[sidecar] restart failed: ${err}`);
-          });
-        }
-      }, delay);
+      this.autoRestart();
     });
 
     // Wait for child 'spawn' event to resolve
