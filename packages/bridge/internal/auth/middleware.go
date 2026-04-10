@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strings"
 )
@@ -24,7 +25,8 @@ func BearerMiddleware(v *Validator) func(http.Handler) http.Handler {
 			tokenStr := strings.TrimPrefix(header, "Bearer ")
 			claims, err := v.Validate(tokenStr)
 			if err != nil {
-				writeUnauthorized(w, "invalid token: "+err.Error())
+				slog.Error("token validation failed", "err", err)
+				writeUnauthorized(w, "invalid token")
 				return
 			}
 			ctx := context.WithValue(r.Context(), claimsKey, claims)
