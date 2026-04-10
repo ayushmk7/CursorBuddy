@@ -30,6 +30,9 @@ export class SessionManager {
   }
 
   async start(): Promise<void> {
+    if (this.state === 'connecting' || this.state === 'live') {
+      return;
+    }
     const cfg = vscode.workspace.getConfiguration('waveclick');
     let openclawBaseUrl = cfg.get<string>('openclaw.baseUrl', 'ws://localhost:9090');
     const workflow = cfg.get<string>('openclaw.workflow', 'waveclick_session');
