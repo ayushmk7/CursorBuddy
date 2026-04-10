@@ -1,45 +1,53 @@
-# Frontend agents — guidance for Claude / Cursor
+# Frontend agents — local application UI
 
-This folder holds **documentation and copy-paste prompts** for building the **Next.js** web application and its **PostgreSQL** and **Redis** layers. It contains **no runnable application code** by default—use these files as the **entry point**, then read the canonical PRDs under [`docs/`](../../../docs/).
+This folder holds documentation and prompts for building the **local on-device frontend** for CursorBuddy / WaveClick.
 
-## Stack (normative)
+The `frontend/` folder is for the UI that runs **inside or alongside the host application**:
 
-| Layer | Choice | Role |
-|--------|--------|------|
-| Framework | **Next.js** (App Router, TypeScript) | UI, SSR/RSC, Route Handlers, Server Actions |
-| Primary datastore | **PostgreSQL** | Durable entities, migrations |
-| Fast datastore | **Redis** | Sessions, cache, rate limits, ephemeral coordination |
+- **sidebar webview**
+- **cursor-adjacent companion / overlay**
+- transcript, steps, confirmations, and local status states
 
-Details: [`STACK.md`](STACK.md).
+It is **not** for the public landing page or waitlist site. Those live in `landingpage/` and should only be changed when a task explicitly targets marketing.
+
+## Scope
+
+This local frontend should align with:
+
+- [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../../docs/07_LOCAL_CURSOR_AND_COMPANION.md)
+- [`backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md`](../../../backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md)
+- [`backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md`](../../../backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md)
+- [`docs/02_TECHNICAL_PRD.md`](../../../docs/02_TECHNICAL_PRD.md)
 
 ## Read first
 
-1. [`AGENT_SYSTEM_INSTRUCTIONS.md`](AGENT_SYSTEM_INSTRUCTIONS.md) — non-negotiables (server/client boundaries, secrets, Redis vs Postgres).
-2. [`STACK.md`](STACK.md) — versions, libraries, when to use Redis vs Postgres.
-3. [`GLOSSARY.md`](GLOSSARY.md) — Next.js and data-layer terms used in these docs.
-4. [`IMPLEMENTATION_STEPS.md`](IMPLEMENTATION_STEPS.md) — phased build order and verification gates.
-5. [`PHASED_IMPLEMENTATION_PROMPTS.md`](PHASED_IMPLEMENTATION_PROMPTS.md) — copy-paste prompts aligned with those steps.
+1. [`AGENT_SYSTEM_INSTRUCTIONS.md`](AGENT_SYSTEM_INSTRUCTIONS.md)
+2. [`STACK.md`](STACK.md)
+3. [`GLOSSARY.md`](GLOSSARY.md)
+4. [`IMPLEMENTATION_STEPS.md`](IMPLEMENTATION_STEPS.md)
+5. [`PHASED_IMPLEMENTATION_PROMPTS.md`](PHASED_IMPLEMENTATION_PROMPTS.md)
 
 ## Product and design sources
 
 | Document | Use |
 |----------|-----|
-| [`docs/01_GENERAL_PRD.md`](../../../docs/01_GENERAL_PRD.md) | Product scope and orchestration context |
-| [`docs/02_TECHNICAL_PRD.md`](../../../docs/02_TECHNICAL_PRD.md) | Contracts (e.g. `AssistantEnvelopeV1`), integration boundaries |
-| [`docs/03_BACKEND_PRD.md`](../../../docs/03_BACKEND_PRD.md) | Bridge, auth—align web app auth with this |
-| [`docs/05_FRONTEND_PROMPT.md`](../../../docs/05_FRONTEND_PROMPT.md) | **Marketing / landing** visual language (if that surface lives in the Next.js app) |
-| [`docs/openapi.yaml`](../../../docs/openapi.yaml) | REST shape for bridge or HTTP APIs the frontend may call |
+| [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) | Primary local UI structure and behavior |
+| [`backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md`](../../../backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md) | Pointer-locked capsule rules, chord, streaming layout |
+| [`backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md`](../../../backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md) | Prevents pushing local UI work into backend/web scopes |
+| [`docs/design/autoapply-design-tokens.md`](../../../docs/design/autoapply-design-tokens.md) | `wg.*` tokens for webview and overlay styling |
+| [`docs/02_TECHNICAL_PRD.md`](../../../docs/02_TECHNICAL_PRD.md) | `AssistantEnvelopeV1`, local execution boundaries |
+| [`docs/05_FRONTEND_PROMPT.md`](../../../docs/05_FRONTEND_PROMPT.md) | Marketing-site only; read only when a task explicitly targets `landingpage/` |
 
-**Path rule:** Canonical paths are **`docs/…`**. Ignore historical references to `docsforother/` in older prose.
+## Contracts
 
-## Contracts (do not duplicate)
+- [`../contracts/README.md`](../contracts/README.md) points to the authoritative contracts for local message shapes and envelope handling.
 
-- [`../contracts/README.md`](../contracts/README.md) — where OpenAPI and shared schemas live; generate client types from a single source of truth.
+## Path rule
 
-## How to run a session with an agent
+Always reference canonical files under `docs/…` and `backend/agents/docs/…`.
 
-From the repository root:
+## Session prompt
 
-> Read `frontend/agents/docs/AGENT_SYSTEM_INSTRUCTIONS.md`, `frontend/agents/docs/STACK.md`, and `docs/01_GENERAL_PRD.md`. Summarize the frontend architecture boundaries (Next.js vs bridge vs local extension). List the next implementation phase from `frontend/agents/docs/IMPLEMENTATION_STEPS.md` that applies to my task.
+From repo root:
 
-Always use paths relative to the repo root.
+> Read `frontend/agents/docs/AGENT_SYSTEM_INSTRUCTIONS.md`, `docs/07_LOCAL_CURSOR_AND_COMPANION.md`, and `backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md`. Summarize the local frontend boundaries and the next implementation step for the sidebar and overlay UI.

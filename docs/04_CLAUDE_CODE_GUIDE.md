@@ -2,6 +2,8 @@
 
 This document is a **practical guide** for using Claude Code (terminal-based agentic coding) to implement the WaveClick system described in `docsforother/*.md`. It mirrors the structure of `docs/04_CLAUDE_CODE_GUIDE.md` but targets **OpenClaw (required) + VS Code extension + sidecar + optional bridge**, with **latency-first** choices (direct to OpenClaw when fastest; **Gemini Live** only when OpenClaw benchmarks it as fastest—not hardcoded in the extension).
 
+**Default repo choice:** implement backend / bridge code in **Go**.
+
 ---
 
 ## 1. Setup
@@ -29,7 +31,7 @@ waveclick/
   packages/
     extension/          # VS Code extension (TypeScript)
     sidecar/              # Node or Rust audio + OpenClaw transport client
-    bridge/               # optional HTTP/WSS proxy to OpenClaw
+    bridge/               # optional Go HTTP/WSS proxy to OpenClaw
     openclaw-pack/        # REQUIRED: workflows, tools, SKILL.md for OpenClaw operators
   docsforother/           # PRDs (or symlink from another repo)
 ```
@@ -106,7 +108,7 @@ Open the repo root in your terminal and run `claude`.
 ### 2.5 Optional Bridge Service
 
 ```
-> Implement packages/bridge with Fastify:
+> Implement packages/bridge in Go:
   - POST /v1/sessions mints proxied upstream URL **to OpenClaw** (not raw provider)
   - WSS proxy with timeouts and idle disconnect
   - JWT auth middleware

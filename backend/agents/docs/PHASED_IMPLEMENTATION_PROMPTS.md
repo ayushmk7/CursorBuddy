@@ -94,7 +94,7 @@ reduced-motion behavior. Do not implement OS-wide mouse automation for navigatio
 
 ```
 Read docs/03_BACKEND_PRD.md §4–6 and docs/openapi.yaml.
-Scaffold packages/bridge only if policy requires: POST /v1/sessions, health, JWT/mTLS per Backend PRD;
+Scaffold packages/bridge as a Go service only if policy requires: POST /v1/sessions, health, JWT/mTLS per Backend PRD;
 transparent proxy for realtime where possible; no UI logic.
 ```
 

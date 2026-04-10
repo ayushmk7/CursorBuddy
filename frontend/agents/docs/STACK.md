@@ -1,72 +1,53 @@
-# Frontend stack — Next.js, PostgreSQL, Redis
+# Frontend stack — local application UI
 
-This document is **normative** for agents implementing the web frontend. Deviations require an explicit product or security reason documented in PRDs or ADRs.
+This document is normative for the **local frontend** in `frontend/`.
 
-## Overview
+## Folder meaning
 
-```
-Browser ──► Next.js (App Router)
-              │
-              ├── Server Components / Route Handlers / Server Actions
-              │         │
-              │         ├── PostgreSQL (durable state, migrations)
-              │         └── Redis (ephemeral + fast: cache, sessions, rate limits)
-              │
-              └── Client Components (minimal; interactivity only)
-```
+`frontend/` is for the **on-device product UI** only:
 
-## Next.js
+- host sidebar webview
+- overlay / companion presentation
+- local visual states for transcript, steps, confirmations, and status
 
-| Topic | Guidance |
-|-------|----------|
-| **Router** | **App Router** (`app/`). Prefer **React Server Components** by default. |
-| **Rendering** | Use static/ISR where possible; use dynamic rendering when auth or request-specific data requires it. |
-| **Data mutations** | Prefer **Server Actions** with validation (e.g. Zod) for same-origin app flows; use **Route Handlers** (`app/api/.../route.ts`) for webhooks, third-party callbacks, or explicit REST. |
-| **Env** | `NEXT_PUBLIC_*` only for values that are safe to expose to the browser. **Never** put database URLs, Redis passwords, or API secrets in `NEXT_PUBLIC_*`. |
-| **Fetching** | Server Components: fetch directly or use the DB/Redis clients in server-only modules. Client Components: call Server Actions or typed API wrappers—**do not** instantiate DB/Redis clients in `"use client"` files. |
+It is **not** the marketing website and **not** a Next.js app.
 
-**Suggested baseline versions (pin in `package.json` to what the team standardizes):**
+## Recommended implementation shape
 
-- `next`, `react`, `react-dom` — current stable major supported by Vercel/hosting.
-- TypeScript `strict` mode enabled.
+| Layer | Choice | Role |
+|------|--------|------|
+| Markup | HTML | Webview-friendly structure and prototype preview |
+| Styling | CSS custom properties | Theme bridge, `wg.*` token mapping, reduced-motion support |
+| Interactivity | Vanilla JS | Lightweight state handling, pointer-follow preview, no framework requirement |
+| Assets | Local static files | CSP-safe packaging for eventual host embedding |
 
-## PostgreSQL
+## Design rules
 
 | Topic | Guidance |
-|-------|----------|
-| **Role** | System of record: users (if not delegated to IdP-only), orgs, billing refs, audit logs, domain entities that must survive restarts. |
-| **Access** | Only from **server** code: Server Components, Server Actions, Route Handlers, background workers. Use a **connection pool** (e.g. `pg` with pool, or ORM’s pooled mode). |
-| **Migrations** | Checked into the repo; apply in CI and deploy pipelines. Do not hand-edit production without a migration file. |
-| **ORM/query** | **Drizzle** or **Prisma**—pick one per repo and stay consistent. Agents should follow existing project choice if already present. |
+|------|----------|
+| **Theme model** | Prefer host theme variables (`--vscode-*`) with local fallbacks for preview mode. |
+| **Token source** | Use `docs/design/autoapply-design-tokens.md` Part B for `wg.*` spacing, radius, type, color, and waveform tokens. |
+| **Surface priority** | Sidebar is required for v1. Overlay is optional and must degrade cleanly. |
+| **Motion** | Keep motion subtle and functional; respect `prefers-reduced-motion`. |
+| **Accessibility** | `aria-live`, visible focus rings, readable contrast, keyboardable controls. |
+| **CSP** | Assume eventual embedding inside a strict host webview. Prefer local scripts and styles only. |
 
-**Do not store** large session blobs or hot cache keys in Postgres if Redis is available for that purpose—unless you need durable session audit.
+## What not to build here
 
-## Redis
+- landing-page hero or waitlist UI
+- Next.js routes or marketing-site data flows
+- Postgres or Redis integrations
+- bridge/backend auth logic
+- mic capture or OpenClaw orchestration
 
-| Topic | Guidance |
-|-------|----------|
-| **Role** | Fast ephemeral data: session store (if using Redis-backed sessions), HTTP rate limiting, short-lived feature flags cache, idempotency keys, job queue metadata (if using Redis as a queue backend), request-scoped deduplication. |
-| **Access** | Only from **server** code (same rule as Postgres). Prefer a single shared module that configures the client once. |
-| **Client** | **ioredis** or **@upstash/redis** (serverless-friendly)—match hosting (long-lived Node vs serverless). |
-| **TTL** | Every cache key should have a **TTL** unless there is a documented exception. |
-| **Key namespacing** | Use a prefix: `app:{env}:{feature}:{id}` to avoid collisions across services. |
+## Data model expectations
 
-**Do not use Redis as** the only copy of business-critical data that must survive eviction—Postgres is the durable store.
+The frontend should be ready to render local session state such as:
 
-## When to use which
+- connection status
+- transcript deltas
+- step states
+- confirmation requirements
+- overlay caption text
 
-| Need | Store |
-|------|--------|
-| User profile, org membership, entitlements | Postgres |
-| “Is this JWT/session still valid?” (server-side session index) | Redis (often) + optional Postgres audit |
-| Idempotent webhook processing marker (short TTL) | Redis |
-| Report/dashboard query result cache | Redis |
-| Financial or compliance-grade audit trail | Postgres (append-only tables) |
-
-## Local development
-
-Agents should assume **Docker Compose** or **devcontainers** may provide Postgres + Redis locally; document required env vars in the app’s `.env.example` when scaffolding (never commit secrets).
-
-## Hosting notes (non-prescriptive)
-
-- **Vercel** + managed Postgres (Neon, Supabase, RDS) + Upstash Redis is a common pattern; connection pooling and serverless timeouts still require **disciplined** DB/Redis usage (no long transactions in serverless handlers).
+These are derived from the local runtime and `AssistantEnvelopeV1`, not from marketing-site APIs.

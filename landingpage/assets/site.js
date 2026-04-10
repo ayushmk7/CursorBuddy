@@ -86,6 +86,64 @@
     openWaitlistDialog();
   }
 
+  const demoDialog = document.querySelector("[data-demo-dialog]");
+  const demoVideo = document.querySelector("[data-demo-video]");
+  let lastDemoFocusEl = null;
+
+  function openDemoDialog() {
+    if (!demoDialog || typeof demoDialog.showModal !== "function") {
+      return;
+    }
+    lastDemoFocusEl = document.activeElement;
+    demoDialog.showModal();
+    window.setTimeout(() => {
+      if (demoVideo && typeof demoVideo.play === "function") {
+        demoVideo.play().catch(() => {});
+      }
+      const closeDemo = demoDialog.querySelector("[data-close-demo]");
+      if (closeDemo && typeof closeDemo.focus === "function") {
+        closeDemo.focus();
+      }
+    }, 0);
+  }
+
+  function pauseDemoVideo() {
+    if (demoVideo && typeof demoVideo.pause === "function") {
+      demoVideo.pause();
+    }
+  }
+
+  function closeDemoDialog() {
+    pauseDemoVideo();
+    if (demoDialog && demoDialog.open) {
+      demoDialog.close();
+    }
+  }
+
+  document.querySelectorAll("[data-open-demo]").forEach((node) => {
+    node.addEventListener("click", () => openDemoDialog());
+  });
+
+  document.querySelectorAll("[data-close-demo]").forEach((node) => {
+    node.addEventListener("click", () => closeDemoDialog());
+  });
+
+  if (demoDialog) {
+    demoDialog.addEventListener("close", () => {
+      pauseDemoVideo();
+      if (lastDemoFocusEl && typeof lastDemoFocusEl.focus === "function") {
+        lastDemoFocusEl.focus();
+      }
+    });
+
+    demoDialog.addEventListener("click", (event) => {
+      const panel = demoDialog.querySelector(".demo-dialog__panel");
+      if (panel && !panel.contains(event.target)) {
+        demoDialog.close();
+      }
+    });
+  }
+
   if (!form || !submitButton || !formStatus || !emailField || !nameField) {
     return;
   }

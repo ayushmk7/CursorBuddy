@@ -2,7 +2,7 @@
 
 This document is a **sequential implementation guide** for building **WaveClick** as described in `docsforother/01_GENERAL_PRD.md`, `docsforother/02_TECHNICAL_PRD.md`, and `docsforother/03_BACKEND_PRD.md`. Execute phases in order unless explicitly marked parallelizable.
 
-**Scope:** **OpenClaw pack** (required workflows + tools), VS Code extension (TypeScript), **sidecar** (strongly recommended) with **OpenClaw** transport, optional **bridge** service, **CI/CD**, and **compatibility testing**. **No** production path that skips OpenClaw.
+**Scope:** **OpenClaw pack** (required workflows + tools), VS Code extension (TypeScript), **sidecar** (strongly recommended) with **OpenClaw** transport, optional **Go bridge** service, **CI/CD**, and **compatibility testing**. **No** production path that skips OpenClaw.
 
 **Related:** `docsforother/04_CLAUDE_CODE_GUIDE.md` (agent prompts), `docsforother/openapi.yaml` (bridge contract), `docsforother/05_FRONTEND_PROMPT.md` (landing + waitlist site), `docsforother/07_LOCAL_CURSOR_AND_COMPANION.md` (local webview + cursor/overlay).
 
@@ -14,6 +14,8 @@ This document is a **sequential implementation guide** for building **WaveClick*
 2. For each subsystem, implement **happy path → schema validation → failure modes → telemetry**.
 3. Treat **command ID drift** as a release-blocking issue; maintain a **version matrix** artifact.
 4. **Never** ship a build where the model can call `executeCommand` with unconstrained strings.
+
+**Default language choice:** use **Go** for backend / bridge code in this repo unless a document explicitly carves out a different server-side component.
 
 ---
 
@@ -65,7 +67,7 @@ Table:
 
 | WaveClick | VS Code min | Node (sidecar) | bridge runtime |
 |-----------|-------------|----------------|----------------|
-| 0.4.x | 1.98.x | 20 | 20 |
+| 0.4.x | 1.98.x | 20 | Go |
 
 **Edge cases**
 
@@ -79,7 +81,7 @@ Recommended: `pnpm` workspaces or `npm` workspaces.
 packages/openclaw-pack    # REQUIRED workflows, tools, SKILL.md
 packages/extension
 packages/sidecar
-packages/bridge
+packages/bridge            # optional Go bridge service
 packages/shared            # zod schemas, types
 ```
 
@@ -387,7 +389,7 @@ Choose library; document platform permissions.
 
 ---
 
-## Phase 7 — Bridge service (`packages/bridge`, optional; OpenClaw still required)
+## Phase 7 — Bridge service (`packages/bridge`, optional Go service; OpenClaw still required)
 
 ### Step 7.1 — OpenAPI implementation
 
@@ -427,7 +429,7 @@ Redis token bucket per org/user.
 
 ### Step 8.1 — Structured logs
 
-Use `pino` in bridge; JSON lines in sidecar; VS Code output channel in extension.
+Use `log/slog` in bridge; JSON lines in sidecar; VS Code output channel in extension.
 
 Fields: `session_id`, `utterance_id`, `action_id`, `latency_ms`, `result`.
 
@@ -461,7 +463,7 @@ Integration test harness:
 
 ### Step 9.3 — Bridge tests
 
-- `supertest` against Fastify app
+- Go `httptest` against the bridge HTTP handlers/router
 - Mock upstream WebSocket server
 
 ### Step 9.4 — Manual QA script (`docs/QA.md` in extension repo)
@@ -784,4 +786,3 @@ server {
 1. Exact Gemini Live message schema versioning — pin SDK version quarterly.
 2. Whether `git.commit` accepts arguments on all platforms — verify macOS/Win/Linux.
 3. Corporate proxy authentication (NTLM) for sidecar — may require native fetch patch.
-

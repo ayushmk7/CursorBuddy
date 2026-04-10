@@ -30,38 +30,37 @@
           <nav class="site-nav site-nav--compact" aria-label="Primary">
             <a href="/terms/">Terms</a>
             <a href="/privacy/">Privacy</a>
-            <button type="button" class="button button--primary button--nav-waitlist" data-open-waitlist>
-              Join Waitlist
-            </button>
           </nav>
         </header>
 
         <section class="section hero">
           <div class="hero__grid">
             <div class="hero__copy">
-              <h1 class="headline headline--single headline--tagline">Speak. Follow. Learn.</h1>
+              <p class="eyebrow eyebrow--hero">Local · private · step by step</p>
+              <h1 class="headline headline--single headline--tagline">
+                Speak. Follow. <span class="headline__glow">Learn.</span>
+              </h1>
               <p class="subhead subhead--single">
                 Voice-guided moves in the real desktop UI, local, private, step by step.
               </p>
+              <div class="hero__actions hero__actions--hero">
+                <button type="button" class="button button--primary button--hero-cta" data-open-waitlist>
+                  Join Waitlist
+                </button>
+                <button
+                  type="button"
+                  class="button button--ghost button--hero-cta"
+                  data-open-demo
+                  aria-haspopup="dialog"
+                  aria-controls="demo-dialog"
+                >
+                  <svg class="button__icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7L8 5z"/>
+                  </svg>
+                  See demo
+                </button>
+              </div>
             </div>
-          </div>
-        </section>
-
-        <section class="section hero-demo" aria-label="CursorBuddy demo">
-          <div class="glass-panel hero-demo__panel">
-            <video
-              class="hero-demo__video"
-              controls
-              autoplay
-              muted
-              loop
-              playsinline
-              preload="auto"
-              poster="/assets/cursorbuddy-hero-remotion-poster.png"
-              aria-label="Screen recording of CursorBuddy guiding the cursor in an app"
-            >
-              <source src="/assets/cursorbuddy-hero-remotion.mp4" type="video/mp4">
-            </video>
           </div>
         </section>
       </div>
@@ -120,22 +119,15 @@
           </div>
         </section>
 
-        <section class="section section--tight">
-          <div class="glass-panel signal-panel">
-            <div>
-              <p class="section-label">Early access</p>
-              <h2>Join the list.</h2>
-            </div>
-            <button type="button" class="button button--primary" data-open-waitlist>Join Waitlist</button>
-          </div>
-        </section>
       </main>
 
-      <footer class="site-footer glass-bar glass-bar--footer">
-        <p class="site-footer__meta">© <span data-year></span> CursorBuddy</p>
+      <footer class="site-footer site-footer--links-only glass-bar glass-bar--footer">
         <div class="site-footer__links site-footer__links--legal">
           <a href="/privacy/">Privacy</a>
           <a href="/terms/">Terms</a>
+          <button type="button" class="site-footer__waitlist-text" data-open-waitlist>
+            Join waitlist
+          </button>
           <a href="mailto:contactayushmadhav@gmail.com">contactayushmadhav@gmail.com</a>
         </div>
       </footer>
@@ -224,6 +216,39 @@
 
           <div class="form-status" data-form-status aria-live="polite"></div>
         </form>
+      </div>
+    </dialog>
+
+    <dialog
+      id="demo-dialog"
+      class="demo-dialog"
+      data-demo-dialog
+      aria-labelledby="demo-dialog-title"
+    >
+      <div class="demo-dialog__panel glass-panel">
+        <button type="button" class="waitlist-dialog__close" data-close-demo aria-label="Close demo video">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+        <h2 id="demo-dialog-title" class="demo-dialog__title">See CursorBuddy in action</h2>
+        <div class="demo-dialog__frame glass-inset">
+          <video
+            id="demo-video"
+            class="demo-dialog__video"
+            data-demo-video
+            controls
+            autoplay
+            muted
+            loop
+            playsinline
+            preload="auto"
+            poster="/assets/cursorbuddy-hero-remotion-poster.png"
+            aria-label="Screen recording of CursorBuddy guiding the cursor in an app"
+          >
+            <source src="/assets/cursorbuddy-hero-remotion.mp4" type="video/mp4">
+          </video>
+        </div>
       </div>
     </dialog>
   </body>

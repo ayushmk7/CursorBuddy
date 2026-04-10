@@ -1,149 +1,139 @@
-# Frontend implementation steps
+# Frontend implementation steps — local application UI
 
-Phased build order for the **Next.js** application using **PostgreSQL** and **Redis**. Agents should implement **in order** unless a task explicitly says otherwise; later phases assume earlier foundations exist.
+Phased build order for the **local frontend** in `frontend/`.
+
+This folder is for the **on-device UI only**. Do not use these steps for `landingpage/`.
 
 ## How to use this file
 
-- Each phase has **outputs** and **verification** an agent must satisfy before claiming completion.
-- Copy detailed prompts from [`PHASED_IMPLEMENTATION_PROMPTS.md`](PHASED_IMPLEMENTATION_PROMPTS.md).
-- If a phase is not applicable (e.g. no bridge integration yet), document **SKIPPED: reason** in the PR or session notes.
+- Implement phases in order unless a task explicitly narrows scope.
+- Each phase should end with a visual or functional verification step.
+- If a phase is intentionally skipped, document why.
 
 ---
 
-## Phase 0 — Decisions and repo wiring
+## Phase 0 — Scope and boundary lock
 
-**Goal:** Fix stack choices and folder layout so later phases do not fork patterns.
-
-**Decide / record:**
-
-- Package manager (npm/pnpm/yarn) and monorepo boundary (app lives in `frontend/` vs `apps/web`).
-- Postgres provider and Redis provider for **dev** and **prod** (placeholders OK until infra exists).
-- ORM: Drizzle vs Prisma (one per repo).
+**Goal:** Make the local-vs-marketing boundary explicit.
 
 **Outputs:**
 
-- `package.json` scripts: `dev`, `build`, `lint`, `test`, `db:migrate` (names may vary but must exist).
-- `.env.example` listing **all** required vars with dummy values—**no real secrets**.
+- `frontend/README.md` states this folder is for local application UI only.
+- Agent docs explicitly say `landingpage/` is out of scope unless requested.
 
 **Verification:**
 
-- `lint` and `build` succeed on a clean checkout (with documented env).
-- `.env.example` matches Zod (or similar) env validation.
+- A new contributor can tell, from `frontend/` docs alone, that this folder is not for the waitlist site.
 
 ---
 
-## Phase 1 — Next.js scaffold (App Router)
+## Phase 1 — Local frontend scaffold
 
-**Goal:** A minimal production-grade Next.js app with strict TypeScript.
+**Goal:** Create a runnable local UI prototype that previews the sidebar and overlay surfaces.
 
 **Outputs:**
 
-- `app/` App Router structure, `layout.tsx`, `page.tsx`.
-- ESLint + Prettier (or Biome) aligned with repo standards.
-- Global styles and a minimal design baseline (if marketing UI is in scope, align tokens with [`docs/05_FRONTEND_PROMPT.md`](../../../docs/05_FRONTEND_PROMPT.md)).
+- `frontend/index.html`
+- `frontend/assets/styles.css`
+- `frontend/assets/app.js`
 
 **Verification:**
 
-- `pnpm build` / `npm run build` passes.
-- No accidental `"use client"` on files that only need server rendering.
+- The prototype opens locally in a browser and renders without external dependencies.
 
 ---
 
-## Phase 2 — PostgreSQL schema and migrations
+## Phase 2 — Sidebar webview shell
 
-**Goal:** Durable data model and migration path.
+**Goal:** Build the primary local surface.
 
 **Outputs:**
 
-- Schema for entities required by PRDs (users/tenants/orgs as needed—**do not invent** entities not implied by PRDs without marking them provisional).
-- Migrations folder checked in.
-- Server-only DB module with **pooled** connections.
+- Header with product mark, connection pill, and latency hint
+- Push-to-talk region with waveform or level visualization
+- Transcript section
+- Step / plan list
+- Safety footer
 
 **Verification:**
 
-- Migrations apply cleanly on empty DB.
-- No raw queries in Client Components.
+- Layout works at desktop and narrow widths.
+- Focus states are visible and semantic regions are present.
 
 ---
 
-## Phase 3 — Redis integration
+## Phase 3 — Overlay capsule
 
-**Goal:** Redis client module with namespacing and TTL discipline per [`STACK.md`](STACK.md).
+**Goal:** Implement the cursor-adjacent companion preview.
 
 **Outputs:**
 
-- Single server-side Redis factory (singleton pattern for long-lived Node; documented pattern for serverless).
-- Example use: session index, cache, or rate-limit stub—pick the **smallest** PRD-backed need first.
+- Overlay capsule with caption text
+- Pointer-follow positioning with edge-aware flipping
+- Reduced-motion-safe waveform presentation
 
 **Verification:**
 
-- Keys use `app:{env}:...` prefix.
-- Example key has a TTL where applicable.
+- Overlay follows pointer within the preview stage without clipping.
+- Reduced motion removes decorative movement while keeping state legible.
 
 ---
 
-## Phase 4 — Auth and session (if required by PRD)
+## Phase 4 — Session states and confirmations
 
-**Goal:** Users can sign in/out; sessions are server-validated; secrets stay server-only.
+**Goal:** Represent real local product states from the PRDs.
 
 **Outputs:**
 
-- Auth library choice aligned with [`docs/03_BACKEND_PRD.md`](../../../docs/03_BACKEND_PRD.md) (may be OAuth, magic link, or bridge-issued tokens—**follow PRD**, do not invent a parallel auth universe).
-- Session storage: Redis and/or encrypted cookies per chosen pattern.
-- Middleware or equivalent route protection for private sections.
+- `Live`, `Degraded`, and `Blocked` states
+- Listening / thinking / confirm states
+- High-risk confirmation card or modal
 
 **Verification:**
 
-- Protected routes return 401/redirect when unauthenticated.
-- No session secrets in client bundle.
+- Status changes update the UI copy and emphasis correctly.
+- High-risk state is clearly separated from read-only guidance.
 
 ---
 
-## Phase 5 — API surface: Server Actions and/or Route Handlers
+## Phase 5 — Theme bridge and accessibility
 
-**Goal:** Typed, validated mutations and JSON APIs.
+**Goal:** Keep the local frontend host-native and accessible.
 
 **Outputs:**
 
-- Zod (or equivalent) schemas shared between actions and types.
-- Route Handlers for webhooks/third parties; Server Actions for same-site forms where appropriate.
+- CSS variables that map to `--vscode-*` style tokens with fallbacks
+- Dark, light, and high-contrast preview modes
+- `aria-live` transcript region and keyboardable controls
 
 **Verification:**
 
-- Invalid payloads fail closed with 4xx and no stack traces leaked to clients in production.
+- Theme switching is visually coherent.
+- High contrast remains readable.
 
 ---
 
-## Phase 6 — Bridge / OpenAPI integration (if in scope)
+## Phase 6 — Host integration readiness
 
-**Goal:** Typed integration with [`docs/openapi.yaml`](../../../docs/openapi.yaml).
+**Goal:** Prepare the prototype for eventual embedding in the extension/webview.
 
 **Outputs:**
 
-- Single client module for bridge base URL and auth headers.
-- Error mapping and retries policy documented (no unbounded retries).
+- Clear state model in JS for host-driven updates
+- CSP-safe asset structure
+- Minimal assumptions about backend/network ownership
 
 **Verification:**
 
-- Mock server or contract tests prove request/response shapes match OpenAPI.
+- The UI can be driven from local state objects rather than hardcoded DOM mutations only.
 
 ---
 
-## Phase 7 — Observability and hardening
+## Done check
 
-**Goal:** Production readiness.
+Before claiming completion:
 
-**Outputs:**
-
-- Structured logging on server (no PII in logs; redact tokens).
-- Health route if required by deployment (`/api/health` checks DB + Redis connectivity **without** exposing secrets).
-
-**Verification:**
-
-- Health check fails if DB or Redis is unreachable (when those deps are enabled).
-
----
-
-## How to verify “done” (session prompt)
-
-Use the verification block in [`PHASED_IMPLEMENTATION_PROMPTS.md`](PHASED_IMPLEMENTATION_PROMPTS.md).
+- confirm `frontend/` clearly reads as local application UI only
+- confirm `landingpage/` was left untouched
+- run a local preview or static verification
+- state how the prototype maps to the sidebar and overlay docs

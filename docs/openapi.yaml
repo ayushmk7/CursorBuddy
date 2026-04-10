@@ -7,6 +7,7 @@ info:
     for all production orchestration. Use this bridge only when policy demands it; otherwise prefer **direct**
     sidecar→OpenClaw for fewer hops. The bridge authenticates the sidecar and proxies **to OpenClaw**; OpenClaw
     selects the **fastest** model path (e.g. **Gemini Live** when benchmarked fastest—not mandatory). Bearer JWT for protected routes.
+    In this repository, the bridge implementation language is **Go**.
     Error shape: `{ "error": string, "code"?: string, "details"?: unknown }`.
 
     **Streaming note:** Binary audio is typically proxied over WebSocket (`wss://`) after session minting;

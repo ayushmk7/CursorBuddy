@@ -6,6 +6,8 @@
 
 **Definition:** In WaveClick, “backend” means **OpenClaw** (required) plus **optional** server-side components (**bridge**) that sit between the **sidecar** and **OpenClaw** or between **OpenClaw** and model providers. **Normative:** the VS Code extension + sidecar **never** replaces OpenClaw with direct vendor API calls in production. Model credentials live in **OpenClaw** (or behind the bridge that OpenClaw uses), not as a “skip OpenClaw” path in the extension.
 
+**Repository decision:** when this repo implements backend or bridge code, the server-side language is **Go**.
+
 ---
 
 ## 1. Component Inventory
@@ -15,7 +17,7 @@
 | **OpenClaw** | **Yes** | User / org infra | Workflows, ReAct, tools, memory; emits `AssistantEnvelopeV1` to sidecar transport |
 | VS Code Extension | Yes | Extension Host | UX, executor, Git adapter, webview |
 | Sidecar | Strongly recommended | Node or native | Audio I/O, **OpenClaw** session transport (WSS/HTTP) |
-| Bridge Service | Optional | Node.js 20+ / Bun / Go | mTLS/JWT to OpenClaw, key escrow, org policy, audit logs, optional WSS proxy |
+| Bridge Service | Optional | Go | mTLS/JWT to OpenClaw, key escrow, org policy, audit logs, optional WSS proxy |
 | Model / Realtime APIs | Yes (via OpenClaw) | SaaS or local | Gemini Live, OpenAI Realtime, Ollama, etc.—**configured only inside OpenClaw** |
 
 ---
@@ -42,7 +44,7 @@ If none apply, **sidecar → OpenClaw** (TLS, user PAT or device token) is the p
 
 | Layer | Technology | Notes |
 |-------|------------|-------|
-| Runtime | Node.js 20+, TypeScript | Express or Fastify |
+| Runtime | Go | `net/http` or `chi` |
 | Auth | mTLS or signed JWT | Short-lived tokens minted by corporate IdP |
 | Transport | HTTPS + WSS proxy | Pass-through **to OpenClaw gateway** and/or model upstream as configured |
 | Storage | Append-only log store | S3 / GCS / OpenTelemetry → SIEM |
@@ -312,24 +314,31 @@ Implement **`MockOpenClawGateway`** that returns canned envelopes for automated 
 
 ---
 
-## 20. Example Fastify Route Stubs (Reference Only)
+## 20. Example Go Route Stub (Reference Only)
 
-```typescript
-app.post('/v1/sessions', async (req, reply) => {
-  const parsed = SessionMintRequestSchema.parse(req.body);
-  const sessionId = randomUUID();
-  // mint upstream, store policy in Redis
-  reply.code(201).send({
-    session_id: sessionId,
-    upstream: {
-      type: 'websocket',
-      url: `wss://bridge.example.com/v1/stream/${sessionId}`,
-      headers: { Authorization: `Bearer ${mintEphemeral(sessionId)}` },
-    },
-    expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-    policy: { vision_allowed: false, max_session_minutes: 30, fallback_mode: 'none' },
-  });
-});
+```go
+func CreateSession(w http.ResponseWriter, r *http.Request) {
+	sessionID := uuid.NewString()
+
+	resp := SessionMintResponse{
+		SessionID: sessionID,
+		Upstream: UpstreamConfig{
+			Type: "websocket",
+			URL:  fmt.Sprintf("wss://bridge.example.com/v1/stream/%s", sessionID),
+			Headers: map[string]string{
+				"Authorization": "Bearer " + mintEphemeral(sessionID),
+			},
+		},
+		ExpiresAt: time.Now().Add(30 * time.Minute).UTC(),
+		Policy: SessionPolicy{
+			VisionAllowed:     false,
+			MaxSessionMinutes: 30,
+			FallbackMode:      "none",
+		},
+	}
+
+	writeJSON(w, http.StatusCreated, resp)
+}
 ```
 
 ---

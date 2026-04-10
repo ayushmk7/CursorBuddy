@@ -1,24 +1,25 @@
-# Contracts — read, do not fork here
+# Contracts — local frontend pointers only
 
-Authoritative HTTP and domain contracts live under **`docs/`** and shared packages (if the monorepo adds them). This folder contains **pointers only**—do not duplicate OpenAPI or envelope definitions.
+Authoritative contracts for the local frontend live outside this folder. Do not fork or duplicate them here.
 
 ## Where to look
 
 | Contract | Location |
 |----------|----------|
-| Bridge REST (illustrative / evolving) | [`docs/openapi.yaml`](../../../docs/openapi.yaml) |
-| `AssistantEnvelopeV1` shape, action types, validation rules | [`docs/02_TECHNICAL_PRD.md`](../../../docs/02_TECHNICAL_PRD.md) §4 |
-| Auth, session minting, trust boundaries | [`docs/03_BACKEND_PRD.md`](../../../docs/03_BACKEND_PRD.md) §4–6 |
+| `AssistantEnvelopeV1` shape and action types | [`docs/02_TECHNICAL_PRD.md`](../../../docs/02_TECHNICAL_PRD.md) §4 |
+| Local runtime UI boundaries | [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) |
+| Pointer-follow capsule behavior | [`backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md`](../../../backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md) |
+| Backend vs local responsibility split | [`backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md`](../../../backend/agents/docs/BACKEND_VS_LOCAL_RUNTIME.md) |
 
 ## Implementation rule
 
-When the Next.js app calls the bridge or shared APIs:
+The local frontend should render and explain:
 
-1. **Generate or sync types** from OpenAPI / shared Zod schemas—one source of truth in code (e.g. `packages/shared` if the repo adds it).
-2. **Centralize** the HTTP client (base URL, auth headers, timeouts) in a single module; no ad-hoc `fetch` to bridge URLs across dozens of files.
-3. **Validate** responses at the boundary if runtime variance is possible (Zod `.parse` on JSON).
+- connection state
+- transcript state
+- step state
+- confirmation state
 
-## Postgres and Redis
+It should not redefine backend contracts or invent alternate orchestration shapes.
 
-- **No** OpenAPI file is required for Postgres/Redis; schemas live in ORM migrations and server-only modules.
-- If multiple services share the same DB (discouraged without strong boundaries), document ownership in PRDs—do not invent cross-service coupling without an explicit spec.
+If later code shares concrete TypeScript types, generate them from one canonical source and reuse them across local runtime packages.

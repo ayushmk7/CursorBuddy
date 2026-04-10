@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="CursorBuddy local frontend prototype for the on-device sidebar webview and cursor-adjacent companion UI."
+    >
+    <title>CursorBuddy Local Frontend</title>
+    <link rel="stylesheet" href="./assets/styles.css">
+    <script src="./assets/app.js" defer></script>
+  </head>
+  <body class="theme-dark" data-status="live" data-overlay="on" data-confirm="off" data-listening="on">
+    <div class="prototype-shell">
+      <header class="topbar" aria-label="Prototype controls">
+        <div class="topbar__intro">
+          <p class="eyebrow">Local Frontend Only</p>
+          <h1>CursorBuddy sidebar + companion preview</h1>
+          <p>
+            This prototype is the on-device UI surface, not the landing page. It previews the host sidebar webview and
+            the cursor-adjacent companion capsule.
+          </p>
+        </div>
+
+        <div class="control-groups">
+          <fieldset class="control-group">
+            <legend>Theme</legend>
+            <div class="segmented" role="group" aria-label="Theme">
+              <button type="button" class="chip is-active" data-theme="dark">Dark</button>
+              <button type="button" class="chip" data-theme="light">Light</button>
+              <button type="button" class="chip" data-theme="hc">High Contrast</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>Session</legend>
+            <div class="segmented" role="group" aria-label="Session status">
+              <button type="button" class="chip is-active" data-status-toggle="live">Live</button>
+              <button type="button" class="chip" data-status-toggle="degraded">Degraded</button>
+              <button type="button" class="chip" data-status-toggle="blocked">Blocked</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="control-group">
+            <legend>State</legend>
+            <div class="segmented" role="group" aria-label="State toggles">
+              <button type="button" class="chip is-active" data-toggle="listening">Listening</button>
+              <button type="button" class="chip" data-toggle="confirm">Confirm</button>
+              <button type="button" class="chip is-active" data-toggle="overlay">Overlay</button>
+            </div>
+          </fieldset>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="host-stage" aria-label="Host application preview">
+          <div class="host-window">
+            <div class="host-window__titlebar">
+              <div class="window-dots" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <p>CursorBuddy Host Preview</p>
+            </div>
+
+            <div class="host-window__body">
+              <aside class="host-nav" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </aside>
+
+              <section class="editor-stage" data-editor-stage>
+                <div class="editor-chrome">
+                  <div class="editor-tabs" aria-hidden="true">
+                    <span class="tab is-active">src/executor.ts</span>
+                    <span class="tab">docs/07_LOCAL_CURSOR_AND_COMPANION.md</span>
+                  </div>
+
+                  <div class="editor-body">
+                    <div class="editor-gutter" aria-hidden="true">
+                      <span>18</span>
+                      <span>19</span>
+                      <span>20</span>
+                      <span>21</span>
+                      <span>22</span>
+                      <span>23</span>
+                      <span>24</span>
+                    </div>
+
+                    <div class="editor-code" aria-hidden="true">
+                      <div class="code-line"><span class="token token-keyword">if</span> <span class="token token-muted">(risk === "high")</span></div>
+                      <div class="code-line code-line--highlight">  <span class="token token-keyword">return</span> <span class="token token-name">showConfirmation</span><span class="token token-muted">(action)</span></div>
+                      <div class="code-line">}</div>
+                      <div class="code-line"></div>
+                      <div class="code-line"><span class="token token-name">renderTranscript</span><span class="token token-muted">(assistant_text)</span></div>
+                      <div class="code-line"><span class="token token-name">updateStepList</span><span class="token token-muted">(actions)</span></div>
+                      <div class="code-line"><span class="token token-name">positionOverlayNearPointer</span><span class="token token-muted">()</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pointer" data-pointer aria-hidden="true"></div>
+
+                <div class="overlay-capsule" data-overlay-capsule aria-hidden="true">
+                  <div class="overlay-capsule__status">
+                    <span class="overlay-dot"></span>
+                    <span data-overlay-label>Listening</span>
+                  </div>
+                  <p class="overlay-capsule__text" data-overlay-text>Opening Source Control so you can commit with context.</p>
+                  <div class="overlay-wave" data-overlay-wave>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+
+                <div class="host-callout">
+                  <p class="eyebrow">Editor guidance</p>
+                  <p>The sidebar carries the full transcript and confirmation flow. The overlay stays brief and local.</p>
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="Local companion sidebar">
+          <section class="sidebar-card sidebar-header">
+            <div>
+              <p class="eyebrow">CursorBuddy</p>
+              <h2>Companion</h2>
+            </div>
+            <div class="status-cluster">
+              <span class="status-pill" data-status-pill>Live</span>
+              <span class="latency-pill">RTT 184ms</span>
+            </div>
+          </section>
+
+          <section class="sidebar-card session-strip">
+            <button type="button" class="ptt-button" data-ptt-button aria-pressed="true">
+              <span class="ptt-button__label">Push to talk</span>
+              <span class="ptt-button__state" data-ptt-label>Listening</span>
+            </button>
+
+            <div class="meter-wrap" aria-hidden="true">
+              <div class="meter-labels">
+                <span>Input level</span>
+                <span data-meter-mode>live stream</span>
+              </div>
+              <div class="wave-meter" data-wave-meter>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="sidebar-card transcript" aria-labelledby="transcript-heading">
+            <div class="section-row">
+              <h3 id="transcript-heading">Transcript</h3>
+              <span class="mono-note">aria-live</span>
+            </div>
+
+            <div class="transcript-log" aria-live="polite" data-transcript-log>
+              <article class="bubble bubble--user">
+                <p class="bubble__role">You</p>
+                <p>Where do I commit this change?</p>
+              </article>
+
+              <article class="bubble bubble--assistant">
+                <p class="bubble__role">CursorBuddy</p>
+                <p data-assistant-copy>Opening Source Control and highlighting the commit flow. I will ask before anything mutates Git state.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="sidebar-card steps" aria-labelledby="steps-heading">
+            <div class="section-row">
+              <h3 id="steps-heading">Steps</h3>
+              <span class="mono-note">AssistantEnvelopeV1</span>
+            </div>
+
+            <ol class="step-list" data-step-list>
+              <li class="step-row is-done">
+                <span class="step-dot"></span>
+                <div>
+                  <p class="step-title">Probe workspace state</p>
+                  <p class="step-detail">Git repository found. Source Control is available in this host.</p>
+                </div>
+              </li>
+              <li class="step-row is-active">
+                <span class="step-dot"></span>
+                <div>
+                  <p class="step-title">Reveal Source Control</p>
+                  <p class="step-detail">Showing the commit area and keeping the explanation local to the editor.</p>
+                </div>
+              </li>
+              <li class="step-row">
+                <span class="step-dot"></span>
+                <div>
+                  <p class="step-title">Wait for confirmation</p>
+                  <p class="step-detail">High-risk actions stay behind an explicit confirm gate.</p>
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <section class="sidebar-card safety-footer" data-safety-card>
+            <div class="section-row">
+              <h3>Safety</h3>
+              <span class="mono-note" data-safety-mode>Read-only</span>
+            </div>
+
+            <div class="safety-copy" data-safety-copy>
+              <p>No confirmation needed yet. The current turn is showing where the action lives without mutating anything.</p>
+            </div>
+
+            <div class="confirm-actions" data-confirm-actions hidden>
+              <button type="button" class="button button--ghost">Cancel</button>
+              <button type="button" class="button button--primary">Confirm action</button>
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>

@@ -2,6 +2,8 @@
 
 This folder holds **documentation and copy-paste prompts only**. There is **no runnable backend code** here. Implementers and coding agents should use these files as the **entry point**, then read the canonical PRDs under [`docs/`](../../docs/).
 
+When backend / bridge code is introduced in this repo, the default server-side language is **Go**.
+
 ## Read first
 
 1. [`AGENT_SYSTEM_INSTRUCTIONS.md`](AGENT_SYSTEM_INSTRUCTIONS.md) — non‑negotiable rules (OpenClaw, envelopes, security).

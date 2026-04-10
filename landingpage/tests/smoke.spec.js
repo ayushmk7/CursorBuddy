@@ -9,6 +9,17 @@ function waitlistDialog(page) {
   return page.locator("[data-waitlist-dialog]");
 }
 
+test("demo video opens in modal from See demo", async ({ page }) => {
+  await page.goto("/", { waitUntil: "load" });
+
+  await page.getByRole("button", { name: "See demo" }).click();
+  await expect(page.getByRole("heading", { name: "See CursorBuddy in action" })).toBeVisible();
+  await expect(page.locator("#demo-video")).toBeVisible();
+
+  await page.getByRole("button", { name: "Close demo video" }).click();
+  await expect(page.locator("[data-demo-dialog]")).toBeHidden();
+});
+
 test("landing page waitlist flow works end to end", async ({ page }) => {
   await page.goto("/", { waitUntil: "load" });
 

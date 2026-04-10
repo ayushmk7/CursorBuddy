@@ -15,6 +15,8 @@ WaveClick is a **VS Code extension ecosystem** optimized for **minimum end-to-en
 
 **Inference speed is a first-class requirement:** deployment choices (**bridge vs direct sidecar→OpenClaw**, region placement, audio codec, batching) are selected to **minimize measured time-to-first-token and time-to-first-envelope**, subject only to security and compliance constraints—not dogma about topology.
 
+**Implementation choice for this repo:** when an optional backend bridge is used, it is implemented in **Go**.
+
 The user speaks natural-language goals (“show me how to commit,” “open the Git graph,” “run this task”), and the system responds by:
 
 1. **Streaming** audio (and optional metadata) from the **sidecar** to **OpenClaw**, which owns the **session**, **memory/skills** (`SOUL.md`, `SKILL.md`, `MEMORY.md` per OpenClaw conventions), and **ReAct-style** tool loops.

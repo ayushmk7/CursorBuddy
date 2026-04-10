@@ -38,8 +38,8 @@
 │             ▼                                       ▼                       │
 │  ┌──────────────────────┐              ┌────────────────────────────────────┐ │
 │  │  Bridge Service      │              │  Model APIs (via OpenClaw only)    │ │
-│  │  (optional—latency-  │              │  Fastest path per OpenClaw config  │ │
-│  │   measured)          │              │  (e.g. Gemini Live if fastest)     │ │
+│  │  (Go, optional—      │              │  Fastest path per OpenClaw config  │ │
+│  │   latency-measured)  │              │  (e.g. Gemini Live if fastest)     │ │
 │  │  mTLS + JWT to OC    │              └────────────────────────────────────┘ │
 │  └──────────────────────┘                                                   │
 └────────────────────────────────────────────────────────────────────────────┘

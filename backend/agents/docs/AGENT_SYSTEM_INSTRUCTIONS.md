@@ -22,10 +22,11 @@ Read in this order when scaffolding or changing behavior:
 | **Executor input** | The only actuator contract is **`AssistantEnvelopeV1`** (validated, versioned). See [`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md) §4. |
 | **COMMAND SAFETY** | Never pass unconstrained strings to `vscode.commands.executeCommand`. Use allowlists, alias maps, and schema validation. |
 | **Latency** | Prefer **fewer hops** when policy allows (sidecar → OpenClaw). Use bridge only when enterprise/policy requires it; co‑locate if you do. See [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md) §2. |
+| **Backend language** | When implementing bridge or other server-side backend code in this repo, use **Go** unless a doc explicitly says otherwise. |
 
 ## Backend vs local
 
-- **Backend (PRD sense):** OpenClaw + **optional** bridge service (session minting, org policy, proxy).
+- **Backend (PRD sense):** OpenClaw + **optional Go** bridge service (session minting, org policy, proxy).
 - **Local runtime:** VS Code (or Cursor) **extension host**, **webview**, **sidecar** (audio, transport), **optional overlay** process.
 
 Do **not** implement **pointer‑following UI**, **mic capture**, or **streaming caption layout** inside the bridge. Those belong to local processes; the bridge may only handle policy, auth, and upstream connectivity per [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md).
