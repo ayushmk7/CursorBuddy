@@ -3,11 +3,10 @@ import { IpcMessage, SessionStartPayload, SessionStopPayload } from './types';
 import { SessionHandler } from './ipc';
 import { OpenClawClientFactory, OpenClawWsClient, defaultClientFactory } from './openclaw-client';
 
-const activeSessions = new Map<string, OpenClawWsClient>();
-
 export function createSessionHandler(
   emit: (msg: IpcMessage) => void,
-  clientFactory: OpenClawClientFactory = defaultClientFactory
+  clientFactory: OpenClawClientFactory = defaultClientFactory,
+  activeSessions: Map<string, OpenClawWsClient> = new Map()
 ): SessionHandler {
   return {
     async start(payload: Record<string, unknown>): Promise<Record<string, unknown>> {
@@ -34,8 +33,11 @@ export function createSessionHandler(
       await client.connect();
       activeSessions.set(sessionHandle, client);
 
-      // Trigger mock-openclaw to send its canned envelope
-      client.sendText(JSON.stringify({ type: 'session_start', sessionHandle }));
+      // In mock mode, send a text message to trigger mock-openclaw's canned envelope response.
+      // Not sent to real OpenClaw (which manages its own session lifecycle).
+      if (process.env.WAVECLICK_MOCK_OPENCLAW === '1') {
+        client.sendText(JSON.stringify({ type: 'session_start', sessionHandle }));
+      }
 
       return { sessionHandle };
     },

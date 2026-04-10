@@ -16,12 +16,16 @@ export class OpenClawWsClient {
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
+      let resolved = false;
       const ws = new WebSocket(this.opts.url);
       this.ws = ws;
-      ws.on('open', () => resolve());
+      ws.on('open', () => { resolved = true; resolve(); });
       ws.on('error', (err) => {
-        this.opts.onError('E_NET', err.message);
-        reject(err);
+        if (!resolved) {
+          reject(err); // pre-connect: let the caller handle it
+        } else {
+          this.opts.onError('E_NET', err.message); // post-connect: route to callback
+        }
       });
       ws.on('close', () => this.opts.onClose());
       ws.on('message', (data) => {
