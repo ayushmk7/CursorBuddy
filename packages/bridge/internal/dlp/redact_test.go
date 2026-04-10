@@ -42,6 +42,11 @@ func TestRedact(t *testing.T) {
 			input: "",
 			want:  "",
 		},
+		{
+			name:  "redacts PEM block",
+			input: "key: -----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA\n-----END RSA PRIVATE KEY-----",
+			want:  "key: [REDACTED_PEM]",
+		},
 	}
 
 	for _, tc := range tests {
