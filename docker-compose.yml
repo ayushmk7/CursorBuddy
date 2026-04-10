@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Mock OpenClaw stub for CI: echoes back a canned AssistantEnvelopeV1
+  # via WebSocket. NOT for production use.
+  mock-openclaw:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./scripts/mock-openclaw.js:/app/mock-openclaw.js:ro
+    command: node mock-openclaw.js
+    ports:
+      - "9090:9090"
+    environment:
+      PORT: "9090"
+    profiles:
+      - ci  # only start in CI: docker compose --profile ci up
