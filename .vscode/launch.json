@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Extension (mock OpenClaw)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/extension"],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
+      "preLaunchTask": "build-all",
+      "env": {
+        "WAVECLICK_MOCK_OPENCLAW": "1",
+        "WAVECLICK_LOG_LEVEL": "debug"
+      },
+      "sourceMaps": true
+    }
+  ]
+}
