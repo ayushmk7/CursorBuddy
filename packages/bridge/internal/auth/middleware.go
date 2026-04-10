@@ -39,6 +39,11 @@ func ClaimsFromContext(ctx context.Context) *Claims {
 	return c
 }
 
+// ContextWithClaims stores Claims in a context. Used by tests to inject claims directly.
+func ContextWithClaims(ctx context.Context, c *Claims) context.Context {
+	return context.WithValue(ctx, claimsKey, c)
+}
+
 func writeUnauthorized(w http.ResponseWriter, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
