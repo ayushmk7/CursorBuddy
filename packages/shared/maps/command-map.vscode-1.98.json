@@ -1,0 +1,40 @@
+{
+  "version": "1.98",
+  "aliases": {
+    "open_scm": {
+      "commands": ["workbench.view.scm"],
+      "risk": "low",
+      "description": "Open Source Control view"
+    },
+    "open_palette": {
+      "commands": ["workbench.action.showCommands"],
+      "risk": "low",
+      "description": "Open Command Palette"
+    },
+    "open_settings_json": {
+      "commands": ["workbench.action.openSettingsJson"],
+      "risk": "low",
+      "description": "Open settings.json"
+    },
+    "focus_terminal": {
+      "commands": ["workbench.action.terminal.focus"],
+      "risk": "low",
+      "description": "Focus integrated terminal"
+    },
+    "git_stage_all": {
+      "commands": ["git.stageAll"],
+      "risk": "medium",
+      "description": "Stage all changes in all repos"
+    },
+    "git_commit": {
+      "commands": ["git.commit"],
+      "risk": "high",
+      "description": "Open commit input and commit"
+    },
+    "git_sync": {
+      "commands": ["git.sync"],
+      "risk": "high",
+      "description": "Sync (pull + push) current branch"
+    }
+  }
+}
