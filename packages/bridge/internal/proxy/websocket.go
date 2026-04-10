@@ -51,7 +51,7 @@ func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL stri
 
 	errc := make(chan error, 2)
 
-	copyFrames := func(dst, src *websocket.Conn, label string) {
+	copyFrames := func(dst, src *websocket.Conn) {
 		for {
 			if p.cfg.IdleTimeout > 0 {
 				src.SetReadDeadline(time.Now().Add(p.cfg.IdleTimeout))
@@ -68,10 +68,13 @@ func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL stri
 		}
 	}
 
-	go copyFrames(upstream, client, "client→upstream")
-	go copyFrames(client, upstream, "upstream→client")
+	go copyFrames(upstream, client)
+	go copyFrames(client, upstream)
 
 	err = <-errc
+	// Explicitly close both connections so the second goroutine unblocks immediately.
+	client.Close()
+	upstream.Close()
 	if err != nil && !websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
 		slog.Debug("proxy: connection closed", "err", err)
 	}
