@@ -8,25 +8,18 @@ export class SessionManager {
   private context: vscode.ExtensionContext;
   private sidecarManager: SidecarManager;
   private onStateChange: (state: SessionState) => void;
-  private onEnvelope: (raw: unknown) => void;
   private log: (line: string) => void;
 
   constructor(
     context: vscode.ExtensionContext,
     sidecarManager: SidecarManager,
     onStateChange: (state: SessionState) => void,
-    onEnvelope: (raw: unknown) => void,
     log: (line: string) => void
   ) {
     this.context = context;
     this.sidecarManager = sidecarManager;
     this.onStateChange = onStateChange;
-    this.onEnvelope = onEnvelope;
     this.log = log;
-    // Note: onEnvelope routing for provider.envelope events happens at the
-    // SidecarManager construction site, since SidecarManager takes onEnvelope
-    // as a constructor parameter (not a setter). The caller should pass
-    // onEnvelope to both SidecarManager and SessionManager so they stay in sync.
   }
 
   async start(): Promise<void> {

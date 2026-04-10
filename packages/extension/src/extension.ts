@@ -32,7 +32,6 @@ export function activate(context: vscode.ExtensionContext): void {
       log(`[session state] ${state}`);
       webviewProvider.postState({ state });
     },
-    (raw) => executeEnvelope(raw, { mapsDir, log }).catch((err) => log('[executor error] ' + String(err))),
     log
   );
 

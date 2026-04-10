@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { randomBytes } from 'crypto';
 import { SessionState } from './sessionManager';
 
 export class WaveClickWebviewProvider implements vscode.WebviewViewProvider {
@@ -52,11 +53,6 @@ export class WaveClickWebviewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getNonce(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < 32; i++) {
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
+    return randomBytes(16).toString('base64url');
   }
 }
