@@ -1,0 +1,9 @@
+{
+  "name": "@waveclick/openclaw-pack",
+  "version": "0.4.0",
+  "private": true,
+  "scripts": {
+    "test": "node scripts/validate.js",
+    "validate": "node scripts/validate.js"
+  }
+}

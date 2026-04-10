@@ -1,0 +1,31 @@
+# Default org policy for WaveClick sessions.
+# OpenClaw operators: copy this file and override values per org.
+version: "0.4.0"
+
+vision:
+  allowed: false          # Set true + add consent banner to enable screenshot-once mode
+  max_pixels: 1048576     # 1 MP cap when enabled
+
+session:
+  max_minutes: 30
+  idle_timeout_minutes: 5
+
+rate_limits:
+  sessions_per_minute_burst: 5
+  sessions_per_hour_sustain: 30
+
+fallback_mode: rest        # "none" = hard-fail on realtime unavailability
+
+dlp:
+  enabled: true
+  rules:
+    - pattern: "[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}"
+      replacement: "[REDACTED_EMAIL]"
+    - pattern: "AKIA[0-9A-Z]{16}"
+      replacement: "[REDACTED_AKIA]"
+    - pattern: "sk-[A-Za-z0-9]{20,}"
+      replacement: "[REDACTED_OPENAI]"
+    - pattern: "AIza[0-9A-Za-z_\\-]{20,}"
+      replacement: "[REDACTED_GOOGLE]"
+
+command_alias_overrides: {}  # org can restrict/override the default alias allowlist

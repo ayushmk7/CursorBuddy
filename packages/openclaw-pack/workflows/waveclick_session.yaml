@@ -1,0 +1,66 @@
+# WaveClick OpenClaw workflow definition
+# Deploy this file into your OpenClaw instance's workflow registry.
+# OpenClaw is the mandatory orchestrator — never bypass it for model calls.
+name: waveclick_session
+version: "0.4.0"
+description: >
+  Realtime voice/text session for WaveClick VS Code companion.
+  Ingests audio or text from the sidecar, runs a ReAct agent loop using
+  configured model path (fastest per env benchmark), and emits AssistantEnvelopeV1.
+
+trigger:
+  type: sidecar_connect
+  # Also supports: webhook (for bridge-initiated sessions)
+
+memory:
+  soul: SOUL.md      # personality + safety constraints
+  skill: SKILL.md    # capability description surfaced to the agent
+  # MEMORY.md: per-user session memory (optional, operator-configured)
+
+steps:
+  - id: ingest
+    type: audio_or_text
+    description: Accept PCM/Opus frames or text turns from sidecar transport.
+    config:
+      vad_threshold: 0.5          # Voice Activity Detection threshold
+      end_of_turn_silence_ms: 800 # ms of silence to finalize a turn
+
+  - id: probe_state
+    type: tool_call
+    tool: vscode_probe_state
+    description: >
+      Gather VS Code workspace and Git snapshot. Called on first turn and
+      whenever the agent decides it needs updated editor context.
+    config:
+      include_git: true
+      include_active_editor: true
+      include_file_body: false    # NEVER include file body by default
+
+  - id: agent_loop
+    type: react
+    description: >
+      ReAct-style reasoning loop. The model receives: transcript + workspace
+      snapshot. It may call tools (vscode_probe_state, web search if org enables)
+      and produces a final AssistantEnvelopeV1 via waveclick_emit_envelope.
+    model_selection:
+      strategy: fastest_benchmarked  # OpenClaw selects: Gemini Live, OpenAI Realtime, REST fallback
+      tier_hint_from_client: true     # respect desired_model_tier_hint from session mint
+      fallback: rest_small            # if realtime path down, use fastest small REST model
+    max_iterations: 8
+    tools:
+      - vscode_probe_state
+      - waveclick_emit_envelope
+    guardrails:
+      - no_file_body_without_consent
+      - no_arbitrary_command_strings  # envelope alias must be in allowlist
+      - confirm_high_risk_before_emit
+
+  - id: emit
+    type: tool_call
+    tool: waveclick_emit_envelope
+    description: Final step — validate and emit AssistantEnvelopeV1 to sidecar transport.
+
+policy:
+  vision_allowed: false           # operator can override per org
+  max_session_minutes: 30
+  fallback_mode: rest             # "none" to hard-fail on realtime unavailability
