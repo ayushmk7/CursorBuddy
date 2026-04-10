@@ -1,0 +1,64 @@
+{
+  "name": "waveclick",
+  "displayName": "WaveClick",
+  "description": "Voice + visual companion for VS Code",
+  "version": "0.1.0",
+  "publisher": "waveclick",
+  "engines": { "vscode": "^1.98.0" },
+  "categories": ["Other"],
+  "activationEvents": ["onCommand:waveclick.startSession"],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      { "command": "waveclick.startSession", "title": "WaveClick: Start Session" },
+      { "command": "waveclick.stopSession", "title": "WaveClick: Stop Session" }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        { "id": "waveclick", "title": "WaveClick", "icon": "resources/icon.svg" }
+      ]
+    },
+    "views": {
+      "waveclick": [
+        { "type": "webview", "id": "waveclick.sidebar", "name": "WaveClick" }
+      ]
+    },
+    "configuration": {
+      "title": "WaveClick",
+      "properties": {
+        "waveclick.connectionMode": {
+          "type": "string", "enum": ["direct", "bridge"], "default": "direct",
+          "description": "Connection mode: direct to OpenClaw or via bridge"
+        },
+        "waveclick.openclaw.baseUrl": {
+          "type": "string", "default": "ws://localhost:9090",
+          "description": "OpenClaw WebSocket base URL"
+        },
+        "waveclick.openclaw.workflow": {
+          "type": "string", "default": "waveclick_session",
+          "description": "OpenClaw workflow name"
+        },
+        "waveclick.openclaw.auth": {
+          "type": "string", "default": "",
+          "description": "OpenClaw auth token (stored in SecretStorage in production)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "watch": "node esbuild.config.js --watch",
+    "compile": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.98.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.4.0",
+    "esbuild": "^0.21.0",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@waveclick/shared": "*"
+  }
+}
