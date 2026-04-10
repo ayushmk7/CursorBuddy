@@ -42,6 +42,8 @@ func Load() (*Config, error) {
 	if c.OpenClawServiceToken == "" {
 		missing = append(missing, "OPENCLAW_SERVICE_TOKEN")
 	}
+	// TODO(phase-8): wire JWTIssuer into jwt.Validator for RS256 JWKS issuer enforcement.
+	// Currently collected but not enforced; keeping it required so callers set it intentionally.
 	c.JWTIssuer = os.Getenv("JWT_ISSUER")
 	if c.JWTIssuer == "" {
 		missing = append(missing, "JWT_ISSUER")

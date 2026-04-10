@@ -34,7 +34,7 @@ func main() {
 		Addr:         cfg.Listen,
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 60 * time.Second, // longer for WSS upgrade
+		WriteTimeout: 60 * time.Second, // applies only to pre-upgrade HTTP phase; gorilla/websocket hijacks the conn
 		IdleTimeout:  120 * time.Second,
 	}
 
