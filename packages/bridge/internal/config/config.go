@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Config holds all bridge runtime configuration loaded from environment variables.
@@ -33,7 +34,7 @@ func Load() (*Config, error) {
 	c.PublicHost = getEnvOrDefault("BRIDGE_PUBLIC_HOST", c.Listen)
 
 	var missing []string
-	c.OpenClawUpstreamURL = os.Getenv("OPENCLAW_UPSTREAM_URL")
+	c.OpenClawUpstreamURL = strings.TrimRight(os.Getenv("OPENCLAW_UPSTREAM_URL"), "/")
 	if c.OpenClawUpstreamURL == "" {
 		missing = append(missing, "OPENCLAW_UPSTREAM_URL")
 	}

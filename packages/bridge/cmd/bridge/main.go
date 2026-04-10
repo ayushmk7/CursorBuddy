@@ -46,7 +46,7 @@ func main() {
 		slog.Info("bridge starting", "addr", cfg.Listen, "version", cfg.Version)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("server error", "err", err)
-			os.Exit(1)
+			done <- os.Interrupt // funnel fatal listen error into shutdown path
 		}
 	}()
 
@@ -54,6 +54,8 @@ func main() {
 	slog.Info("shutting down...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	srv.Shutdown(ctx)
+	if err := srv.Shutdown(ctx); err != nil {
+		slog.Error("shutdown error", "err", err)
+	}
 	slog.Info("stopped")
 }
