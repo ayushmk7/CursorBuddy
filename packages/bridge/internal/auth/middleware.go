@@ -1,0 +1,46 @@
+package auth
+
+import (
+	"context"
+	"net/http"
+	"strings"
+)
+
+type contextKey string
+
+const claimsKey contextKey = "claims"
+
+// BearerMiddleware extracts and validates the Authorization: Bearer <token> header.
+// Responds 401 on missing or invalid token. Stores Claims in request context.
+func BearerMiddleware(v *Validator) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			header := r.Header.Get("Authorization")
+			if !strings.HasPrefix(header, "Bearer ") {
+				writeUnauthorized(w, "missing bearer token")
+				return
+			}
+			tokenStr := strings.TrimPrefix(header, "Bearer ")
+			claims, err := v.Validate(tokenStr)
+			if err != nil {
+				writeUnauthorized(w, "invalid token: "+err.Error())
+				return
+			}
+			ctx := context.WithValue(r.Context(), claimsKey, claims)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// ClaimsFromContext retrieves Claims stored by BearerMiddleware.
+// Returns nil if not present.
+func ClaimsFromContext(ctx context.Context) *Claims {
+	c, _ := ctx.Value(claimsKey).(*Claims)
+	return c
+}
+
+func writeUnauthorized(w http.ResponseWriter, msg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusUnauthorized)
+	_, _ = w.Write([]byte(`{"error":"` + msg + `","code":"E_AUTH"}`))
+}
