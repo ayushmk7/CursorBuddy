@@ -4,7 +4,12 @@ import type { CommandEntry } from '@waveclick/shared';
 
 export async function executeEnvelope(
   rawPayload: unknown,
-  ctx: { mapsDir: string; log(s: string): void },
+  ctx: {
+    mapsDir: string;
+    log(s: string): void;
+    requestConfirm?: (id: string, title: string, details?: string) => Promise<boolean>;
+    postStepStatus?: (id: string, status: 'pending' | 'running' | 'done' | 'blocked') => void;
+  },
 ): Promise<void> {
   // Step 1: Validate envelope
   const result = AssistantEnvelopeV1Schema.safeParse(rawPayload);
@@ -38,28 +43,88 @@ export async function executeEnvelope(
 
         // Confirm high-risk commands
         if (entry.risk === 'high') {
-          const confirmed = await vscode.window.showWarningMessage(
-            `High-risk action: ${entry.description ?? entry.commands[0]}`,
-            { modal: true },
-            'Confirm',
-          );
-          if (confirmed !== 'Confirm') {
+          let confirmed: boolean;
+          if (ctx.requestConfirm) {
+            confirmed = await ctx.requestConfirm(
+              action.id,
+              `High-risk action: ${entry.description ?? entry.commands[0]}`,
+            );
+          } else {
+            confirmed =
+              (await vscode.window.showWarningMessage(
+                `High-risk action: ${entry.description ?? entry.commands[0]}`,
+                { modal: true },
+                'Confirm',
+              )) === 'Confirm';
+          }
+          if (!confirmed) {
+            ctx.postStepStatus?.(action.id, 'blocked');
             ctx.log('user cancelled high-risk command: ' + action.alias);
             continue;
           }
         }
 
+        ctx.postStepStatus?.(action.id, 'running');
         await vscode.commands.executeCommand(entry.commands[0], ...(action.args ?? []));
+        ctx.postStepStatus?.(action.id, 'done');
         break;
       }
 
       case 'show_information_message': {
+        ctx.postStepStatus?.(action.id, 'running');
         await vscode.window.showInformationMessage(action.message);
+        ctx.postStepStatus?.(action.id, 'done');
         break;
       }
 
       case 'noop': {
         ctx.log('noop: ' + (action.reason ?? ''));
+        break;
+      }
+
+      case 'reveal_uri': {
+        ctx.postStepStatus?.(action.id, 'running');
+        const uri = vscode.Uri.parse(action.uri);
+        await vscode.commands.executeCommand('vscode.open', uri);
+        ctx.log('revealed uri: ' + action.uri);
+        ctx.postStepStatus?.(action.id, 'done');
+        break;
+      }
+
+      case 'set_editor_selection': {
+        ctx.postStepStatus?.(action.id, 'running');
+        const target = vscode.Uri.parse(action.uri);
+        const doc = await vscode.workspace.openTextDocument(target);
+        const editor = await vscode.window.showTextDocument(doc, { preserveFocus: true });
+        const start = new vscode.Position(action.start.line, action.start.character);
+        const end   = new vscode.Position(action.end.line,   action.end.character);
+        editor.selection = new vscode.Selection(start, end);
+        editor.revealRange(new vscode.Range(start, end), vscode.TextEditorRevealType.InCenterIfOutsideViewport);
+        ctx.log(`set selection in ${action.uri} [${action.start.line}:${action.start.character}→${action.end.line}:${action.end.character}]`);
+        ctx.postStepStatus?.(action.id, 'done');
+        break;
+      }
+
+      case 'request_user_confirm': {
+        ctx.postStepStatus?.(action.id, 'running');
+        let confirmed: boolean;
+        if (ctx.requestConfirm) {
+          confirmed = await ctx.requestConfirm(action.id, action.title, action.details);
+        } else {
+          const answer = await vscode.window.showWarningMessage(
+            action.title + (action.details ? '\n' + action.details : ''),
+            { modal: true },
+            'Confirm'
+          );
+          confirmed = answer === 'Confirm';
+        }
+        if (!confirmed) {
+          ctx.postStepStatus?.(action.id, 'blocked');
+          ctx.log('user cancelled confirm: ' + action.title);
+          return; // Stop processing remaining actions in this envelope
+        }
+        ctx.postStepStatus?.(action.id, 'done');
+        ctx.log('user confirmed: ' + action.title);
         break;
       }
 
