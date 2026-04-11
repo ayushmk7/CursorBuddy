@@ -1,6 +1,6 @@
 # How to Use Claude Code to Build CursorBuddy
 
-This document is a **practical guide** for using Claude Code (terminal-based agentic coding) to implement the CursorBuddy system described in `docsforother/*.md`. It mirrors the structure of `docs/04_CLAUDE_CODE_GUIDE.md` but targets **OpenClaw (required) + VS Code extension + sidecar + optional bridge**, with **latency-first** choices (direct to OpenClaw when fastest; **Gemini Live** only when OpenClaw benchmarks it as fastest—not hardcoded in the extension).
+This document is a **practical guide** for using Claude Code (terminal-based agentic coding) to implement the CursorBuddy system described in `docs/`. It targets the accepted current path: **Larry in VS Code + sidecar + Go bridge + OpenClaw service**, with **OpenAI Realtime Mini** as the recommended default backend behind OpenClaw.
 
 **Default repo choice:** implement backend / bridge code in **Go**.
 
@@ -33,7 +33,7 @@ cursorbuddy/
     sidecar/              # Node or Rust audio + OpenClaw transport client
     bridge/               # optional Go HTTP/WSS proxy to OpenClaw
     openclaw-pack/        # REQUIRED: workflows, tools, SKILL.md for OpenClaw operators
-  docsforother/           # PRDs (or symlink from another repo)
+  docs/                   # PRDs and architecture docs
 ```
 
 Open the repo root in your terminal and run `claude`.
@@ -41,8 +41,8 @@ Open the repo root in your terminal and run `claude`.
 ### 1.4 First Orientation Prompt
 
 ```
-> Read docsforother/01_GENERAL_PRD.md and docsforother/02_TECHNICAL_PRD.md.
-  Summarize the architecture: OpenClaw (required), extension host, sidecar, optional bridge.
+> Read docs/01_GENERAL_PRD.md and docs/02_TECHNICAL_PRD.md.
+  Summarize the architecture: Larry in VS Code, extension host, sidecar, Go bridge, OpenClaw service, and OpenAI Realtime Mini.
   Explain why direct model API calls from the extension are forbidden in production.
   List the top 10 VS Code APIs we must use and why.
 ```
@@ -58,7 +58,7 @@ Open the repo root in your terminal and run `claude`.
   - workflow definition for cursorbuddy_session
   - tool specs: vscode_probe_state, cursorbuddy_emit_envelope
   - SKILL.md describing safe Git guidance
-  Align with docsforother/02_TECHNICAL_PRD.md §9.
+  Align with docs/02_TECHNICAL_PRD.md.
   OpenClaw must be the only orchestrator; extension only executes AssistantEnvelopeV1.
 ```
 
@@ -67,9 +67,10 @@ Open the repo root in your terminal and run `claude`.
 ```
 > Initialize packages/extension as a VS Code extension using the official generator
   pattern: esbuild bundling, strict TypeScript, eslint, @vscode/test-electron.
-  Add a sidebar view "cursorbuddy.sidebar" with a React or vanilla webview—pick one
-  and justify. Include activationEvents limited to onCommand for start/stop.
-  Cite docsforother/02_TECHNICAL_PRD.md §2 for manifest contributions.
+  Add Larry as the primary VS Code guide surface plus any minimal support UI you need—pick the lightest implementation approach
+  and justify. Include activationEvents limited to onCommand for start/stop and the documented default controls
+  `Control+Option+L`, `Control+Option+V`, and `Control+Option+C`.
+  Cite docs/02_TECHNICAL_PRD.md §2 for manifest contributions.
 ```
 
 ### 2.2 Implement the Action Executor with Hardening
@@ -77,7 +78,7 @@ Open the repo root in your terminal and run `claude`.
 ```
 > Implement packages/extension/src/executor/ActionExecutor.ts that:
   - Parses AssistantEnvelopeV1 JSON
-  - Validates with Zod schemas matching docsforother/02_TECHNICAL_PRD.md §4
+  - Validates with Zod schemas matching docs/02_TECHNICAL_PRD.md §4
   - Maps aliases via versioned JSON command-map files
   - Blocks unknown commands and logs structured errors
   - Requires modal confirmation for risk=high actions
@@ -98,11 +99,12 @@ Open the repo root in your terminal and run `claude`.
 > Implement packages/sidecar as a small Node app that:
   - Speaks JSON-RPC over stdio to the extension
   - Captures microphone via a cross-platform library (choose one; document limitations)
-  - Maintains WebSocket (or HTTPS streaming) to **OpenClaw** using backoff+jitter
+  - Maintains WebSocket (or HTTPS streaming) to the **bridge/OpenClaw** path using backoff+jitter
   - Forwards binary audio frames and receives OpenClaw events + AssistantEnvelopeV1 payloads
+  - Supports Larry's voice-first flow, transient bubble guidance, and secondary mini chat state
   - Never persists OpenClaw tokens to disk; accept token via env or one-shot IPC message
   - Never opens direct connections to Gemini/OpenAI in production builds
-  Reference docsforother/03_BACKEND_PRD.md §4.1 for personal mode threats.
+  Reference docs/03_BACKEND_PRD.md for backend/runtime boundaries.
 ```
 
 ### 2.5 Optional Bridge Service
@@ -112,8 +114,8 @@ Open the repo root in your terminal and run `claude`.
   - POST /v1/sessions mints proxied upstream URL **to OpenClaw** (not raw provider)
   - WSS proxy with timeouts and idle disconnect
   - JWT auth middleware
-  - OpenAPI sync from docsforother/openapi.yaml
-  Include docker-compose with Redis for rate limits.
+  - OpenAPI sync from docs/openapi.yaml
+  Include Redis support for rate limits if the current backend shape needs it.
 ```
 
 ### 2.6 Compatibility Tests
@@ -122,7 +124,7 @@ Open the repo root in your terminal and run `claude`.
 > Add @vscode/test-electron integration test that launches VS Code, activates the
   extension in a temp workspace with a git repo, and verifies executor can run
   a safe command (open SCM). Gate command IDs using the version matrix approach
-  from docsforother/02_TECHNICAL_PRD.md §8.
+  from docs/02_TECHNICAL_PRD.md and current command map assumptions.
 ```
 
 ---
@@ -158,7 +160,7 @@ Open the repo root in your terminal and run `claude`.
 
 ```
 > Threat model the ActionExecutor against prompt injection and malicious workspace
-  files. Propose concrete code-level defenses aligned with docsforother/02_TECHNICAL_PRD.md §5.
+  files. Propose concrete code-level defenses aligned with docs/02_TECHNICAL_PRD.md.
 ```
 
 ```
@@ -190,7 +192,7 @@ Open the repo root in your terminal and run `claude`.
 
 ## 7. Related Documents
 
-- `docsforother/06_BACKEND_IMPLEMENTATION_STEPS.md` — phased execution order  
-- `docsforother/05_FRONTEND_PROMPT.md` — **marketing** landing + waitlist (liquid glass)
-- `docsforother/07_LOCAL_CURSOR_AND_COMPANION.md` — VS Code webview, overlay, local cursor UX  
-- `docsforother/openapi.yaml` — bridge contract  
+- `docs/06_BACKEND_IMPLEMENTATION_STEPS.md` — phased execution order  
+- `docs/05_FRONTEND_PROMPT.md` — **marketing** landing + waitlist (liquid glass)
+- `docs/07_LOCAL_CURSOR_AND_COMPANION.md` — Larry and local VS Code product UX  
+- `docs/openapi.yaml` — bridge contract  

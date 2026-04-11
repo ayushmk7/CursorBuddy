@@ -7,6 +7,8 @@
 .DS_Store
 cursorbuddy-waitlist.csv
 promptforcsv
+.worktrees/
+.local-previews/
 
 # Go
 packages/bridge/bin/

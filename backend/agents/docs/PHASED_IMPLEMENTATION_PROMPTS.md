@@ -1,6 +1,6 @@
 # Phased implementation prompts
 
-Copy‑paste blocks for **Claude Code / Cursor**. Each block assumes the repo root is open and [`AGENT_SYSTEM_INSTRUCTIONS.md`](AGENT_SYSTEM_INSTRUCTIONS.md) applies.
+Copy-paste blocks for coding agents. Each block assumes the repo root is open and [`AGENT_SYSTEM_INSTRUCTIONS.md`](AGENT_SYSTEM_INSTRUCTIONS.md) applies.
 
 **Path reminder:** All canonical PRDs live under **`docs/`** (ignore `docsforother/` if you see it in older sentences inside copied PRD text).
 
@@ -10,9 +10,9 @@ Copy‑paste blocks for **Claude Code / Cursor**. Each block assumes the repo ro
 
 ```
 Read docs/01_GENERAL_PRD.md, docs/02_TECHNICAL_PRD.md §1–4, and docs/03_BACKEND_PRD.md §1–4.
-Summarize: (1) why OpenClaw cannot be bypassed in production, (2) when a bridge is justified vs sidecar→OpenClaw direct,
-(3) trust boundaries between Extension Host, Sidecar, Bridge, OpenClaw. Output a one-page ARCHITECTURE.md skeleton
-with deployment mode A vs B and latency measurement plan per docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 0.1.
+Summarize: (1) why OpenClaw cannot be bypassed in production, (2) why the accepted topology is Larry in VS Code -> extension -> sidecar -> bridge -> OpenClaw -> OpenAI Realtime Mini,
+(3) trust boundaries between Extension Host, Sidecar, Bridge, OpenClaw, and OpenAI. Output a one-page ARCHITECTURE.md skeleton
+that reflects the current accepted architecture and required user-provided secrets.
 ```
 
 ---
@@ -42,19 +42,19 @@ and command-map file format per Step 1.2. Ensure duplicate action ids fail close
 ## Phase 2 — Extension skeleton (local)
 
 ```
-Read docs/02_TECHNICAL_PRD.md §2, docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 2, and backend/agents/HOST_COMPAT_VS_CURSOR.md.
+Read docs/02_TECHNICAL_PRD.md §2 and docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 2.
 Scaffold packages/extension: esbuild, strict TypeScript, narrow activationEvents, CursorBuddy output channel,
 SecretStorage helpers for OpenClaw token only (never provider keys), configuration keys per Step 2.4.
 ```
 
 ---
 
-## Phase 3 — Webview UI (local)
+## Phase 3 — Larry UI shell (local)
 
 ```
-Read docs/07_LOCAL_CURSOR_AND_COMPANION.md §3, docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 3.
-Implement sidebar WebviewViewProvider with strict CSP and typed postMessage protocol per Step 3.2.
-Use VS Code theme variables (--vscode-*); no remote scripts. High-contrast test pass.
+Read docs/07_LOCAL_CURSOR_AND_COMPANION.md and docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 3.
+Implement Larry as the primary local guide surface plus minimal support UI for auth, logs, and blocked states.
+Use VS Code theme variables where relevant; no remote scripts. High-contrast test pass.
 ```
 
 ---
@@ -73,19 +73,19 @@ Implement GitAdapter and WorkspaceAdapter; never shell git with string concat; h
 ```
 Read docs/02_TECHNICAL_PRD.md §4, docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 5 onward.
 Implement ActionExecutor: parse with shared Zod, map command aliases via versioned maps, block unknown commands,
-enforce high-risk confirms. Sidecar: audio framing to OpenClaw transport; forward AssistantEnvelopeV1 to extension;
+enforce high-risk confirms. Sidecar: audio framing to bridge/OpenClaw transport; forward AssistantEnvelopeV1 to extension;
 no orchestration bypass.
 ```
 
 ---
 
-## Companion overlay + chord (local UX; cross‑cutting)
+## Larry listening + guidance UX (local; cross-cutting)
 
 ```
-Read backend/agents/COMPANION_OVERLAY_UX_SPEC.md and docs/07_LOCAL_CURSOR_AND_COMPANION.md §4–6.
-Plan overlay or degraded path: pointer-follow throttling, default macOS chord Ctrl+Option+Command as keybinding contribution,
-press-and-hold PTT default, streaming caption growth with max height and inner scroll, aria-live duplication in sidebar,
-reduced-motion behavior. Do not implement OS-wide mouse automation for navigation.
+Read backend/agents/COMPANION_OVERLAY_UX_SPEC.md and docs/07_LOCAL_CURSOR_AND_COMPANION.md.
+Plan Larry's primary guidance path: `Control+Option+L` / `Control+Option+V` / `Control+Option+C`, blue cursor follow mode,
+self-move-to-destination guidance, transient bubble text, TTS playback, secondary mini chat after arrival, reduced-motion behavior,
+and minimal support UI fallback. Do not implement OS-wide mouse automation for navigation.
 ```
 
 ---
@@ -94,8 +94,8 @@ reduced-motion behavior. Do not implement OS-wide mouse automation for navigatio
 
 ```
 Read docs/03_BACKEND_PRD.md §4–6 and docs/openapi.yaml.
-Scaffold packages/bridge as a Go service only if policy requires: POST /v1/sessions, health, JWT/mTLS per Backend PRD;
-transparent proxy for realtime where possible; no UI logic.
+Implement packages/bridge as a Go service for the accepted real path: POST /v1/sessions, health, JWT/mTLS per Backend PRD;
+transparent proxy to OpenClaw where possible; no UI logic.
 ```
 
 ---
@@ -104,5 +104,5 @@ transparent proxy for realtime where possible; no UI logic.
 
 ```
 Read backend/agents/AGENT_SYSTEM_INSTRUCTIONS.md and docs/06_BACKEND_IMPLEMENTATION_STEPS.md “How to use this file”.
-List what was implemented, run the repo’s tests/lint if present, and state any skipped phases or platform limits (VS Code vs Cursor).
+List what was implemented, run the repo’s tests/lint if present, and state any skipped phases or platform limits.
 ```

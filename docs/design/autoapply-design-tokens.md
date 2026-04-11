@@ -2,7 +2,7 @@
 
 **Note:** This file intentionally keeps the name `autoapply-design-tokens.md` to mirror `docs/design/autoapply-design-tokens.md` in this repository.
 
-**Consumers:** (A) **Marketing landing + waitlist** — static site CSS, Figma; (B) **VS Code webview + optional overlay** — bundled extension CSS, theme bridge.
+**Consumers:** (A) **Marketing landing + waitlist** — static site CSS, Figma; (B) **Larry + support UI in VS Code** — bundled extension CSS, theme bridge.
 
 ---
 
@@ -30,11 +30,11 @@ Use **fixed hex / rgba** on the public site—same system as `docs/05_FRONTEND_P
 
 **Typography (landing):** display **800–900**; body **200–300**; trust line / counts in **JetBrains Mono** or **SF Mono** at 400.
 
-**Related:** `docsforother/05_FRONTEND_PROMPT.md`
+**Related:** `docs/05_FRONTEND_PROMPT.md`
 
 ---
 
-## Part B — VS Code webview & optional local overlay (`wg.*`)
+## Part B — Larry + support UI in VS Code (`wg.*`)
 
 ---
 
@@ -66,7 +66,7 @@ Maps to CSS custom properties:
 | `wg.space.5` | 20 | Major section separation |
 | `wg.space.6` | 24 | Rare large gaps |
 
-**Rule:** Sidebar width is constrained; **do not** exceed `wg.space.6` for vertical rhythm between major blocks without scroll.
+**Rule:** Support UI width is constrained; **do not** exceed `wg.space.6` for vertical rhythm between major blocks without scroll.
 
 ---
 
@@ -81,9 +81,9 @@ Maps to CSS custom properties:
 
 **Usage**
 
-- Transcript bubbles: `md`
-- Push-to-talk: `pill`
-- Modal: `lg` (if webview modal)
+- Larry bubble / mini chat: `md`
+- Larry cursor-adjacent controls: `pill`
+- modal/support surface: `lg`
 
 ---
 
@@ -134,11 +134,18 @@ Maps to CSS custom properties:
 | `wg.color.danger` | `--vscode-errorForeground` |
 | `wg.color.info` | `--vscode-textLink-foreground` at 90% |
 
+Larry state-dot mapping in v1:
+
+- `wg.color.success` -> idle dot
+- `wg.color.warning` -> thinking dot
+- `wg.color.danger` -> error / blocked dot
+- Larry's base cursor body should stay blue and separate from the dot-state semantic colors
+
 ---
 
 ## 6. Elevation & Shadows
 
-VS Code webviews rarely need heavy shadows. Prefer **borders**.
+VS Code product surfaces rarely need heavy shadows. Prefer **borders**.
 
 | Token | Value |
 |-------|--------|
@@ -184,7 +191,7 @@ border-radius: var(--wg-radius-pill);
 font: var(--wg-type-caption);
 ```
 
-### 9.2 Transcript bubble (user)
+### 9.2 Larry guidance bubble
 
 ```
 background: color-mix(in srgb, var(--vscode-editor-selectionBackground) 35%, transparent);
@@ -193,7 +200,21 @@ border-radius: var(--wg-radius-md);
 padding: var(--wg-space-2) var(--wg-space-3);
 ```
 
-### 9.3 Step row
+Use this as a transient comic-style pop-out bubble from the blue Larry cursor. Keep copy short and contextual.
+
+### 9.3 Larry mini chat surface
+
+```
+background: var(--wg-color-surface-elevated);
+color: var(--wg-color-fg);
+border: 1px solid var(--wg-color-border-subtle);
+border-radius: var(--wg-radius-md);
+padding: var(--wg-space-3);
+```
+
+This is a secondary dropdown surface for follow-up detail after Larry reaches a destination. It must not become a giant persistent primary panel.
+
+### 9.4 Support-state row
 
 ```
 display: grid;
@@ -248,6 +269,6 @@ padding: var(--wg-space-3) 0;
 
 ## 13. Related Documents
 
-- `docsforother/05_FRONTEND_PROMPT.md` — landing + waitlist  
-- `docsforother/07_LOCAL_CURSOR_AND_COMPANION.md` — local webview + overlay  
-- `docsforother/02_TECHNICAL_PRD.md`  
+- `docs/05_FRONTEND_PROMPT.md` — landing + waitlist  
+- `docs/07_LOCAL_CURSOR_AND_COMPANION.md` — Larry + local support UI  
+- `docs/02_TECHNICAL_PRD.md`  

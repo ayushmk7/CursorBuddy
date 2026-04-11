@@ -4,13 +4,13 @@
 
 This document defines the **public marketing website only**: a **liquid-glass landing page** with **waitlist** (and minimal supporting chrome—footer, legal links, post-submit confirmation). It is intentionally aligned with **`docs/05_FRONTEND_PROMPT.md`** (AutoApply): same anti–“AI slop” bar, same typography extremes, same glass system, same motion philosophy.
 
-**Out of scope here:** The **live companion**—voice UI, cursor overlay, VS Code extension webview, sidecar, and anything that runs **on the user’s computer**—is specified in **`docsforother/07_LOCAL_CURSOR_AND_COMPANION.md`**. Do not design the product chrome as if it lived on this site.
+**Out of scope here:** The **live product**—Larry inside CursorBuddy, the VS Code runtime, sidecar, support UI, and anything that runs **on the user’s computer**—is specified in **`docs/07_LOCAL_CURSOR_AND_COMPANION.md`**. Do not design the product chrome as if it lived on this site.
 
 ---
 
 ## Design Direction
 
-Design a **single primary experience**: a landing + waitlist site for **CursorBuddy**, a voice-guided companion for developers (OpenClaw-orchestrated; the editor does the real work locally). The visual language should feel like **Apple’s liquid glass**: translucent layers, frosted glass panels, soft depth, light refraction, smooth rounded surfaces—panels of glass floating over a soft gradient canvas.
+Design a **single primary experience**: a landing + waitlist site for **CursorBuddy**, a developer product where **Larry** is the local guide inside VS Code (OpenClaw-orchestrated; the editor does the real work locally). The visual language should feel like **Apple’s liquid glass**: translucent layers, frosted glass panels, soft depth, light refraction, smooth rounded surfaces—panels of glass floating over a soft gradient canvas.
 
 **This must not look AI-generated.** No purple-blue gradients. No generic SaaS dashboard look. No Inter at weight 400 as the hero of the layout. No flat cards with heavy drop shadows. The goal is something a visitor would screenshot and share because it looks that good—not because it screams “chatbot.”
 
@@ -160,13 +160,13 @@ Do **NOT** use:
 
 ### Page 1 — Landing + Waitlist (primary URL)
 
-**Purpose:** Explain CursorBuddy in one breath; capture email for waitlist; set expectation that **the product runs on your machine** (VS Code / desktop), not in the browser.
+**Purpose:** Explain CursorBuddy in one breath; capture email for waitlist; set expectation that **the product runs on your machine** in VS Code, not in the browser.
 
 **Layout:**
 
 - **Full-viewport hero**
   - Headline, weight **900**, tight tracking: e.g. *“Your editor, finally listens.”* or *“Speak. It shows you the way.”* (final copy TBD—tone: confident, human, not “AI assistant” hype)
-  - Subhead, weight **200**: one line on **local / VS Code / OpenClaw**—e.g. *“Voice-guided help inside VS Code. Runs on your computer—this page is only the waitlist.”*
+  - Subhead, weight **200**: one line on **local / VS Code / OpenClaw**—e.g. *“Larry guides you inside VS Code. Runs on your computer—this page is only the waitlist.”*
   - **Primary CTA:** scroll or anchor to **waitlist glass panel** (filled blue `#0066FF`)
   - **Secondary CTA:** glass-outline button—*“How it works”* scrolls to explainer strip
 
@@ -179,7 +179,7 @@ Do **NOT** use:
   - **Honeypot** field (hidden) for bots—design must not break layout
 
 - **“Why it’s different”** — 3–4 **staggered glass cards** (not identical boxes in a row):
-  - *Local-first companion* — cursor / editor context stays on device; OpenClaw orchestrates
+  - *Local-first guide* — Larry lives in VS Code; OpenClaw orchestrates
   - *Built for real workflows* — Git, SCM, palette—not a generic chat window
   - *Fast path* — latency-aware stack (copy light on vendor names; no “powered by” wall of logos unless legal requires)
   - Optional fourth: *Privacy posture* — high-level, honest
@@ -255,7 +255,7 @@ Apply the same principles as **`docs/05_FRONTEND_PROMPT.md`** § “Distinctive 
 
 - Export Figma with **spacing / radius** matching tokens above
 - Implement with **CSS variables**; support `prefers-reduced-motion`
-- Waitlist POST to backend endpoint (contract in `docsforother/openapi.yaml` if extended—otherwise separate BaaS)
+- Waitlist POST to backend endpoint (contract in `docs/openapi.yaml` if extended—otherwise separate BaaS)
 - **CSP-safe** static site (Vite/Next static export)—no inline eval
 
 ---
@@ -263,5 +263,5 @@ Apply the same principles as **`docs/05_FRONTEND_PROMPT.md`** § “Distinctive 
 ## Related Documents
 
 - `docs/05_FRONTEND_PROMPT.md` — AutoApply reference (full liquid glass system)
-- `docsforother/design/autoapply-design-tokens.md` — token JSON handoff (landing + local sections)
-- `docsforother/07_LOCAL_CURSOR_AND_COMPANION.md` — **on-device** cursor, overlay, VS Code UI
+- `docs/design/autoapply-design-tokens.md` — token JSON handoff (landing + local sections)
+- `docs/07_LOCAL_CURSOR_AND_COMPANION.md` — **on-device** cursor, overlay, VS Code UI

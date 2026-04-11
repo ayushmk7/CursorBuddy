@@ -2,6 +2,8 @@
 
 Renders the looping hero MP4 for the CursorBuddy marketing site.
 
+The marketing story should match the product docs: CursorBuddy is the product, and Larry is the local guide inside VS Code.
+
 ## Composition
 
 | Property | Value |

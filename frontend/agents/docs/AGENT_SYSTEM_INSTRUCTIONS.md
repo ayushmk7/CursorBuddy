@@ -4,9 +4,9 @@ Use this document at the start of every implementation session that changes the 
 
 This folder is for the **on-device UI only**:
 
-- sidebar webview
-- cursor-adjacent companion / overlay
-- transcript, plan, and confirmation UI
+- Larry as the primary guide surface
+- minimal support UI
+- transcript and confirmation UI
 - theme-aware frontend assets that plug into the host application
 
 It is **not** for the landing page. Do not change `landingpage/` unless the task explicitly asks for marketing work.
@@ -28,22 +28,24 @@ Read in this order:
 | Rule | Detail |
 |------|--------|
 | **Local only** | `frontend/` is the UI for the local application, not the public website. |
-| **Theme-native first** | The sidebar/webview should prefer `--vscode-*` tokens and local `wg.*` token mapping. Do not paste the landing-page visual system directly into the host UI. |
-| **Overlay is optional** | The pointer-adjacent capsule is a local enhancement. Unsupported hosts or denied permissions must degrade to sidebar + editor decorations. |
+| **Theme-native first** | The local UI should prefer `--vscode-*` tokens and local `wg.*` token mapping. Do not paste the landing-page visual system directly into the host UI. |
+| **Larry is primary** | Larry is the primary product surface in v1. Support UI is secondary. |
 | **No fake backend responsibilities** | Do not put mic capture, session orchestration, OpenClaw policy, or bridge logic in the frontend. This UI renders local state; backend and sidecar own transport/orchestration. |
 | **No OS-wide automation promise** | The local frontend may guide and explain; it must not imply arbitrary OS-wide mouse control as the main execution model. |
 | **Accessibility required** | `aria-live`, keyboard focus, contrast, and reduced-motion handling are mandatory. |
 | **CSP-safe assets** | Prefer local assets and CSP-friendly scripts/styles that can ship inside a host webview. |
 | **Contract fidelity** | UI labels and states should align with `AssistantEnvelopeV1`, OpenClaw status, and glossary terms from the PRDs. |
+| **V1 interaction model** | Larry uses `Control+Option+L` / `Control+Option+V` / `Control+Option+C` as the current documented defaults, follows by default, responds with a short bubble plus TTS, exposes mini chat as a secondary surface, and performs safe navigation only. |
 
 ## What this frontend renders
 
 - Connection state: `Live`, `Degraded`, `Blocked`
-- Push-to-talk controls and listening state
-- Transcript stream
-- Step / plan rows
+- Larry wake/follow, voice, and mini chat control states
+- Larry cursor-follow and self-move guidance states
+- Larry guidance bubble text
+- TTS speaking state
 - High-risk confirmation UI
-- Overlay caption and waveform preview
+- Support UI fallback states
 
 ## What it does not own
 

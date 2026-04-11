@@ -2,6 +2,8 @@
 
 This folder contains the full public waitlist site and keeps every landing-page file self-contained here.
 
+This site is marketing-only. The real product runs locally in VS Code, where Larry is the guide inside CursorBuddy.
+
 ## What is included
 
 - Static marketing site with homepage, waitlist flow (modal), legal pages, and `404.html`

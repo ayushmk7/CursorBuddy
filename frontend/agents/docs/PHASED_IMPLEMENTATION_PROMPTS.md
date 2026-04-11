@@ -19,40 +19,40 @@ Rewrite any frontend docs that still imply Next.js, marketing pages, or server-o
 
 ```text
 Create a runnable prototype under frontend/ for the local UI only:
-- sidebar webview shell
-- pointer-adjacent overlay capsule
-- transcript, steps, and safety footer
+- Larry shell
+- minimal support UI
+- local status, transcript fallback, and confirmation states
 Use local HTML/CSS/JS assets and keep them CSP-friendly.
 ```
 
 ---
 
-## Phase 2 — Sidebar UI
+## Phase 2 — Larry UI
 
 ```text
-Read docs/07_LOCAL_CURSOR_AND_COMPANION.md §3 and docs/design/autoapply-design-tokens.md Part B.
-Implement the sidebar with:
-- header
-- OpenClaw status pill
-- push-to-talk region
-- transcript
-- numbered steps
-- high-risk confirmation area
+Read docs/07_LOCAL_CURSOR_AND_COMPANION.md and docs/design/autoapply-design-tokens.md Part B.
+Implement Larry with:
+- blue cursor rendering plus green idle / yellow thinking / red error dot semantics
+- `Control+Option+L` / `Control+Option+V` / `Control+Option+C` default controls
+- cursor-follow mode and self-move safe-guidance mode
+- short comic-style bubble guidance text
+- secondary mini chat for follow-up detail
+- safe-navigation examples
 Use host-style variables with fallbacks.
 ```
 
 ---
 
-## Phase 3 — Overlay capsule
+## Phase 3 — Support UI
 
 ```text
-Read backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md.
-Implement the pointer-follow overlay with:
-- offset and edge flipping
-- streaming caption area
-- subtle waveform
-- reduced-motion fallback
-Do not imply OS-wide automation.
+Read backend/agents/docs/COMPANION_OVERLAY_UX_SPEC.md and docs/07_LOCAL_CURSOR_AND_COMPANION.md.
+Implement the minimal support UI with:
+- auth/setup states
+- blocked/degraded status
+- confirmation area
+- transcript/history fallback if needed
+Do not let the support UI become the primary product surface.
 ```
 
 ---
@@ -64,7 +64,9 @@ Implement local UI presets for:
 - Live
 - Degraded
 - Blocked
-- Listening
+- Thinking
+- Speaking
+- Mini chat open
 - Confirm required
 Drive the UI from a small state model rather than one-off DOM patches.
 ```

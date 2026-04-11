@@ -125,7 +125,7 @@ Verify: npx remotion compositions shows HeroDemo; render produces the mp4.
 | **Deliverable** | One **looping MP4** (H.264 + AAC), suitable for `<video muted playsinline loop>` on the marketing site. |
 | **No live features** | **No** visitor microphone, **no** `@remotion/player` on the public page for this hero. Waveforms are **fully scripted**. |
 | **Click behavior** | **In-animation only**: a **fake cursor** moves and performs a **press** on the commit UI. No clickable HTML overlay for users on top of the video (unless added separately later). |
-| **Narrative** | Show that CursorBuddy is an **agent cursor** that **follows** the user, react to **speech** with a **waveform**, then **navigate** to a **source-control / commit** view and **call out** where to commit, ending with a **scripted click**. |
+| **Narrative** | Show that CursorBuddy's local guide, **Larry**, is an **agent cursor** that **follows** the user, reacts to **speech** with a **waveform**, then **navigates** to a **source-control / commit** view and **calls out** where to commit, ending with a **scripted click**. |
 | **Look & realism** | The video must look **very realistic** — like a **high-quality screen recording** of a believable desktop app, not a flat diagram or storyboard sketch. Follow [Visual realism (very believable UI)](#visual-realism-very-believable-ui). |
 
 ---

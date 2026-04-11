@@ -1,297 +1,205 @@
 # CursorBuddy — General Product Requirements Document
 
-**Project:** CursorBuddy — Realtime Voice + Visual Companion for Visual Studio Code  
-**Codename:** CursorBuddy (internal)  
+**Project:** CursorBuddy  
 **Version:** 1.0  
-**Date:** April 2026  
-
-**Scope note:** This documentation set lives under `docsforother/` and describes a **standalone product** adjacent to the AutoApply repository. It is written to the same document taxonomy as `docs/` (General PRD, Technical PRD, Backend PRD, etc.) for consistency.
+**Date:** April 2026
 
 ---
 
 ## 1. Product Overview
 
-CursorBuddy is a **VS Code extension ecosystem** optimized for **minimum end-to-end latency** from speech (or text) to editor action. It pairs **realtime multimodal inference** (speech in, optional vision in, speech and/or text out) with **deterministic editor automation** via the **Visual Studio Code Extension API**. **OpenClaw is a hard dependency:** all reasoning, workflow orchestration, tool routing, and policy-aware planning run **inside an OpenClaw runtime** (local or org-hosted). The VS Code stack is the **actuator and sensor**; it does **not** replace OpenClaw with a “direct to LLM” shortcut in production.
+CursorBuddy is a VS Code-only guidance product built around Larry, a cursor-following guide that helps the user get real work done inside the editor.
 
-**Inference speed is a first-class requirement:** deployment choices (**bridge vs direct sidecar→OpenClaw**, region placement, audio codec, batching) are selected to **minimize measured time-to-first-token and time-to-first-envelope**, subject only to security and compliance constraints—not dogma about topology.
+Larry is:
 
-**Implementation choice for this repo:** when an optional backend bridge is used, it is implemented in **Go**.
+- the in-product guide inside CursorBuddy
+- the primary user-facing surface in v1
+- limited to VS Code for v1
+- powered by OpenClaw through a Go bridge path
 
-The user speaks natural-language goals (“show me how to commit,” “open the Git graph,” “run this task”), and the system responds by:
+Larry is not:
 
-1. **Streaming** audio (and optional metadata) from the **sidecar** to **OpenClaw**, which owns the **session**, **memory/skills** (`SOUL.md`, `SKILL.md`, `MEMORY.md` per OpenClaw conventions), and **ReAct-style** tool loops.
-2. **Understanding** intent using whatever **lowest-latency** path OpenClaw configures for the session (**Gemini Live**, OpenAI Realtime, other vendor realtime, or fastest REST fallback when realtime is slower or unavailable). **Gemini Live is not mandatory:** it is the **default recommendation** only when profiling shows it wins for your region, network, and modality mix. **OpenClaw is always mandatory** as the orchestrator that owns that choice.
-3. **Grounding** decisions via OpenClaw tools that call into **workspace truth** (Git state, open editors, tasks, settings) gathered locally—**not** inferred from pixels when avoidable. The canonical tool surface is **`vscode_probe_state`** (and related) returning **metadata only** unless the user explicitly opts into richer context.
-4. **Emitting** a **validated `AssistantEnvelopeV1`** (see Technical PRD) from OpenClaw—**only** this envelope shape may drive the **Action Executor** in the extension.
-5. **Acting** through an **allowlisted command surface** (`vscode.commands.executeCommand`, view reveals, editor operations) and **explaining** concurrently via **sidebar/webview UI**, **inline decorations**, and optional **text-to-speech**.
-6. **Signaling attention** with a **cursor-adjacent or editor-local affordance** (e.g. waveform visualization while the user speaks, caption strip for model output).
+- a separate product name
+- a generic OS automation tool
+- a local-model-first assistant
 
-The product deliberately **does not** attempt to be a general-purpose OS-level overlay for arbitrary applications in v1. **VS Code is the host and the source of truth** for editor actions; **OpenClaw is the host for agent orchestration.**
+The product consists of:
 
-### 1.1 OpenClaw requirement (normative)
+- a VS Code extension
+- a local sidecar process
+- a Go bridge service
+- a real OpenClaw backend service
+- OpenAI Realtime Mini as the default recommended model transport behind OpenClaw
+
+### 1.1 Normative runtime shape
+
+For this repository, the canonical runtime is:
+
+```text
+Larry overlay in VS Code -> extension -> sidecar -> Go bridge -> OpenClaw service -> OpenAI Realtime Mini
+```
+
+This is the single documented product path for the real v1 experience.
+
+### 1.2 What Larry does in v1
+
+Larry v1 is deliberately narrow:
+
+- uses `Control+Option+L` as the current documented default for wake/follow
+- uses `Control+Option+V` as the current documented default for voice requests
+- uses `Control+Option+C` as the current documented default for the mini chat
+- follows the user's cursor by default and moves on its own only when guiding toward a safe destination
+- responds with a short transient comic-style text bubble plus TTS
+- uses VS Code state as the primary grounding source
+- performs safe navigation only
+
+Example:
+
+- the user presses `Control+Option+V` and says, "Larry, how do I commit?"
+- Larry opens Source Control in VS Code
+- Larry moves there on its own, then points/explains where the commit flow lives
+- Larry can speak the guidance out loud while also showing a short bubble near itself
+- the mini chat can expand afterward if the user wants follow-up detail
+
+### 1.3 What OpenClaw means in this repo
+
+OpenClaw is the backend orchestration layer for CursorBuddy. It is the real service responsible for:
+
+- handling Larry session lifecycle
+- receiving streamed audio or text turns
+- calling backend tools
+- using OpenAI Realtime for inference
+- returning guidance for text plus TTS
+- emitting validated `AssistantEnvelopeV1` responses for the extension to execute
+
+### 1.4 Hard rules
 
 | Rule | Detail |
 |------|--------|
-| **R1** | A **reachable OpenClaw instance** must be configured before **CursorBuddy: Start Session** succeeds (URL, token, or local socket—see Backend PRD). |
-| **R2** | Production builds **must not** bypass OpenClaw to call provider APIs directly. A **developer-only** mock flag may exist for UI tests; it is **disabled** in release artifacts. |
-| **R3** | Envelopes executed in VS Code **must** originate from OpenClaw (or from OpenClaw-sanctioned bridge code that applies the **same** schema validation). |
-
-### 1.2 Latency-first operations (normative)
-
-| Rule | Detail |
-|------|--------|
-| **L1** | Ship a **latency budget** and measure **p50/p95** TTFT (time to first assistant token or envelope) per release; regressions are release-blocking when they exceed agreed SLOs. |
-| **L2** | Prefer **fewer network hops** when security allows (e.g. **sidecar → OpenClaw** in the same region as the model edge often beats unnecessary double-proxy). |
-| **L3** | Use **bridge** when required for auth/compliance, but deploy it **co-located** with OpenClaw or on a low-RTT path so it does not become an artificial bottleneck. |
-| **L4** | Audio path: prefer **Opus** (or provider-native low-latency framing), small buffers, and **no** redundant serialization between sidecar and OpenClaw. |
-
-### 1.3 Realtime provider (Gemini Live optional)
-
-- **Required:** OpenClaw.  
-- **Not required:** any specific vendor API. **Gemini Live** should be used when—and only when—it is the **fastest correct** option for voice (and optional vision) after measurement; otherwise OpenClaw must switch to a faster configured path (e.g. another realtime API, regional endpoint, or smallest REST model for micro-turns).
+| **R1** | Real sessions require the bridge and OpenClaw service to be running. |
+| **R2** | Production flows must not bypass OpenClaw and call OpenAI directly from the extension or sidecar. |
+| **R3** | The extension only executes validated `AssistantEnvelopeV1` payloads. |
+| **R4** | Larry may perform safe navigation only in v1. |
+| **R5** | Mock OpenClaw is not the product path and should not be described as such in current docs. |
 
 ---
 
-## 2. Problem Statement
+## 2. User Value
 
-Expert users already know keyboard shortcuts and command IDs; **intermediate and returning users** forget the exact path through VS Code’s surface area (SCM, multi-root workspaces, remote SSH/WSL containers, GitLens coexistence, conflicting keybindings). Traditional help is static (docs) or generic (search). **Speech-first, in-editor guidance** reduces context switching and matches how humans ask for help.
+The user interacts with Larry inside VS Code and gets:
 
-Competing approaches:
+- grounded guidance based on real editor state
+- deterministic, allowlisted navigation actions in the editor
+- cursor-adjacent help that feels attached to where they are working
+- brief bubble text plus TTS explanation for what Larry is showing them
+- a secondary mini chat for follow-up detail instead of a big persistent panel
 
-| Approach | Failure mode |
-|---------|----------------|
-| Static docs | Not synchronized with user’s exact UI state, extension set, or workspace |
-| Screen-recording tutorials | No interactivity; stale after updates |
-| Generic LLM chat | May hallucinate command IDs; cannot safely act without tool grounding |
-| OS-level “move my mouse” automation | Fragile across themes, scaling, DPI, multi-monitor; high privacy risk |
-
-CursorBuddy’s wedge: **OpenClaw-orchestrated agents** + **tight integration with VS Code APIs** + **realtime conversational layer** + **explicit safety gates** for mutating operations.
+The point is not generic chat. The point is to help the user get real work done in VS Code using real host APIs, a trustworthy backend contract, and a guide that stays visually present.
 
 ---
 
-## 3. Target Users
+## 3. System Responsibilities
 
-### 3.1 Primary
+### 3.1 Larry overlay and extension
 
-- Developers who use VS Code daily but **forget SCM affordances** (staging, partial staging, commit vs sync, branch operations).
-- Developers new to a **team Git workflow** (fork/PR flow vs direct commit, signed commits, hooks).
-- Users working in **Remote Development** contexts where paths and Git behavior differ from local assumptions.
+The extension layer owns:
 
-### 3.2 Secondary
+- Larry as the primary guide surface
+- safe action execution
+- VS Code state access
+- minimal support UI for auth, logs, settings, and failure states
+- secure local secret storage
 
-- Educators demonstrating workflows (**step-by-step mode** with confirmations).
-- Users with **temporary accessibility preferences** (voice input for hands-busy scenarios); CursorBuddy is **not** a certified assistive technology substitute but may align with user workflows.
+### 3.2 Sidecar
 
-### 3.3 Non-target (v1)
+The sidecar owns:
 
-- Users seeking **unattended autonomous coding** without review (out of scope; safety posture is assistive).
-- **JetBrains / Zed / Neovim** users (future ports require separate PRDs).
+- long-lived local transport
+- audio capture and streaming
+- TTS playback support where implemented
+- IPC with the extension
+- connection to the Go bridge
 
----
+### 3.3 Go bridge
 
-## 4. Core Value Proposition
+The bridge owns:
 
-**Speak in the editor. The editor shows you the way—using real APIs, not guesses.**
+- bridge-mode HTTP and WebSocket entrypoints
+- user auth and session minting
+- upstream proxying to OpenClaw
+- org policy and auditing hooks
 
-Secondary value:
+### 3.4 OpenClaw service
 
-- **Lower cognitive load** for Git and workbench navigation.
-- **Faster time-to-correct-action** than reading generic documentation.
-- **Auditable behavior**: every executed command can be logged with rationale (user-toggleable).
+The OpenClaw service owns:
 
----
+- orchestration and reasoning
+- OpenAI Realtime session management
+- tool calling such as `vscode_probe_state`
+- generation of `AssistantEnvelopeV1`
+- response payloads needed for overlay text and speech output
 
-## 5. User Flows
+### 3.5 OpenAI Realtime Mini
 
-### 5.1 First Install & Trust Onboarding
-
-1. User installs the extension from the Marketplace (or VSIX sideload for enterprise).
-2. Extension displays **Trust & Safety** explainer:
-   - Which **scopes** are requested (`workspace`, possibly `extensionHost` details).
-   - That **mutating Git actions** require explicit confirmation unless user opts into **“guided auto-run”** for a subset of safe commands.
-   - That **audio and session metadata** flow through **OpenClaw** (and from there to configured models/providers per org policy).
-3. User configures **OpenClaw endpoint** (base URL or IPC descriptor) and **authentication** (PAT, OAuth device flow, or mTLS client cert—see Backend PRD). Provider keys for LLMs live **in OpenClaw** (or its bridge), not as a shortcut around OpenClaw.
-4. User stores **CursorBuddy ↔ OpenClaw** credentials in VS Code **SecretStorage** (e.g. session token issued by org bridge).
-5. User runs **CursorBuddy: Start Session** from the Command Palette; extension **health-checks OpenClaw** before enabling the mic.
-6. Extension performs **capability probe**: VS Code version, built-in Git extension presence, optional GitLens detection (soft dependency), remote kind (local, SSH, WSL, Codespaces).
-
-### 5.2 Voice Session (Happy Path)
-
-1. User invokes **push-to-talk** or **hands-free** (Voice Activity Detection) based on setting.
-2. Sidecar streams PCM/opus frames and session context to **OpenClaw** (via its gateway protocol—HTTP, WebSocket, or OpenClaw’s native connector as implemented).
-3. **OpenClaw** runs the agent loop: may call **`vscode_probe_state`**, other allowlisted tools, and configured **realtime** or **REST** model endpoints.
-4. **Partial transcripts** appear in sidebar webview (optional privacy mode: show dots only); text may be mirrored from OpenClaw events.
-5. OpenClaw emits a **`AssistantEnvelopeV1`** (JSON schema; see Technical PRD) to the sidecar/extension—consumed by the **Action Executor** after **schema validation**.
-6. For **read-only / navigation** intents:
-   - Executor runs `executeCommand` to reveal SCM, open settings JSON, focus terminal, etc.
-   - UI shows **numbered steps** matching what happened.
-7. For **mutating** intents (commit, push, stage all):
-   - Executor opens **confirmation modal** with diff summary where feasible.
-   - User confirms; then commands run.
-
-### 5.3 Guided “How Do I Commit?” (Reference Flow)
-
-1. User: “Where do I commit a file in VS Code?”
-2. **OpenClaw** drives **`vscode_probe_state`** (or equivalent) so the agent knows workspace layout: single folder vs multi-root; Git repository detected or not.
-3. If no repo: explain **Initialize Repository** path and offer to run **safe** init command (still confirm if creating files).
-4. If repo exists:
-   - Reveal **Source Control** view.
-   - If file is open and unstaged: offer **stage file** (confirm).
-   - Point user to **message box** with **decoration** or **selection** in SCM input (API limitations may require explanation rather than literal cursor injection into SCM input—see Technical PRD **honesty constraints**).
-5. Spoken or textual summary: “You commit in the Source Control view, not the Explorer. Type your message here, then click Commit—or I can run the palette command.”
-
-### 5.4 “Show Me” vs “Do It For Me”
-
-User-configurable **mode**:
-
-| Mode | Behavior |
-|------|----------|
-| Show | Only reveals panels, highlights files, reads state aloud |
-| Assist | Executes **safe** commands (open views) automatically; mutating actions confirm |
-| Power | User-defined allowlist can auto-run mutating commands (enterprise may disable) |
-
-### 5.5 Failure & Degradation
-
-1. **OpenClaw unreachable** (HTTP 5xx, TLS failure, auth): session **cannot start**; show remediation (check URL, token, VPN). **No** silent fallback to direct provider.
-2. **OpenClaw alive but model/realtime offline**: OpenClaw may fall back per **its** config (e.g. REST completion); CursorBuddy still only accepts **envelopes** from OpenClaw.
-3. **No microphone permission**: text input only in webview; typed text is sent to **OpenClaw** as a user message on the same session.
-4. **Command ID mismatch** across VS Code versions: executor logs failure; error returned to **OpenClaw** as tool result so the agent can replan; user sees **retry with palette search** suggestion.
-5. **Conflicting extension** (e.g. custom SCM UI): system explains limitation and falls back to **command palette** navigation.
-
-### 5.6 Privacy Modes
-
-1. **Local metadata only** to cloud: workspace-relative paths hashed; file contents never sent unless user triggers **“explain this file”** with explicit consent per session.
-2. **Redaction pipeline** for error logs attached to telemetry (tokens, emails stripped).
+`OpenAI Realtime Mini` is the default recommended backend for Larry because it preserves the real-time architecture while keeping recurring inference costs lower than the larger Realtime tier.
 
 ---
 
-## 6. Functional Requirements (High Level)
+## 4. First-Run Requirements
 
-### 6.1 Must-have (v1)
+A real working setup requires:
 
-- **OpenClaw** runtime deployed and reachable; **CursorBuddy OpenClaw skill/workflow** package installed on that instance (defines tools, guardrails, and envelope emission).
-- **Latency profiling** artifact: documented baseline TTFT / time-to-envelope for the chosen OpenClaw + model path (include at least one **Gemini Live** vs alternative comparison where applicable).
-- VS Code extension package, activation events scoped to avoid slowing editor.
-- Sidecar (or equivalent) with **OpenClaw session client**: reconnect/backoff, auth rotation, health probes; transport chosen for **minimum RTT** to OpenClaw.
-- **Structured action schema** (`AssistantEnvelopeV1`) validated with JSON Schema / Zod before execution; **reject** envelopes not traceable to OpenClaw session (correlation IDs).
-- Allowlisted `executeCommand` registry with **semantic aliases** (“open scm” → `workbench.view.scm` class commands; exact IDs version-gated).
-- Sidebar webview UI: transcript, steps, **OpenClaw + model connection** status, mic meter.
-- Confirmation UX for mutating Git operations.
-- Settings: **OpenClaw base URL**, auth secret reference, voice mode, privacy tier, allowlist editor, optional org bridge URL.
+- the Go bridge running
+- the OpenClaw service running
+- an OpenAI API key with Realtime access configured on the backend
+- a user auth token stored in VS Code
+- bridge mode enabled in extension settings
 
-### 6.2 Should-have (v1.1)
-
-- Optional **single-frame screenshot** capture for rare ambiguous UI states (user-triggered only), sent **through OpenClaw** policy/DLP pipeline.
-- **TTS** output using OS or cloud voice (may be triggered by OpenClaw events).
-- **Step replay** (“do that again”) via OpenClaw idempotent workflow hooks.
-
-### 6.3 Could-have (v2+)
-
-- Additional OpenClaw workflows that coordinate **non–VS Code** tools (email, calendar) **only** where enterprise policy explicitly enables them; still **no** bypass of OpenClaw for VS Code actions.
+If any of those are missing, the real Larry path is not functional.
 
 ---
 
-## 7. Non-Goals
+## 5. Non-Goals
 
-- Replacing Copilot/Cursor AI coding agents.
-- General OS mouse control.
-- Guaranteed correctness on **third-party webviews** inside VS Code (e.g. embedded browser pages) without explicit integration.
-- Bypassing enterprise policy (extension must respect disabled marketplace, proxy, and certificate pinning environments—document limitations).
+CursorBuddy v1 is not:
 
----
-
-## 8. Success Metrics (Product)
-
-| Metric | Definition |
-|--------|------------|
-| Time-to-first-correct-view | Stopwatch from end of utterance to correct workbench view focused |
-| Mutation error rate | Commits pushed without user intent / wrong scope (target: ~0 with confirmations on) |
-| Latency p50/p95 | End-to-end for “navigation-only” intents |
-| Session completion rate | User reaches stated goal without abandoning |
+- a direct-to-OpenAI VS Code extension
+- a mock-backed demo product
+- a generic OS automation tool
+- a fully offline local-model product
+- a replacement for the backend orchestration layer
 
 ---
 
-## 9. Compliance & Ethics
+## 6. Success Criteria
 
-- **Transparency**: clear indication when **OpenClaw** and downstream model providers are active.
-- **User control**: hard stop hotkey; delete session transcripts locally.
-- **Safety**: no credential exfiltration via prompt injection—executor must not read SecretStorage for model context.
-- **License**: third-party SDKs compatible with Marketplace rules.
+The product is considered functional when:
+
+- a user can start a real Larry session from VS Code
+- the documented default controls `Control+Option+L`, `Control+Option+V`, and `Control+Option+C` work through the local runtime
+- audio or text turns reach OpenClaw through the bridge
+- OpenClaw calls OpenAI Realtime and returns validated envelopes
+- Larry can safely open Source Control and similar VS Code surfaces
+- Larry follows by default, moves on its own during safe guidance, renders brief bubble guidance, and can provide TTS output
+- anything above the safe-navigation boundary still requires explicit confirmation
 
 ---
 
-## 10. Glossary
+## 7. Glossary
 
 | Term | Meaning |
 |------|---------|
-| OpenClaw | **Required** agent orchestration runtime (workflows, tools, memory, model routing) |
-| Extension Host | VS Code process isolating extension code |
-| Sidecar | Separate OS process for audio I/O, OpenClaw session transport, and long-lived sockets (strongly recommended) |
-| Realtime session | Often terminates **inside OpenClaw**; may use provider WebSocket for streaming audio and tokens |
-| Action Executor | Local module mapping **OpenClaw-emitted** structured intents to VS Code API calls |
-| Allowlist | Approved commands and argument shapes |
+| Larry | The cursor-following guide inside CursorBuddy |
+| OpenClaw | The real CursorBuddy backend orchestration service in this repo |
+| Bridge mode | Extension/sidecar path that goes through the Go bridge before OpenClaw |
+| OpenAI Realtime Mini | The default recommended realtime model backend for Larry |
+| AssistantEnvelopeV1 | The structured action contract executed by the extension |
 
 ---
 
-## 11. Related Documents
+## 8. Related Documents
 
-- `docsforother/02_TECHNICAL_PRD.md` — architecture, schemas, threat model
-- `docsforother/03_BACKEND_PRD.md` — bridge service, secrets, deployment
-- `docsforother/05_FRONTEND_PROMPT.md` — public landing + waitlist (liquid glass, AutoApply-aligned)
-- `docsforother/07_LOCAL_CURSOR_AND_COMPANION.md` — on-device companion, VS Code webview, optional cursor overlay
-- `docsforother/06_BACKEND_IMPLEMENTATION_STEPS.md` — phased build plan
-
----
-
-## 12. Competitive Landscape (Contextual)
-
-| Category | Examples | CursorBuddy differentiation |
-|----------|----------|---------------------------|
-| In-editor AI chat | Copilot Chat, Cursor | CursorBuddy is **OpenClaw-orchestrated**, **goal-directed workbench navigation** with **executable allowlist**, not free-form codegen-first |
-| Screen recording tutors | Loom, docs sites | **Live**, **state-aware**, **interactive** |
-| OS automation | AutoHotkey, macOS Shortcuts | **VS Code-native**, fewer fragile pixel assumptions |
-| Voice assistants | Siri, Alexa | **Deep editor API integration** via OpenClaw tools |
-
----
-
-## 13. Roadmap (Indicative)
-
-| Horizon | Deliverable |
-|---------|-------------|
-| v0.1 | **OpenClaw** skill pack + minimal workflow; extension skeleton; mock envelope pipe; SCM open |
-| v0.2 | Sidecar ↔ **OpenClaw** transport; transcript UI; real OpenClaw session |
-| v0.3 | `vscode_probe_state` tool + Git snapshot; confirm gating |
-| v0.4 | Sidecar production binaries + crash recovery; OpenClaw health UX |
-| v1.0 | Marketplace, security review, enterprise bridge beta (**OpenClaw** + bridge) |
-| v1.1 | Optional screenshot-on-demand **via OpenClaw** policy |
-| v2.0 | Pluggable task runner (off by default), team policy packs on OpenClaw |
-
----
-
-## 14. Assumptions & Dependencies
-
-- **OpenClaw** is installed, configured, and reachable from the developer machine (or org network).
-- User has permission to install VS Code extensions (some managed devices block Marketplace).
-- Built-in **Git** extension enabled (common; not universal).
-- Network egress allowed to **OpenClaw** and, as configured inside OpenClaw, to model providers.
-
----
-
-## 15. Risks & Mitigations (Product-Level)
-
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| OpenClaw outage / misconfig | No sessions | Health checks, clear errors, runbooks; multi-instance OpenClaw for enterprise |
-| Command ID drift | Broken automation | Versioned alias maps + CI verification |
-| Provider price spikes | Cost surprise | Session timers + org budgets on bridge **and** OpenClaw quotas |
-| Privacy backlash | Adoption blocker | Redaction, clear disclosures, org DLP on OpenClaw |
-| Over-trust in model | Wrong git ops | Confirm gates, immutable audit log option |
-
----
-
-## 16. Acceptance Criteria (UAT Scenarios)
-
-1. **Cold user:** Install → set key → “open source control” → SCM visible ≤ 3s after provider response (network dependent).
-2. **Multi-root:** Two folders; user asks “commit in repo B only” → plan references correct repo root or asks clarifying question without executing.
-3. **Denied mic:** UI degrades to text; no crash loops.
-4. **Insider build:** Feature flags hide experimental providers.
+- `docs/02_TECHNICAL_PRD.md`
+- `docs/03_BACKEND_PRD.md`
+- `docs/06_BACKEND_IMPLEMENTATION_STEPS.md`
+- `ARCHITECTURE.md`

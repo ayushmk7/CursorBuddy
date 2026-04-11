@@ -29,7 +29,7 @@ This folder is for the **on-device UI only**. Do not use these steps for `landin
 
 ## Phase 1 — Local frontend scaffold
 
-**Goal:** Create a runnable local UI prototype that previews the sidebar and overlay surfaces.
+**Goal:** Create a runnable local UI prototype that previews Larry and the minimal support UI.
 
 **Outputs:**
 
@@ -45,37 +45,38 @@ This folder is for the **on-device UI only**. Do not use these steps for `landin
 
 ## Phase 2 — Sidebar webview shell
 
-**Goal:** Build the primary local surface.
+**Goal:** Build Larry as the primary local surface.
 
 **Outputs:**
 
-- Header with product mark, connection pill, and latency hint
-- Push-to-talk region with waveform or level visualization
-- Transcript section
-- Step / plan list
-- Safety footer
+- Larry shell with blue cursor identity and green idle / yellow thinking / red error dot semantics
+- Cursor-follow mode and self-move guidance mode
+- Cursor-adjacent transient bubble guidance text
+- Documented default controls for wake/follow, voice, and mini chat
+- Safe-navigation guidance examples
 
 **Verification:**
 
-- Layout works at desktop and narrow widths.
-- Focus states are visible and semantic regions are present.
+- Larry states are visually distinct and readable.
+- Guidance remains legible in light, dark, and narrow layouts.
 
 ---
 
-## Phase 3 — Overlay capsule
+## Phase 3 — Minimal support UI
 
-**Goal:** Implement the cursor-adjacent companion preview.
+**Goal:** Implement the secondary support surface for setup and failure states.
 
 **Outputs:**
 
-- Overlay capsule with caption text
-- Pointer-follow positioning with edge-aware flipping
-- Reduced-motion-safe waveform presentation
+- Auth and settings states
+- Logs/status surface
+- Fallback transcript/history if needed
+- Confirmation UI for non-safe actions
 
 **Verification:**
 
-- Overlay follows pointer within the preview stage without clipping.
-- Reduced motion removes decorative movement while keeping state legible.
+- Support UI is clearly secondary to Larry.
+- Blocked and setup states are understandable without becoming the main product surface.
 
 ---
 
@@ -86,8 +87,10 @@ This folder is for the **on-device UI only**. Do not use these steps for `landin
 **Outputs:**
 
 - `Live`, `Degraded`, and `Blocked` states
-- Listening / thinking / confirm states
+- thinking / confirm states
+- mini chat open / closed secondary states
 - High-risk confirmation card or modal
+- TTS speaking state
 
 **Verification:**
 
@@ -136,4 +139,4 @@ Before claiming completion:
 - confirm `frontend/` clearly reads as local application UI only
 - confirm `landingpage/` was left untouched
 - run a local preview or static verification
-- state how the prototype maps to the sidebar and overlay docs
+- state how the prototype maps to Larry and support UI docs

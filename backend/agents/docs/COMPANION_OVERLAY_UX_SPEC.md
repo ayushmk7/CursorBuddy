@@ -1,76 +1,88 @@
-# Companion overlay UX specification
+# Larry overlay UX specification
 
-**Status:** Normative for **agent implementation** and product QA. Extends [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §4 with **shortcut**, **streaming layout**, and **PRD tension** called out below.
+**Status:** Normative for implementation and product QA. Extends [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) with shortcut, streaming layout, and speaking behavior.
 
-## PRD tension and stance
+## Product stance
 
-- [`docs/01_GENERAL_PRD.md`](../../docs/01_GENERAL_PRD.md) limits **OS‑wide** scope in v1 (no generic “move the mouse anywhere” automation).
-- [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) allows an **optional overlay**: pointer‑anchored caption + waveform.
+- Larry is the primary product surface in v1.
+- Larry is VS Code-only in v1.
+- Larry performs safe navigation only.
+- Larry is not OS-wide mouse automation.
 
-**Stance for this repo:** Ship the **pointer‑locked capsule** as a **v1 goal on macOS** where OS permissions and performance allow; **degrade** gracefully to **editor decorations + sidebar webview** on unsupported platforms or when the user denies accessibility/screen permissions. “Guide the user” is implemented via **`AssistantEnvelopeV1`** (text + allowlisted actions), not OS‑level mouse control.
+Guide-the-user behavior is implemented via `AssistantEnvelopeV1` plus local rendering of text and TTS, not by taking over the machine.
 
 ## Vision
 
-- A **single** lightweight surface **anchored near the system pointer** (below‑right by default), visually **attached** to the cursor (speech‑bubble / callout tail optional in a later polish pass).
-- **No separate application window** dedicated to chat: the capsule is the **only** floating assistant chrome for inline feedback. The **sidebar webview** remains for transcript, steps, confirmations, and settings ([`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §3)—not an extra “popup app,” but the existing product surface.
-- When **not** in voice/interaction mode, the companion **may** show a minimal idle state (dot or thin wave) that **follows** the pointer at throttled rate, or **hide** entirely until the chord arms interaction—**product choice:** default = **follow idle indicator** until dismissed by settings.
+- A **single** lightweight surface anchored near the current VS Code work context.
+- No separate chat app window.
+- Minimal support UI may still exist for settings, logs, auth, and blocked states.
+- When idle, Larry may either remain subtly visible or hide based on product settings. Default: visible but restrained.
 
-## Global shortcut (macOS default)
+## Default controls
 
 | Input | Role |
 |-------|------|
-| **⌃⌥⌘** — Control + Option + Command (same physical chord, user‑rebindable) | **Arms voice turn:** press‑and‑hold **or** tap‑to‑toggle **listening** (pick **one** default for v1: **press‑and‑hold** recommended for fewer accidental hot mics). |
+| `Control+Option+L` | Wake Larry / keep Larry in follow mode |
+| `Control+Option+V` | Start a voice request |
+| `Control+Option+C` | Toggle the secondary mini chat |
 
-**Implementation note:** Express as a `keybindings` contribution in the extension; avoid hardcoding scan codes. Document the default in README and settings.
-
-### Windows / Linux
-
-- No single canonical triple‑modifier; ship **defaults per platform** and allow **user override** in `keybindings.json` ([`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md) §2.1).
+**Implementation note:** These are the current documented macOS-first defaults. Keep them user-rebindable in the product, but do not leave the docs vague.
 
 ## Voice and processing flow
 
-1. User holds (or toggles) chord → sidecar **starts capture** (subject to mic permission).
-2. Audio streams to **OpenClaw** per architecture; `assistant_text` and optional incremental tokens arrive on the **local** transport.
-3. **Capsule** shows **streaming text** as chunks arrive (ChatGPT‑style reveal: growing height, multi‑line wrap).
-4. When the turn completes, **actions** in `AssistantEnvelopeV1` run through the executor; capsule may **summarize** or **echo** final `assistant_text`; highlights/reveals happen per envelope.
+1. User wakes or keeps Larry active with `Control+Option+L`.
+2. Sidecar starts capture, subject to mic permission.
+3. Audio streams to OpenClaw through the accepted bridge path.
+4. Larry shows short transient bubble guidance as chunks arrive.
+5. Larry may speak the result through TTS.
+6. When the turn completes, actions in `AssistantEnvelopeV1` run through the executor.
 
-## Pointer follow
+## Follow behavior
 
-- Update position on pointer move **throttled** to **30–60 Hz** max ([`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §5).
-- Offset **12–24 px** below‑right of the pointer; **flip** to above‑left when near screen edges (**collision detection**).
-- **Do not** block the extension host thread; overlay process or compositor thread owns layout.
+- Update position relative to the current work point at a throttled rate.
+- Keep offset small and predictable.
+- Avoid blocking the extension host thread.
+- Stay visually attached to current work without jitter.
+- Follow the user's cursor by default.
+- Move on its own only when guiding toward a safe destination in VS Code.
+- After arrival, allow the mini chat to open for follow-up detail without becoming the main surface.
 
-## Streaming text layout (normative)
+## Bubble layout (normative)
 
 | Rule | Detail |
 |------|--------|
-| **Growth** | Start at **one line** min height; **grow vertically** as wrapped lines increase, up to **`max_height`** (~40–50% of viewport height or **280–360 px**, whichever is smaller—tune in implementation). |
-| **Scroll** | After `max_height`, **inner scroll** with subtle fade at bottom edge; no separate window resize by the user. |
-| **Wrapping** | Hard wrap at capsule **max width** ~**280–320 px** (aligns with §4.2 of local PRD). |
-| **Typography** | System UI **12–13 px**; instruction weight **500**; monospace for command IDs when shown. |
-| **Animation** | Optional caret or fade‑in per chunk; **respect `prefers-reduced-motion`** → static text updates, no decorative motion ([`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §4.3, §6). |
-| **Clearing** | New user turn **clears** or **archives** prior bubble content per session policy (default: clear on new listen arm). |
+| **Growth** | Start at one line and grow vertically as wrapped lines increase, up to a tuned max height. |
+| **Scroll** | After max height, use inner scroll only in the secondary mini chat, not in the default transient bubble. |
+| **Wrapping** | Keep a compact max width suitable for cursor-adjacent guidance. |
+| **Typography** | System UI 12-13 px; concise, readable, direct. |
+| **Animation** | Subtle only; respect reduced motion. |
+| **Clearing** | New user turn clears or archives prior bubble content according to session policy. |
 
-## Visual baseline (aligned with PRD §4.2)
+## Visual baseline
 
-- Rounded rect or pill, **12–16 px** radius; frosted translucent fill where supported; solid high‑contrast fallback in **high contrast** themes.
-- Border **1 px** subtle; shadow for separation from busy backgrounds.
+- Blue cursor-first identity
+- Tiny status dot with green idle, yellow thinking, and red error semantics
+- Comic-style transient bubble
+- restrained brand accent
+- high-contrast fallback for difficult themes
+- clear differentiation between listening, thinking, and speaking states
 
 ## Accessibility
 
-- Overlay is **visually supplemental**. **Same** critical content MUST appear in the **sidebar** transcript with **`aria-live="polite"`** on the webview side ([`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §6).
-- If overlay is non‑interactive, decorative waveform may be **`aria-hidden`**; spoken/announced content still in sidebar.
+- Larry's spoken content must also exist as visible text.
+- Critical content must also be available in support UI or transcript fallback.
+- Decorative motion should be suppressible.
 
 ## Failure and degrade modes
 
 | Condition | Behavior |
 |-----------|----------|
-| Overlay unavailable | Sidebar + status bar + **editor decorations** only. |
-| OpenClaw blocked | Show blocked state in sidebar; capsule **short** error string or hide. |
-| Mic denied | Sidebar message + text‑only input fallback ([`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §3.3). |
+| Larry unavailable | Support UI + editor decorations only. |
+| OpenClaw blocked | Show blocked state in support UI; Larry may show a short error line or hide. |
+| Mic denied | Support UI message plus text-only fallback if implemented. |
 
 ## Related
 
 - [`BACKEND_VS_LOCAL_RUNTIME.md`](BACKEND_VS_LOCAL_RUNTIME.md)
-- [`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md) §4 (`assistant_text`)
+- [`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md)
 - [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md)

@@ -1,15 +1,15 @@
-# Agent system instructions (CursorBuddy / CursorBuddy)
+# Agent system instructions
 
-Use this document at the **start of every implementation session** for building CursorBuddy (this repo’s product codename). It orients **Claude Code, Cursor agents, or other coding assistants** toward the existing PRDs and away from common mistakes.
+Use this document at the **start of every implementation session** for building CursorBuddy. It orients coding assistants toward the current PRDs and away from common mistakes.
 
 ## Canonical sources
 
 Read in this order when scaffolding or changing behavior:
 
-1. [`docs/01_GENERAL_PRD.md`](../../docs/01_GENERAL_PRD.md) — scope, OpenClaw as orchestrator, latency mindset.
+1. [`docs/01_GENERAL_PRD.md`](../../docs/01_GENERAL_PRD.md) — scope and the accepted real backend path.
 2. [`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md) — VS Code integration, `AssistantEnvelopeV1`, sidecar rationale, session state machine.
-3. [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md) — bridge vs direct sidecar→OpenClaw; auth; optional API surface.
-4. [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) — webview, optional overlay, accessibility.
+3. [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md) — bridge, OpenClaw service, auth, and OpenAI Realtime backend direction.
+4. [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) — Larry overlay, support UI, accessibility.
 
 **Path rule:** Always reference **`docs/…`** in new text. Older copies may say `docsforother/`; that is **not** the folder name in this repository.
 
@@ -17,27 +17,28 @@ Read in this order when scaffolding or changing behavior:
 
 | Rule | Detail |
 |------|--------|
-| **OpenClaw required** | Production reasoning, tools, and envelope emission run in **OpenClaw**. The extension is sensor + actuator, not a second brain. |
-| **No direct provider bypass** | Do not add release paths that call model vendor APIs from the extension for orchestration. A **dev-only mock** may exist for UI tests only—disabled in shipping artifacts. |
+| **OpenClaw required** | Production reasoning, tools, and envelope emission run in the real **OpenClaw service**. The extension is sensor + actuator, not a second brain. |
+| **No direct provider bypass** | Do not add release paths that call model vendor APIs from the extension or sidecar for orchestration. |
 | **Executor input** | The only actuator contract is **`AssistantEnvelopeV1`** (validated, versioned). See [`docs/02_TECHNICAL_PRD.md`](../../docs/02_TECHNICAL_PRD.md) §4. |
 | **COMMAND SAFETY** | Never pass unconstrained strings to `vscode.commands.executeCommand`. Use allowlists, alias maps, and schema validation. |
-| **Latency** | Prefer **fewer hops** when policy allows (sidecar → OpenClaw). Use bridge only when enterprise/policy requires it; co‑locate if you do. See [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md) §2. |
+| **Current topology** | The accepted real path is Larry in VS Code -> extension -> sidecar -> Go bridge -> OpenClaw service -> OpenAI Realtime Mini. Do not reintroduce old direct/mock-first architecture text. |
 | **Backend language** | When implementing bridge or other server-side backend code in this repo, use **Go** unless a doc explicitly says otherwise. |
+| **V1 scope** | Larry is VS Code-only, uses `Control+Option+L` / `Control+Option+V` / `Control+Option+C` as the current documented defaults, follows by default, responds with a short bubble plus TTS, exposes mini chat as a secondary surface, and performs safe navigation only. |
 
 ## Backend vs local
 
-- **Backend (PRD sense):** OpenClaw + **optional Go** bridge service (session minting, org policy, proxy).
-- **Local runtime:** VS Code (or Cursor) **extension host**, **webview**, **sidecar** (audio, transport), **optional overlay** process.
+- **Backend (PRD sense):** Go bridge + OpenClaw service + OpenAI Realtime integration.
+- **Local runtime:** VS Code **extension host**, Larry overlay, minimal support UI, and sidecar (audio, transport, TTS).
 
-Do **not** implement **pointer‑following UI**, **mic capture**, or **streaming caption layout** inside the bridge. Those belong to local processes; the bridge may only handle policy, auth, and upstream connectivity per [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md).
+Do **not** implement Larry UI, mic capture, or TTS playback inside the bridge. Those belong to local processes; the bridge handles policy, auth, and upstream connectivity, while OpenClaw handles orchestration and provider communication.
 
-## Companion UX (summary)
+## Larry UX (summary)
 
-Normative UX for the cursor‑adjacent companion (chord, voice, streaming bubble) lives in [`COMPANION_OVERLAY_UX_SPEC.md`](COMPANION_OVERLAY_UX_SPEC.md). It **extends** [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md) §4; it does not replace OpenClaw or envelope semantics.
+Normative UX for Larry (default controls, follow-vs-guide motion, transient bubble guidance, TTS, secondary mini chat, safe navigation) lives in [`COMPANION_OVERLAY_UX_SPEC.md`](COMPANION_OVERLAY_UX_SPEC.md). It extends [`docs/07_LOCAL_CURSOR_AND_COMPANION.md`](../../docs/07_LOCAL_CURSOR_AND_COMPANION.md); it does not replace OpenClaw or envelope semantics.
 
 ## Host targets
 
-Implement against **VS Code extension APIs** first; validate on **Cursor** where product requirements need it. See [`HOST_COMPAT_VS_CURSOR.md`](HOST_COMPAT_VS_CURSOR.md).
+Implement against **VS Code extension APIs** only for v1. [`HOST_COMPAT_VS_CURSOR.md`](HOST_COMPAT_VS_CURSOR.md) is historical context, not active product direction.
 
 ## When uncertain
 
