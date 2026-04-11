@@ -1,0 +1,9 @@
+**/__tests__/**
+**/*.test.ts
+**/*.test.js
+**/*.map
+src/
+tsconfig.json
+esbuild.config.js
+vitest.config.ts
+node_modules/

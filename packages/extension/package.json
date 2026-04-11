@@ -1,9 +1,9 @@
 {
-  "name": "waveclick",
-  "displayName": "WaveClick",
+  "name": "cursorbuddy",
+  "displayName": "CursorBuddy",
   "description": "Voice + visual companion for VS Code",
   "version": "0.1.0",
-  "publisher": "waveclick",
+  "publisher": "cursorbuddy",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -11,47 +11,47 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:waveclick.startSession",
-    "onView:waveclick.sidebar"
+    "onCommand:cursorbuddy.startSession",
+    "onView:cursorbuddy.sidebar"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "waveclick.startSession",
-        "title": "WaveClick: Start Session"
+        "command": "cursorbuddy.startSession",
+        "title": "CursorBuddy: Start Session"
       },
       {
-        "command": "waveclick.stopSession",
-        "title": "WaveClick: Stop Session"
+        "command": "cursorbuddy.stopSession",
+        "title": "CursorBuddy: Stop Session"
       },
       {
-        "command": "waveclick.setAuth",
-        "title": "WaveClick: Set Auth Token"
+        "command": "cursorbuddy.setAuth",
+        "title": "CursorBuddy: Set Auth Token"
       }
     ],
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "waveclick",
-          "title": "WaveClick",
+          "id": "cursorbuddy",
+          "title": "CursorBuddy",
           "icon": "resources/icon.svg"
         }
       ]
     },
     "views": {
-      "waveclick": [
+      "cursorbuddy": [
         {
           "type": "webview",
-          "id": "waveclick.sidebar",
-          "name": "WaveClick"
+          "id": "cursorbuddy.sidebar",
+          "name": "CursorBuddy"
         }
       ]
     },
     "configuration": {
-      "title": "WaveClick",
+      "title": "CursorBuddy",
       "properties": {
-        "waveclick.connectionMode": {
+        "cursorbuddy.connectionMode": {
           "type": "string",
           "enum": [
             "direct",
@@ -60,17 +60,17 @@
           "default": "direct",
           "description": "Connection mode: direct to OpenClaw or via bridge"
         },
-        "waveclick.openclaw.baseUrl": {
+        "cursorbuddy.openclaw.baseUrl": {
           "type": "string",
           "default": "ws://localhost:9090",
           "description": "OpenClaw WebSocket base URL"
         },
-        "waveclick.openclaw.workflow": {
+        "cursorbuddy.openclaw.workflow": {
           "type": "string",
-          "default": "waveclick_session",
+          "default": "cursorbuddy_session",
           "description": "OpenClaw workflow name"
         },
-        "waveclick.openclaw.auth": {
+        "cursorbuddy.openclaw.auth": {
           "type": "string",
           "default": "",
           "description": "OpenClaw auth token (stored in SecretStorage in production)"
@@ -83,12 +83,13 @@
     "watch": "node esbuild.config.js --watch",
     "compile": "tsc --noEmit",
     "test": "node esbuild.config.js && tsc -p tsconfig.json && node dist/test/runTests.js",
-    "package": "vsce package --out ../../dist/waveclick.vsix"
+    "package": "vsce package --out ../../dist/cursorbuddy.vsix"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.98.0",
+    "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.0.0",
     "esbuild": "^0.21.0",
@@ -96,6 +97,6 @@
     "typescript": "^5.4.0"
   },
   "dependencies": {
-    "@waveclick/shared": "*"
+    "@cursorbuddy/shared": "*"
   }
 }

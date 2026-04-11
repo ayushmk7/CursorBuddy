@@ -1,4 +1,4 @@
-# WaveClick — Frontend Design Prompt (Figma AI)
+# CursorBuddy — Frontend Design Prompt (Figma AI)
 
 ## Scope (read first)
 
@@ -10,7 +10,7 @@ This document defines the **public marketing website only**: a **liquid-glass la
 
 ## Design Direction
 
-Design a **single primary experience**: a landing + waitlist site for **WaveClick**, a voice-guided companion for developers (OpenClaw-orchestrated; the editor does the real work locally). The visual language should feel like **Apple’s liquid glass**: translucent layers, frosted glass panels, soft depth, light refraction, smooth rounded surfaces—panels of glass floating over a soft gradient canvas.
+Design a **single primary experience**: a landing + waitlist site for **CursorBuddy**, a voice-guided companion for developers (OpenClaw-orchestrated; the editor does the real work locally). The visual language should feel like **Apple’s liquid glass**: translucent layers, frosted glass panels, soft depth, light refraction, smooth rounded surfaces—panels of glass floating over a soft gradient canvas.
 
 **This must not look AI-generated.** No purple-blue gradients. No generic SaaS dashboard look. No Inter at weight 400 as the hero of the layout. No flat cards with heavy drop shadows. The goal is something a visitor would screenshot and share because it looks that good—not because it screams “chatbot.”
 
@@ -156,11 +156,11 @@ Do **NOT** use:
 
 ---
 
-## Pages and Screens (WaveClick Web — Minimal Set)
+## Pages and Screens (CursorBuddy Web — Minimal Set)
 
 ### Page 1 — Landing + Waitlist (primary URL)
 
-**Purpose:** Explain WaveClick in one breath; capture email for waitlist; set expectation that **the product runs on your machine** (VS Code / desktop), not in the browser.
+**Purpose:** Explain CursorBuddy in one breath; capture email for waitlist; set expectation that **the product runs on your machine** (VS Code / desktop), not in the browser.
 
 **Layout:**
 
@@ -196,7 +196,7 @@ Do **NOT** use:
 
 - Centered or hero-aligned **glass panel**
 - Weight 900: *“You’re on the list.”*
-- Weight 200: *“We’ll be in touch. The WaveClick companion installs on your machine—watch your inbox for the download.”*
+- Weight 200: *“We’ll be in touch. The CursorBuddy companion installs on your machine—watch your inbox for the download.”*
 - Single secondary: *“Back to home”*
 
 ### Page 3 — Legal (minimal)
@@ -204,7 +204,7 @@ Do **NOT** use:
 - **Privacy** and **Terms** as simple long-form pages **or** modals
 - Same canvas + glass container for readability; typography extremes for headings only, readable body (still thin weight acceptable at 16–18px for legal)
 
-**Do not** add login, dashboard, or in-browser “app” for WaveClick v1 web—**waitlist + story only.**
+**Do not** add login, dashboard, or in-browser “app” for CursorBuddy v1 web—**waitlist + story only.**
 
 ---
 

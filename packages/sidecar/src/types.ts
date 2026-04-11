@@ -16,3 +16,18 @@ export interface SessionStartPayload {
 export interface SessionStopPayload {
   sessionHandle: string;
 }
+
+export interface AudioStartPayload {
+  session_handle: string;
+  sample_rate?: number;
+}
+
+export interface AudioStopPayload {
+  session_handle: string;
+}
+
+export interface ToolResultPayload {
+  session_handle: string;
+  call_id: string;
+  result: unknown;
+}

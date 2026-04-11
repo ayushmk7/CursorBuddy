@@ -55,7 +55,7 @@ export const ActionSchema = z.discriminatedUnion("type", [
   NoopActionSchema,
 ]);
 
-export type WaveClickAction = z.infer<typeof ActionSchema>;
+export type CursorBuddyAction = z.infer<typeof ActionSchema>;
 
 // ─── Envelope ─────────────────────────────────────────────────────────────────
 export const AssistantEnvelopeV1Schema = z

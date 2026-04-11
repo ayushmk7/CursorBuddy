@@ -1,8 +1,8 @@
-# WaveClick Backend — Bridge + OpenClaw Pack + Shared Contracts Implementation Plan
+# CursorBuddy Backend — Bridge + OpenClaw Pack + Shared Contracts Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a running, tested WaveClick backend vertical slice: OpenClaw pack (workflow + tools), shared TypeScript/Zod contracts, and a Go bridge service implementing the full `docs/openapi.yaml` API surface.
+**Goal:** Build a running, tested CursorBuddy backend vertical slice: OpenClaw pack (workflow + tools), shared TypeScript/Zod contracts, and a Go bridge service implementing the full `docs/openapi.yaml` API surface.
 
 **Architecture:** OpenClaw is the mandatory orchestrator. The Go bridge is optional enterprise tier between sidecar and OpenClaw — handling JWT/mTLS auth, org policy, rate limiting, audit, and transparent WSS proxy. The `packages/shared` TypeScript package is the single source of truth for `AssistantEnvelopeV1`. The `packages/openclaw-pack` contains YAML/markdown artifacts that operators deploy into their OpenClaw instance.
 
@@ -25,10 +25,10 @@ packages/
   openclaw-pack/
     package.json                  version + validate script entry
     workflows/
-      waveclick_session.yaml      OpenClaw workflow definition
+      cursorbuddy_session.yaml      OpenClaw workflow definition
     tools/
       vscode_probe_state.md       tool spec: workspace/Git snapshot
-      waveclick_emit_envelope.md  tool spec: validates + emits AssistantEnvelopeV1
+      cursorbuddy_emit_envelope.md  tool spec: validates + emits AssistantEnvelopeV1
     SKILL.md                      user-facing capability description
     policy/
       default.yaml                default DLP rules, vision_allowed, alias overrides
@@ -107,7 +107,7 @@ Create `/Users/ayush/Downloads/My Projects/CursorBuddy/package.json`:
 
 ```json
 {
-  "name": "waveclick",
+  "name": "cursorbuddy",
   "private": true,
   "workspaces": [
     "packages/openclaw-pack",
@@ -175,9 +175,9 @@ git commit -m "chore: monorepo scaffold + directory structure"
 
 **Files:**
 - Create: `packages/openclaw-pack/package.json`
-- Create: `packages/openclaw-pack/workflows/waveclick_session.yaml`
+- Create: `packages/openclaw-pack/workflows/cursorbuddy_session.yaml`
 - Create: `packages/openclaw-pack/tools/vscode_probe_state.md`
-- Create: `packages/openclaw-pack/tools/waveclick_emit_envelope.md`
+- Create: `packages/openclaw-pack/tools/cursorbuddy_emit_envelope.md`
 - Create: `packages/openclaw-pack/SKILL.md`
 - Create: `packages/openclaw-pack/policy/default.yaml`
 - Create: `packages/openclaw-pack/scripts/validate.js`
@@ -186,7 +186,7 @@ git commit -m "chore: monorepo scaffold + directory structure"
 
 ```json
 {
-  "name": "@waveclick/openclaw-pack",
+  "name": "@cursorbuddy/openclaw-pack",
   "version": "0.4.0",
   "private": true,
   "scripts": {
@@ -196,16 +196,16 @@ git commit -m "chore: monorepo scaffold + directory structure"
 }
 ```
 
-- [ ] **Step 1.2: Create `packages/openclaw-pack/workflows/waveclick_session.yaml`**
+- [ ] **Step 1.2: Create `packages/openclaw-pack/workflows/cursorbuddy_session.yaml`**
 
 ```yaml
-# WaveClick OpenClaw workflow definition
+# CursorBuddy OpenClaw workflow definition
 # Deploy this file into your OpenClaw instance's workflow registry.
 # OpenClaw is the mandatory orchestrator — never bypass it for model calls.
-name: waveclick_session
+name: cursorbuddy_session
 version: "0.4.0"
 description: >
-  Realtime voice/text session for WaveClick VS Code companion.
+  Realtime voice/text session for CursorBuddy VS Code companion.
   Ingests audio or text from the sidecar, runs a ReAct agent loop using
   configured model path (fastest per env benchmark), and emits AssistantEnvelopeV1.
 
@@ -242,7 +242,7 @@ steps:
     description: >
       ReAct-style reasoning loop. The model receives: transcript + workspace
       snapshot. It may call tools (vscode_probe_state, web search if org enables)
-      and produces a final AssistantEnvelopeV1 via waveclick_emit_envelope.
+      and produces a final AssistantEnvelopeV1 via cursorbuddy_emit_envelope.
     model_selection:
       strategy: fastest_benchmarked  # OpenClaw selects: Gemini Live, OpenAI Realtime, REST fallback
       tier_hint_from_client: true     # respect desired_model_tier_hint from session mint
@@ -250,7 +250,7 @@ steps:
     max_iterations: 8
     tools:
       - vscode_probe_state
-      - waveclick_emit_envelope
+      - cursorbuddy_emit_envelope
     guardrails:
       - no_file_body_without_consent
       - no_arbitrary_command_strings  # envelope alias must be in allowlist
@@ -258,7 +258,7 @@ steps:
 
   - id: emit
     type: tool_call
-    tool: waveclick_emit_envelope
+    tool: cursorbuddy_emit_envelope
     description: Final step — validate and emit AssistantEnvelopeV1 to sidecar transport.
 
 policy:
@@ -273,7 +273,7 @@ policy:
 # Tool: vscode_probe_state
 
 **Purpose:** Returns a structured JSON snapshot of the VS Code workspace and Git state.
-Called by the WaveClick agent when it needs editor context. Never returns file bodies
+Called by the CursorBuddy agent when it needs editor context. Never returns file bodies
 by default — only metadata.
 
 ## Input schema
@@ -298,7 +298,7 @@ by default — only metadata.
     "repositories": [
       {
         "root": "file:///workspace/app",
-        "head": "refs/heads/feature/waveclick",
+        "head": "refs/heads/feature/cursorbuddy",
         "working_tree_changes": 3,
         "index_changes": 1,
         "remotes": ["origin"]
@@ -328,10 +328,10 @@ Implement the handler in the VS Code extension (`packages/extension/src/adapters
 + `GitAdapter.ts`). The sidecar exposes it as an RPC method; OpenClaw calls via sidecar transport.
 ```
 
-- [ ] **Step 1.4: Create `packages/openclaw-pack/tools/waveclick_emit_envelope.md`**
+- [ ] **Step 1.4: Create `packages/openclaw-pack/tools/cursorbuddy_emit_envelope.md`**
 
 ```markdown
-# Tool: waveclick_emit_envelope
+# Tool: cursorbuddy_emit_envelope
 
 **Purpose:** Validates an `AssistantEnvelopeV1` JSON object and emits it to the sidecar
 transport for the extension's Action Executor. This is the *only* actuator contract.
@@ -387,7 +387,7 @@ On validation failure: return error to agent loop; do NOT emit partial envelopes
 - [ ] **Step 1.5: Create `packages/openclaw-pack/SKILL.md`**
 
 ```markdown
-# WaveClick — VS Code Companion Skill
+# CursorBuddy — VS Code Companion Skill
 
 I help you navigate Visual Studio Code using voice or text commands. I know your current
 editor state, open files, and Git repository status, so my guidance is grounded in what's
@@ -426,7 +426,7 @@ allowlist before executing anything.
 - [ ] **Step 1.6: Create `packages/openclaw-pack/policy/default.yaml`**
 
 ```yaml
-# Default org policy for WaveClick sessions.
+# Default org policy for CursorBuddy sessions.
 # OpenClaw operators: copy this file and override values per org.
 version: "0.4.0"
 
@@ -470,9 +470,9 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 
 const REQUIRED = [
-  "workflows/waveclick_session.yaml",
+  "workflows/cursorbuddy_session.yaml",
   "tools/vscode_probe_state.md",
-  "tools/waveclick_emit_envelope.md",
+  "tools/cursorbuddy_emit_envelope.md",
   "SKILL.md",
   "policy/default.yaml",
 ];
@@ -515,9 +515,9 @@ cd packages/openclaw-pack && node scripts/validate.js
 ```
 Expected output:
 ```
-OK: workflows/waveclick_session.yaml
+OK: workflows/cursorbuddy_session.yaml
 OK: tools/vscode_probe_state.md
-OK: tools/waveclick_emit_envelope.md
+OK: tools/cursorbuddy_emit_envelope.md
 OK: SKILL.md
 OK: policy/default.yaml
 
@@ -552,7 +552,7 @@ git commit -m "feat(openclaw-pack): workflow, tool specs, SKILL.md, default poli
 
 ```json
 {
-  "name": "@waveclick/shared",
+  "name": "@cursorbuddy/shared",
   "version": "0.4.0",
   "private": true,
   "main": "dist/index.js",
@@ -782,7 +782,7 @@ export const ActionSchema = z.discriminatedUnion("type", [
   NoopActionSchema,
 ]);
 
-export type WaveClickAction = z.infer<typeof ActionSchema>;
+export type CursorBuddyAction = z.infer<typeof ActionSchema>;
 
 // ─── Envelope ─────────────────────────────────────────────────────────────────
 export const AssistantEnvelopeV1Schema = z
@@ -1407,7 +1407,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims is the JWT payload for WaveClick bridge sessions.
+// Claims is the JWT payload for CursorBuddy bridge sessions.
 type Claims struct {
 	Sub    string         `json:"sub"`
 	Org    string         `json:"org"`
@@ -1764,7 +1764,7 @@ func TestCreateSession(t *testing.T) {
 	h := newTestHandler()
 	body := `{
 		"client": {"vscode_version":"1.99.0","extension_version":"0.4.2","os":"darwin","sidecar_version":"0.4.2"},
-		"openclaw_workflow": "waveclick_session",
+		"openclaw_workflow": "cursorbuddy_session",
 		"locale": "en-US"
 	}`
 	req := httptest.NewRequest(http.MethodPost, "/v1/sessions", strings.NewReader(body))
@@ -2575,7 +2575,7 @@ git commit -m "feat(bridge): main entrypoint, /v1/stream WSS proxy route, full b
 - [ ] **Step 9.1: Create `.env.example`**
 
 ```bash
-# WaveClick Bridge — copy to .env and fill in values for local dev
+# CursorBuddy Bridge — copy to .env and fill in values for local dev
 # NEVER commit .env to git
 
 # Bridge server bind address
@@ -2675,7 +2675,7 @@ console.log(`mock-openclaw listening on ws://0.0.0.0:${PORT}`);
 - [ ] **Step 9.4: Create `ARCHITECTURE.md`**
 
 ```markdown
-# WaveClick — Architecture Decision Record
+# CursorBuddy — Architecture Decision Record
 
 **Date:** 2026-04-09  
 **Status:** Accepted  

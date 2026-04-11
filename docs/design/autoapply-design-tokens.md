@@ -1,4 +1,4 @@
-# WaveClick — Design Tokens
+# CursorBuddy — Design Tokens
 
 **Note:** This file intentionally keeps the name `autoapply-design-tokens.md` to mirror `docs/design/autoapply-design-tokens.md` in this repository.
 

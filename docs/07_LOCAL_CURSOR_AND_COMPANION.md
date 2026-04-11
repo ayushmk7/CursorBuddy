@@ -1,6 +1,6 @@
-# WaveClick — Local Cursor, Overlay & In-Editor Companion (Design + UX PRD)
+# CursorBuddy — Local Cursor, Overlay & In-Editor Companion (Design + UX PRD)
 
-**Project:** WaveClick  
+**Project:** CursorBuddy  
 **Version:** 1.0  
 **Date:** April 2026  
 
@@ -27,8 +27,8 @@ The **landing page** uses **AutoApply-parity liquid glass** (warm canvas, froste
 
 **Strategy:**
 
-- **In-editor (webview):** **Theme-native first**—consume `var(--vscode-*)` for backgrounds and text. Use **WaveClick accent** only for primary actions and recording state, aligned with user’s theme (pick `#0066FF` only when theme allows contrast; otherwise use `textLinkForeground`).
-- **Optional overlay:** May use **stronger brand glass** (subtle blur, soft white translucent capsule) so it reads as **WaveClick** floating over **any** app—but keep **small footprint** and **high contrast** for WCAG on arbitrary wallpapers.
+- **In-editor (webview):** **Theme-native first**—consume `var(--vscode-*)` for backgrounds and text. Use **CursorBuddy accent** only for primary actions and recording state, aligned with user’s theme (pick `#0066FF` only when theme allows contrast; otherwise use `textLinkForeground`).
+- **Optional overlay:** May use **stronger brand glass** (subtle blur, soft white translucent capsule) so it reads as **CursorBuddy** floating over **any** app—but keep **small footprint** and **high contrast** for WCAG on arbitrary wallpapers.
 - **Wordmark / icon:** Same logotype system as web where space allows (monochrome or single accent).
 
 ---

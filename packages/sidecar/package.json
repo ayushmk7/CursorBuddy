@@ -1,5 +1,5 @@
 {
-  "name": "@waveclick/sidecar",
+  "name": "@cursorbuddy/sidecar",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -8,7 +8,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@waveclick/shared": "*",
+    "@cursorbuddy/shared": "*",
+    "node-record-lpcm16": "^1.0.1",
     "ws": "^8.18.0"
   },
   "devDependencies": {

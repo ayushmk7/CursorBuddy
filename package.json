@@ -1,11 +1,12 @@
 {
-  "name": "waveclick",
+  "name": "cursorbuddy",
   "private": true,
   "workspaces": [
     "packages/openclaw-pack",
     "packages/shared",
     "packages/sidecar",
-    "packages/extension"
+    "packages/extension",
+    "packages/mock-openclaw"
   ],
   "scripts": {
     "test:shared": "npm test --workspace=packages/shared",

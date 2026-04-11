@@ -1,4 +1,4 @@
-# WaveClick — Architecture Decision Record
+# CursorBuddy — Architecture Decision Record
 
 **Date:** 2026-04-09  
 **Status:** Accepted  

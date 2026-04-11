@@ -1,5 +1,5 @@
 {
-  "name": "@waveclick/shared",
+  "name": "@cursorbuddy/shared",
   "version": "0.4.0",
   "private": true,
   "main": "dist/index.js",

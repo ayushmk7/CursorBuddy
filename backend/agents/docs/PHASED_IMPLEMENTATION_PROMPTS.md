@@ -21,9 +21,9 @@ with deployment mode A vs B and latency measurement plan per docs/06_BACKEND_IMP
 
 ```
 Read docs/02_TECHNICAL_PRD.md §9 (OpenClaw pack / tools) and docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 0.5.
-Scaffold packages/openclaw-pack with waveclick_session workflow (names may match OpenClaw DSL),
-tools vscode_probe_state and waveclick_emit_envelope, and SKILL.md for safe Git guidance.
-waveclick_emit_envelope must validate AssistantEnvelopeV1 before transport; cite docs/02_TECHNICAL_PRD.md §4 for the JSON shape.
+Scaffold packages/openclaw-pack with cursorbuddy_session workflow (names may match OpenClaw DSL),
+tools vscode_probe_state and cursorbuddy_emit_envelope, and SKILL.md for safe Git guidance.
+cursorbuddy_emit_envelope must validate AssistantEnvelopeV1 before transport; cite docs/02_TECHNICAL_PRD.md §4 for the JSON shape.
 Do not add direct model SDK calls from the VS Code extension.
 ```
 
@@ -43,7 +43,7 @@ and command-map file format per Step 1.2. Ensure duplicate action ids fail close
 
 ```
 Read docs/02_TECHNICAL_PRD.md §2, docs/06_BACKEND_IMPLEMENTATION_STEPS.md Phase 2, and backend/agents/HOST_COMPAT_VS_CURSOR.md.
-Scaffold packages/extension: esbuild, strict TypeScript, narrow activationEvents, WaveClick output channel,
+Scaffold packages/extension: esbuild, strict TypeScript, narrow activationEvents, CursorBuddy output channel,
 SecretStorage helpers for OpenClaw token only (never provider keys), configuration keys per Step 2.4.
 ```
 

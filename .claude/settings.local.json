@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.vscode/launch.json','utf8'\\)\\); console.log\\('launch.json valid'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('.vscode/tasks.json','utf8'\\)\\); console.log\\('tasks.json valid'\\)\")"
+    ]
+  }
+}

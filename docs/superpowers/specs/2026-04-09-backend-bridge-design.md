@@ -1,4 +1,4 @@
-# WaveClick Backend — Bridge + OpenClaw Pack + Shared Contracts Design
+# CursorBuddy Backend — Bridge + OpenClaw Pack + Shared Contracts Design
 
 **Date:** 2026-04-09  
 **Scope:** Server-side vertical slice (Phase 0 / 0.5 / 1 / 7 from `docs/06_BACKEND_IMPLEMENTATION_STEPS.md`)  
@@ -28,12 +28,12 @@ Docs driving this: `docs/03_BACKEND_PRD.md §2`, `docs/02_TECHNICAL_PRD.md §1.1
 
 ### 2a. `packages/openclaw-pack`
 
-**Purpose:** Deployed into OpenClaw operator's instance. Defines the workflow and tools WaveClick depends on.
+**Purpose:** Deployed into OpenClaw operator's instance. Defines the workflow and tools CursorBuddy depends on.
 
 **Contents:**
-- `workflows/waveclick_session.yaml` — trigger on sidecar connect; steps: ingest_audio → agent_loop → emit_envelope
+- `workflows/cursorbuddy_session.yaml` — trigger on sidecar connect; steps: ingest_audio → agent_loop → emit_envelope
 - `tools/vscode_probe_state.md` — JSON schema for workspace/Git snapshot tool
-- `tools/waveclick_emit_envelope.md` — validates `AssistantEnvelopeV1` before transport
+- `tools/cursorbuddy_emit_envelope.md` — validates `AssistantEnvelopeV1` before transport
 - `SKILL.md` — user-facing agent capability description
 - `policy/default.yaml` — default DLP rules, alias overrides, vision_allowed: false
 

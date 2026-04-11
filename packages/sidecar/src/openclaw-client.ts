@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 export interface OpenClawClientOptions {
   url: string;
   onEnvelope: (raw: unknown) => void;
+  onToolCall: (callId: string, name: string, input: unknown) => void;
   onError: (code: string, message: string) => void;
   onClose: () => void;
 }
@@ -31,7 +32,11 @@ export class OpenClawWsClient {
       ws.on('message', (data) => {
         try {
           const parsed = JSON.parse(data.toString());
-          this.opts.onEnvelope(parsed);
+          if (parsed?.type === 'tool_call') {
+            this.opts.onToolCall(parsed.call_id, parsed.name, parsed.input);
+          } else {
+            this.opts.onEnvelope(parsed);
+          }
         } catch {
           this.opts.onError('E_PROTOCOL', 'failed to parse upstream message');
         }
@@ -41,6 +46,23 @@ export class OpenClawWsClient {
 
   sendText(text: string): void {
     this.ws?.send(text);
+  }
+
+  sendAudio(pcmBuffer: Buffer, sampleRate: number = 16000): void {
+    this.ws?.send(JSON.stringify({
+      type: 'audio_chunk',
+      data: pcmBuffer.toString('base64'),
+      encoding: 'pcm16',
+      sample_rate: sampleRate,
+    }));
+  }
+
+  sendToolResult(callId: string, result: unknown): void {
+    this.ws?.send(JSON.stringify({ type: 'tool_result', call_id: callId, output: result }));
+  }
+
+  sendAudioEnd(): void {
+    this.ws?.send(JSON.stringify({ type: 'audio_end' }));
   }
 
   dispose(): void {

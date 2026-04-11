@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { AssistantEnvelopeV1Schema, loadCommandMap, resolveAlias } from '@waveclick/shared';
-import type { CommandEntry } from '@waveclick/shared';
+import { AssistantEnvelopeV1Schema, loadCommandMap, resolveAlias } from '@cursorbuddy/shared';
+import type { CommandEntry } from '@cursorbuddy/shared';
 
 export async function executeEnvelope(
   rawPayload: unknown,
@@ -72,7 +72,8 @@ export async function executeEnvelope(
 
       case 'show_information_message': {
         ctx.postStepStatus?.(action.id, 'running');
-        await vscode.window.showInformationMessage(action.message);
+        // Fire-and-forget: we do not wait for the user to dismiss the notification.
+        void vscode.window.showInformationMessage(action.message);
         ctx.postStepStatus?.(action.id, 'done');
         break;
       }

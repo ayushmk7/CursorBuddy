@@ -1,6 +1,6 @@
-# WaveClick — Implementation Steps (End-to-End)
+# CursorBuddy — Implementation Steps (End-to-End)
 
-This document is a **sequential implementation guide** for building **WaveClick** as described in `docsforother/01_GENERAL_PRD.md`, `docsforother/02_TECHNICAL_PRD.md`, and `docsforother/03_BACKEND_PRD.md`. Execute phases in order unless explicitly marked parallelizable.
+This document is a **sequential implementation guide** for building **CursorBuddy** as described in `docsforother/01_GENERAL_PRD.md`, `docsforother/02_TECHNICAL_PRD.md`, and `docsforother/03_BACKEND_PRD.md`. Execute phases in order unless explicitly marked parallelizable.
 
 **Scope:** **OpenClaw pack** (required workflows + tools), VS Code extension (TypeScript), **sidecar** (strongly recommended) with **OpenClaw** transport, optional **Go bridge** service, **CI/CD**, and **compatibility testing**. **No** production path that skips OpenClaw.
 
@@ -26,7 +26,7 @@ This document is a **sequential implementation guide** for building **WaveClick*
 Before any feature work:
 
 1. Provision **OpenClaw** (docker compose, k8s, or hosted) with network path from developer machines (or VPN).
-2. Add **`packages/openclaw-pack`** to the repo with **waveclick** workflow + tools per `docsforother/02_TECHNICAL_PRD.md` §9.
+2. Add **`packages/openclaw-pack`** to the repo with **cursorbuddy** workflow + tools per `docsforother/02_TECHNICAL_PRD.md` §9.
 3. CI job **`verify-openclaw-pack`** validates pack structure (filenames, tool stubs).
 
 **Edge cases**
@@ -46,7 +46,7 @@ Choose the mode with the **lowest measured p50 TTFT** to first envelope that sti
 
 **Edge cases**
 
-- Hybrid orgs: some users direct, some bridged → support **runtime switch** via setting `waveclick.connectionMode`.
+- Hybrid orgs: some users direct, some bridged → support **runtime switch** via setting `cursorbuddy.connectionMode`.
 - Re-benchmark when OpenClaw region or model vendor changes.
 - Air-gapped: OpenClaw unreachable → extension degrades to **offline help** (static tips) without throwing; **no** silent cloud bypass.
 
@@ -65,7 +65,7 @@ Review `docsforother/02_TECHNICAL_PRD.md` §5. Add:
 
 Table:
 
-| WaveClick | VS Code min | Node (sidecar) | bridge runtime |
+| CursorBuddy | VS Code min | Node (sidecar) | bridge runtime |
 |-----------|-------------|----------------|----------------|
 | 0.4.x | 1.98.x | 20 | Go |
 
@@ -95,13 +95,13 @@ packages/shared            # zod schemas, types
 
 ### Step 0.5.1 — Workflow file
 
-- Define **`waveclick_session`** entry: triggers on sidecar connect or HTTP webhook from bridge.
+- Define **`cursorbuddy_session`** entry: triggers on sidecar connect or HTTP webhook from bridge.
 - Steps: `ingest_audio`, `agent_loop`, `emit_envelope` (names illustrative—match OpenClaw’s actual workflow DSL).
 
 ### Step 0.5.2 — Tools
 
 - **`vscode_probe_state`**: documents JSON schema returned from extension RPC.
-- **`waveclick_emit_envelope`**: validates `AssistantEnvelopeV1` with same Zod as extension **before** transport.
+- **`cursorbuddy_emit_envelope`**: validates `AssistantEnvelopeV1` with same Zod as extension **before** transport.
 
 ### Step 0.5.3 — Version coupling
 
@@ -172,7 +172,7 @@ Use `yo code` or manual scaffold with:
 Implement:
 
 - `activate(context)` registers commands **lazily**
-- `WaveClick` output channel for structured logs (JSON lines in dev)
+- `CursorBuddy` output channel for structured logs (JSON lines in dev)
 
 **Edge cases**
 
@@ -197,10 +197,10 @@ export async function deleteOpenClawToken(context: vscode.ExtensionContext): Pro
 
 `package.json` `contributes.configuration`:
 
-- `waveclick.connectionMode`
-- `waveclick.provider`
-- `waveclick.privacy.redactTranscript`
-- `waveclick.audio.deviceId` (optional)
+- `cursorbuddy.connectionMode`
+- `cursorbuddy.provider`
+- `cursorbuddy.privacy.redactTranscript`
+- `cursorbuddy.audio.deviceId` (optional)
 
 Validate on change via `vscode.workspace.onDidChangeConfiguration`.
 
@@ -334,7 +334,7 @@ Prevent model loops:
 
 Spawn:
 
-- `waveclick-sidecar` with `stdio: ['pipe','pipe','pipe']`
+- `cursorbuddy-sidecar` with `stdio: ['pipe','pipe','pipe']`
 - Pass env: `WC_LOG_LEVEL`, optional `WC_BRIDGE_URL`
 
 Restart on crash with exponential backoff capped at 30s.
@@ -677,9 +677,9 @@ Apply before emitting logs:
 
 Bridge exposes:
 
-- `waveclick_sessions_active`
-- `waveclick_session_mint_total{result}`
-- `waveclick_proxy_bytes_total{dir}`
+- `cursorbuddy_sessions_active`
+- `cursorbuddy_session_mint_total{result}`
+- `cursorbuddy_proxy_bytes_total{dir}`
 
 ---
 

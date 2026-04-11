@@ -6,7 +6,7 @@ This document prevents **misplaced implementation**: the **PRD “backend”** i
 
 | Layer | Components | Owns |
 |-------|------------|------|
-| **Backend (PRD)** | **OpenClaw** (required) + **optional Go bridge** | Session orchestration, tools (`vscode_probe_state`, `waveclick_emit_envelope`, …), model/realtime routing **inside** OpenClaw, policy, audit (bridge), minting upstream params ([`docs/openapi.yaml`](../../docs/openapi.yaml)). |
+| **Backend (PRD)** | **OpenClaw** (required) + **optional Go bridge** | Session orchestration, tools (`vscode_probe_state`, `cursorbuddy_emit_envelope`, …), model/realtime routing **inside** OpenClaw, policy, audit (bridge), minting upstream params ([`docs/openapi.yaml`](../../docs/openapi.yaml)). |
 | **Local runtime** | Extension host, sidebar **webview**, **sidecar**, **optional overlay** process | Mic capture, encoding, WSS/HTTP client to OpenClaw (or bridge), **Action Executor**, editor decorations, keybindings, **pointer‑adjacent UI** spec in [`COMPANION_OVERLAY_UX_SPEC.md`](COMPANION_OVERLAY_UX_SPEC.md). |
 
 ## Data flow (high level)

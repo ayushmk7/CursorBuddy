@@ -1,11 +1,11 @@
 # Glossary
 
-Terms as used in this repository’s WaveClick documentation and agent guidance.
+Terms as used in this repository’s CursorBuddy documentation and agent guidance.
 
 | Term | Meaning |
 |------|---------|
-| **WaveClick** | Product: realtime voice + visual companion for the editor; OpenClaw‑orchestrated. |
-| **CursorBuddy** | Repository / branding context; implementation still follows WaveClick PRDs unless explicitly forked. |
+| **CursorBuddy** | Product: realtime voice + visual companion for the editor; OpenClaw‑orchestrated. |
+| **CursorBuddy** | Repository / branding context; implementation still follows CursorBuddy PRDs unless explicitly forked. |
 | **OpenClaw** | **Required** runtime for workflows, ReAct‑style tool loops, memory/skills, and emission of structured results to the client. All production orchestration goes through it. |
 | **Sidecar** | Separate process (Node or native) for **audio I/O**, stable transport to OpenClaw, and optionally owning or coordinating **overlay** UI. Keeps the extension host responsive. |
 | **Bridge** | **Optional** Go server between sidecar and OpenClaw (or upstream): mTLS/JWT, org policy, audit, rate limits. Not required for latency alone. See [`docs/03_BACKEND_PRD.md`](../../docs/03_BACKEND_PRD.md). |

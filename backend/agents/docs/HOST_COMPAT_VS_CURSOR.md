@@ -15,8 +15,8 @@ Both hosts expose the **`@types/vscode`** surface for extensions. Differences ar
 | **Secrets** | `ExtensionContext.secrets` | Same API | Store OpenClaw token per PRD; never provider keys in extension. |
 | **Git integration** | `vscode.git` extension API | Same pattern | Abstract behind `GitAdapter` per Technical PRD §2.3. |
 | **Publishing** | VS Code Marketplace | Cursor may use Open VSX or internal gallery | Document **install from VSIX** for internal builds; separate marketplace listing if required. |
-| **Product name / branding** | “WaveClick” in UI | Same extension; may reference Cursor in copy | Keep code host‑agnostic; strings can use `${productName}` if needed later. |
-| **AI features inside host** | Copilot Chat (optional) | Cursor Agent / chat | **Do not** rely on host AI for WaveClick orchestration; OpenClaw remains mandatory per PRD. |
+| **Product name / branding** | “CursorBuddy” in UI | Same extension; may reference Cursor in copy | Keep code host‑agnostic; strings can use `${productName}` if needed later. |
+| **AI features inside host** | Copilot Chat (optional) | Cursor Agent / chat | **Do not** rely on host AI for CursorBuddy orchestration; OpenClaw remains mandatory per PRD. |
 
 ## Testing checklist (both hosts)
 

@@ -7,6 +7,19 @@
       "request": "launch",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/extension"],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
+      "preLaunchTask": "build-and-start-mock",
+      "env": {
+        "WAVECLICK_MOCK_OPENCLAW": "1",
+        "WAVECLICK_LOG_LEVEL": "debug"
+      },
+      "sourceMaps": true
+    },
+    {
+      "name": "Run Extension Only (mock already running)",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/extension"],
+      "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
       "preLaunchTask": "build-all",
       "env": {
         "WAVECLICK_MOCK_OPENCLAW": "1",

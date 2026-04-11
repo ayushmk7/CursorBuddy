@@ -1,6 +1,6 @@
-# WaveClick — Technical Product Requirements Document
+# CursorBuddy — Technical Product Requirements Document
 
-**Project:** WaveClick — Realtime Voice + Visual Companion for Visual Studio Code  
+**Project:** CursorBuddy — Realtime Voice + Visual Companion for Visual Studio Code  
 **Version:** 1.0  
 **Date:** April 2026  
 
@@ -31,7 +31,7 @@
 │  │  (recommended)       ├────────►│  - Workflows / ReAct loop             │ │
 │  │  - Audio capture     │  HTTP   │  - SOUL / MEMORY / SKILL             │ │
 │  │  - VAD / resample    │         │  - Tool: vscode_probe_state          │ │
-│  │  - Session lifecycle │◄────────┤  - Tool: waveclick_emit_envelope *   │ │
+│  │  - Session lifecycle │◄────────┤  - Tool: cursorbuddy_emit_envelope *   │ │
 │  └──────────┬───────────┘         │  - Model routing (realtime / REST)    │ │
 │             │                     └─────────────────┬────────────────────┘ │
 │             │ optional path                         │                       │
@@ -47,7 +47,7 @@
                               ▼
                     vscode.* APIs, built-in Git extension
 
-* `waveclick_emit_envelope` is the logical name for the OpenClaw tool that outputs
+* `cursorbuddy_emit_envelope` is the logical name for the OpenClaw tool that outputs
   validated AssistantEnvelopeV1 to the sidecar/extension transport.
 ```
 
@@ -75,7 +75,7 @@ A **small native or Node sidecar** (signed binary per OS, spawned by extension) 
 
 | Contribution | Purpose |
 |--------------|---------|
-| `activationEvents` | Prefer `onCommand:waveclick.startSession` over `*` to preserve startup performance |
+| `activationEvents` | Prefer `onCommand:cursorbuddy.startSession` over `*` to preserve startup performance |
 | `viewsContainers` / `views` | Sidebar primary UI |
 | `commands` | Start/stop session, toggle privacy, emergency stop |
 | `keybindings` | Push-to-talk default chord (user-overridable) |
@@ -99,7 +99,7 @@ A **small native or Node sidecar** (signed binary per OS, spawned by extension) 
 
 ### 2.3 Git Extension Integration (Technical Detail)
 
-The built-in Git extension exposes an API via `getAPI(version)`. WaveClick MUST:
+The built-in Git extension exposes an API via `getAPI(version)`. CursorBuddy MUST:
 
 1. Request a **compatible API version** range (pin minimum supported VS Code version in README).
 2. Enumerate `repositories: Repository[]` from `gitAPI.repositories`.
@@ -145,7 +145,7 @@ Document this in user-facing copy to avoid false expectations.
    +--user stop / error--> [Inactive]
 ```
 
-- **Connecting_OpenClaw**: TLS + auth to OpenClaw; load workflow **waveclick_session** (name illustrative).
+- **Connecting_OpenClaw**: TLS + auth to OpenClaw; load workflow **cursorbuddy_session** (name illustrative).
 - **Live**: audio and/or text user turns flow **through OpenClaw**; structured envelopes returned to extension.
 - **Blocked**: OpenClaw unreachable or unauthorized—**no** direct provider fallback in production.
 - **Degraded_REST**: only if OpenClaw is up but realtime model path failed **inside** OpenClaw config; extension behavior unchanged (still receives envelopes from OpenClaw).
@@ -166,7 +166,7 @@ Document this in user-facing copy to avoid false expectations.
 
 ### 3.3 Model path selection (latency-first; Gemini Live optional)
 
-WaveClick does **not** mandate **Gemini Live**. OpenClaw **must** be configured to use the **lowest-latency** stack that still meets quality and compliance for each deployment:
+CursorBuddy does **not** mandate **Gemini Live**. OpenClaw **must** be configured to use the **lowest-latency** stack that still meets quality and compliance for each deployment:
 
 | Priority | Guidance |
 |----------|----------|
@@ -181,9 +181,9 @@ Configuration keys in **VS Code** (example)—**not** provider keys; those belon
 
 ```json
 {
-  "waveclick.openclaw.baseUrl": "https://openclaw.internal.example",
-  "waveclick.openclaw.workflow": "waveclick_session",
-  "waveclick.openclaw.auth": "bearer_from_secret_storage"
+  "cursorbuddy.openclaw.baseUrl": "https://openclaw.internal.example",
+  "cursorbuddy.openclaw.workflow": "cursorbuddy_session",
+  "cursorbuddy.openclaw.auth": "bearer_from_secret_storage"
 }
 ```
 
@@ -285,7 +285,7 @@ If the realtime API supports **function calling**, expose a single tool:
     "repositories": [
       {
         "root": "file:///.../app",
-        "head": "refs/heads/feature/waveclick",
+        "head": "refs/heads/feature/cursorbuddy",
         "working_tree_changes": 3,
         "index_changes": 1
       }
@@ -352,13 +352,13 @@ Fields:
 ```typescript
 export type Risk = 'low' | 'medium' | 'high';
 
-export interface WaveClickActionBase {
+export interface CursorBuddyActionBase {
   id: string;
   type: string;
   risk: Risk;
 }
 
-export interface ExecuteCommandAction extends WaveClickActionBase {
+export interface ExecuteCommandAction extends CursorBuddyActionBase {
   type: 'execute_command';
   alias: string;
   args?: unknown[];
@@ -370,7 +370,7 @@ export interface AssistantEnvelopeV1 {
   utterance_id: string;
   assistant_text: string;
   confidence: number;
-  actions: WaveClickActionBase[];
+  actions: CursorBuddyActionBase[];
 }
 ```
 
@@ -398,7 +398,7 @@ Policy: support **current stable** and **previous stable** only.
 
 ### 9.1 Normative role
 
-**OpenClaw is mandatory.** WaveClick is a **client + executor** for a fixed contract (`AssistantEnvelopeV1`); **all** of the following belong in OpenClaw:
+**OpenClaw is mandatory.** CursorBuddy is a **client + executor** for a fixed contract (`AssistantEnvelopeV1`); **all** of the following belong in OpenClaw:
 
 - Session and turn management, including **which** model/realtime API to call.
 - **ReAct** (or equivalent) loops, **skills**, and long-lived **MEMORY** / personality files per OpenClaw conventions.
@@ -411,9 +411,9 @@ Ship as versioned package (e.g. npm tarball or Git submodule) consumed by OpenCl
 
 | Artifact | Purpose |
 |----------|---------|
-| `workflows/waveclick_session.yaml` (or equivalent) | Defines trigger, steps, tool allowlist; wires **fastest** model/realtime path per env |
+| `workflows/cursorbuddy_session.yaml` (or equivalent) | Defines trigger, steps, tool allowlist; wires **fastest** model/realtime path per env |
 | `tools/vscode_probe_state.md` + handler | Returns Git/workspace snapshot JSON |
-| `tools/waveclick_emit_envelope.md` + handler | Emits canonical JSON to transport |
+| `tools/cursorbuddy_emit_envelope.md` + handler | Emits canonical JSON to transport |
 | `SKILL.md` | User-facing capability description for the agent |
 | Policy templates | Enterprise DLP + rate hints |
 

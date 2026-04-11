@@ -1,4 +1,4 @@
-# WaveClick — VS Code Companion Skill
+# CursorBuddy — VS Code Companion Skill
 
 I help you navigate Visual Studio Code using voice or text commands. I know your current
 editor state, open files, and Git repository status, so my guidance is grounded in what's

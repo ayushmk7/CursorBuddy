@@ -1,6 +1,6 @@
-# How to Use Claude Code to Build WaveClick
+# How to Use Claude Code to Build CursorBuddy
 
-This document is a **practical guide** for using Claude Code (terminal-based agentic coding) to implement the WaveClick system described in `docsforother/*.md`. It mirrors the structure of `docs/04_CLAUDE_CODE_GUIDE.md` but targets **OpenClaw (required) + VS Code extension + sidecar + optional bridge**, with **latency-first** choices (direct to OpenClaw when fastest; **Gemini Live** only when OpenClaw benchmarks it as fastest—not hardcoded in the extension).
+This document is a **practical guide** for using Claude Code (terminal-based agentic coding) to implement the CursorBuddy system described in `docsforother/*.md`. It mirrors the structure of `docs/04_CLAUDE_CODE_GUIDE.md` but targets **OpenClaw (required) + VS Code extension + sidecar + optional bridge**, with **latency-first** choices (direct to OpenClaw when fastest; **Gemini Live** only when OpenClaw benchmarks it as fastest—not hardcoded in the extension).
 
 **Default repo choice:** implement backend / bridge code in **Go**.
 
@@ -27,7 +27,7 @@ claude auth
 Create a dedicated repository (or monorepo packages):
 
 ```
-waveclick/
+cursorbuddy/
   packages/
     extension/          # VS Code extension (TypeScript)
     sidecar/              # Node or Rust audio + OpenClaw transport client
@@ -55,8 +55,8 @@ Open the repo root in your terminal and run `claude`.
 
 ```
 > Create packages/openclaw-pack with:
-  - workflow definition for waveclick_session
-  - tool specs: vscode_probe_state, waveclick_emit_envelope
+  - workflow definition for cursorbuddy_session
+  - tool specs: vscode_probe_state, cursorbuddy_emit_envelope
   - SKILL.md describing safe Git guidance
   Align with docsforother/02_TECHNICAL_PRD.md §9.
   OpenClaw must be the only orchestrator; extension only executes AssistantEnvelopeV1.
@@ -67,7 +67,7 @@ Open the repo root in your terminal and run `claude`.
 ```
 > Initialize packages/extension as a VS Code extension using the official generator
   pattern: esbuild bundling, strict TypeScript, eslint, @vscode/test-electron.
-  Add a sidebar view "waveclick.sidebar" with a React or vanilla webview—pick one
+  Add a sidebar view "cursorbuddy.sidebar" with a React or vanilla webview—pick one
   and justify. Include activationEvents limited to onCommand for start/stop.
   Cite docsforother/02_TECHNICAL_PRD.md §2 for manifest contributions.
 ```
@@ -134,7 +134,7 @@ Open the repo root in your terminal and run `claude`.
 ```
 > The extension never activates. Inspect package.json activationEvents,
   command registrations, and extension.ts activation function. Add structured
-  logging to a VS Code output channel "WaveClick".
+  logging to a VS Code output channel "CursorBuddy".
 ```
 
 ### 3.2 Webview Blank / CSP Errors

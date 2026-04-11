@@ -53,7 +53,7 @@ describe('processLine — real session handler', () => {
     const { handler, write, responses } = makeCtx();
     await processLine(
       JSON.stringify({ v: 1, kind: 'request', id: 'r1', method: 'session.start',
-        payload: { openclawBaseUrl: url, workflow: 'waveclick_session', authRef: 'token' } }),
+        payload: { openclawBaseUrl: url, workflow: 'cursorbuddy_session', authRef: 'token' } }),
       write, handler,
     );
     expect(responses[0].kind).toBe('response');

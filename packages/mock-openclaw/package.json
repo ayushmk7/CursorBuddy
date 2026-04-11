@@ -1,0 +1,11 @@
+{
+  "name": "@cursorbuddy/mock-openclaw",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm run build && node dist/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js"
+  },
+  "dependencies": { "ws": "^8.0.0" },
+  "devDependencies": { "typescript": "^5.4.0", "esbuild": "^0.21.0", "@types/ws": "^8.0.0" }
+}

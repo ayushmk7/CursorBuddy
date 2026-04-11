@@ -1,6 +1,6 @@
 # Frontend agents — local application UI
 
-This folder holds documentation and prompts for building the **local on-device frontend** for CursorBuddy / WaveClick.
+This folder holds documentation and prompts for building the **local on-device frontend** for CursorBuddy / CursorBuddy.
 
 The `frontend/` folder is for the UI that runs **inside or alongside the host application**:
 

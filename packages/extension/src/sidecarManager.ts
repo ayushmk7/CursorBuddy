@@ -23,7 +23,7 @@ const BACKOFF_MAX_MS = 30_000;
 export class SidecarManager {
   private sidecarPath: string;
   private env: Record<string, string>;
-  private onEnvelope: (raw: unknown) => void;
+  private onEvent: (method: string, payload: unknown) => void;
   private onError: (code: string, msg: string) => void;
   private log: (line: string) => void;
 
@@ -36,13 +36,13 @@ export class SidecarManager {
   constructor(
     sidecarPath: string,
     env: Record<string, string>,
-    onEnvelope: (raw: unknown) => void,
+    onEvent: (method: string, payload: unknown) => void,
     onError: (code: string, msg: string) => void,
     log: (line: string) => void
   ) {
     this.sidecarPath = sidecarPath;
     this.env = env;
-    this.onEnvelope = onEnvelope;
+    this.onEvent = onEvent;
     this.onError = onError;
     this.log = log;
   }
@@ -125,11 +125,7 @@ export class SidecarManager {
           }
         }
       } else if (msg.kind === 'event') {
-        if (msg.method === 'provider.envelope') {
-          this.onEnvelope(msg.payload);
-        } else {
-          this.log(`[sidecar event] ${msg.method ?? '(no method)'}: ${JSON.stringify(msg.payload)}`);
-        }
+        this.onEvent(msg.method ?? '', msg.payload);
       }
     });
 

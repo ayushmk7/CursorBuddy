@@ -6,9 +6,9 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 
 const REQUIRED = [
-  "workflows/waveclick_session.yaml",
+  "workflows/cursorbuddy_session.yaml",
   "tools/vscode_probe_state.md",
-  "tools/waveclick_emit_envelope.md",
+  "tools/cursorbuddy_emit_envelope.md",
   "SKILL.md",
   "policy/default.yaml",
 ];

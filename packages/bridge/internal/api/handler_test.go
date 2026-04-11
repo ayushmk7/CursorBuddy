@@ -72,7 +72,7 @@ func TestCreateSession(t *testing.T) {
 	h := newTestHandler()
 	body := `{
 		"client": {"vscode_version":"1.99.0","extension_version":"0.4.2","os":"darwin","sidecar_version":"0.4.2"},
-		"openclaw_workflow": "waveclick_session",
+		"openclaw_workflow": "cursorbuddy_session",
 		"locale": "en-US"
 	}`
 	req := httptest.NewRequest(http.MethodPost, "/v1/sessions", strings.NewReader(body))

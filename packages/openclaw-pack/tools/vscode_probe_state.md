@@ -1,7 +1,7 @@
 # Tool: vscode_probe_state
 
 **Purpose:** Returns a structured JSON snapshot of the VS Code workspace and Git state.
-Called by the WaveClick agent when it needs editor context. Never returns file bodies
+Called by the CursorBuddy agent when it needs editor context. Never returns file bodies
 by default — only metadata.
 
 ## Input schema
@@ -26,7 +26,7 @@ by default — only metadata.
     "repositories": [
       {
         "root": "file:///workspace/app",
-        "head": "refs/heads/feature/waveclick",
+        "head": "refs/heads/feature/cursorbuddy",
         "working_tree_changes": 3,
         "index_changes": 1,
         "remotes": ["origin"]

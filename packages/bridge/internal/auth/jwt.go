@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Claims is the JWT payload for WaveClick bridge sessions.
+// Claims is the JWT payload for CursorBuddy bridge sessions.
 type Claims struct {
 	Sub    string         `json:"sub"`
 	Org    string         `json:"org"`

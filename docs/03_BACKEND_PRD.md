@@ -1,10 +1,10 @@
-# WaveClick — Backend / Bridge Service Product Requirements Document
+# CursorBuddy — Backend / Bridge Service Product Requirements Document
 
-**Project:** WaveClick — Realtime Voice + Visual Companion for Visual Studio Code  
+**Project:** CursorBuddy — Realtime Voice + Visual Companion for Visual Studio Code  
 **Version:** 1.0  
 **Date:** April 2026  
 
-**Definition:** In WaveClick, “backend” means **OpenClaw** (required) plus **optional** server-side components (**bridge**) that sit between the **sidecar** and **OpenClaw** or between **OpenClaw** and model providers. **Normative:** the VS Code extension + sidecar **never** replaces OpenClaw with direct vendor API calls in production. Model credentials live in **OpenClaw** (or behind the bridge that OpenClaw uses), not as a “skip OpenClaw” path in the extension.
+**Definition:** In CursorBuddy, “backend” means **OpenClaw** (required) plus **optional** server-side components (**bridge**) that sit between the **sidecar** and **OpenClaw** or between **OpenClaw** and model providers. **Normative:** the VS Code extension + sidecar **never** replaces OpenClaw with direct vendor API calls in production. Model credentials live in **OpenClaw** (or behind the bridge that OpenClaw uses), not as a “skip OpenClaw” path in the extension.
 
 **Repository decision:** when this repo implements backend or bridge code, the server-side language is **Go**.
 
@@ -57,8 +57,8 @@ If none apply, **sidecar → OpenClaw** (TLS, user PAT or device token) is the p
 
 ### 4.1 Personal Mode (No Bridge, OpenClaw Still Required)
 
-1. User enters **OpenClaw base URL** and **OpenClaw auth token** (PAT or API key issued by their OpenClaw deployment) in WaveClick settings.
-2. Extension writes to `context.secrets.store('waveclick.openclawToken', token)` (names illustrative).
+1. User enters **OpenClaw base URL** and **OpenClaw auth token** (PAT or API key issued by their OpenClaw deployment) in CursorBuddy settings.
+2. Extension writes to `context.secrets.store('cursorbuddy.openclawToken', token)` (names illustrative).
 3. Sidecar receives token via **one-shot IPC** when session starts (prefer **ephemeral** memory only; avoid writing to `/tmp` files).
 4. **Model provider keys** are **not** stored in the extension; they are configured in **OpenClaw** only.
 
@@ -72,12 +72,12 @@ If none apply, **sidecar → OpenClaw** (TLS, user PAT or device token) is the p
   "sub": "user-id",
   "org": "acme",
   "exp": 1712592000,
-  "scopes": ["openclaw:waveclick", "audit:write"],
+  "scopes": ["openclaw:cursorbuddy", "audit:write"],
   "rl": { "rpm": 60 }
 }
 ```
 
-3. Sidecar presents JWT to bridge; bridge **authenticates to OpenClaw** on the user’s behalf (mTLS/service account) and opens the **WaveClick** workflow session. Provider credentials remain in **OpenClaw** or vault accessible only to OpenClaw.
+3. Sidecar presents JWT to bridge; bridge **authenticates to OpenClaw** on the user’s behalf (mTLS/service account) and opens the **CursorBuddy** workflow session. Provider credentials remain in **OpenClaw** or vault accessible only to OpenClaw.
 
 ### 4.3 Token Refresh
 
@@ -114,7 +114,7 @@ Endpoints (illustrative):
     "os": "darwin",
     "sidecar_version": "0.4.2"
   },
-  "openclaw_workflow": "waveclick_session",
+  "openclaw_workflow": "cursorbuddy_session",
   "desired_model_tier_hint": "flash",
   "locale": "en-US"
 }
@@ -225,11 +225,11 @@ Sidecar → TLS → OpenClaw (localhost or LAN) → Model provider(s)
 
 ## 12. OpenClaw Integration Pattern (Required)
 
-**OpenClaw is the planner; WaveClick is the actuator.** Normative pattern:
+**OpenClaw is the planner; CursorBuddy is the actuator.** Normative pattern:
 
-1. **Workflow** `waveclick_session` (name illustrative) starts when the sidecar connects.
+1. **Workflow** `cursorbuddy_session` (name illustrative) starts when the sidecar connects.
 2. Audio/text user turns are **ingested by OpenClaw**; tools such as **`vscode_probe_state`** return workspace/Git metadata from the extension via sidecar RPC.
-3. OpenClaw completes a turn by invoking **`waveclick_emit_envelope`** with **validated** `AssistantEnvelopeV1` JSON.
+3. OpenClaw completes a turn by invoking **`cursorbuddy_emit_envelope`** with **validated** `AssistantEnvelopeV1` JSON.
 4. Sidecar forwards the envelope to the extension **Action Executor**; optional bridge **logs** envelope hash + outcome for audit.
 
 OpenClaw should **not** receive raw repo file bodies by default—only tool metadata unless the user explicitly opts in.

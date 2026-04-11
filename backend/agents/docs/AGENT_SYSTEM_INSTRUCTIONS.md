@@ -1,6 +1,6 @@
-# Agent system instructions (WaveClick / CursorBuddy)
+# Agent system instructions (CursorBuddy / CursorBuddy)
 
-Use this document at the **start of every implementation session** for building WaveClick (this repo’s product codename). It orients **Claude Code, Cursor agents, or other coding assistants** toward the existing PRDs and away from common mistakes.
+Use this document at the **start of every implementation session** for building CursorBuddy (this repo’s product codename). It orients **Claude Code, Cursor agents, or other coding assistants** toward the existing PRDs and away from common mistakes.
 
 ## Canonical sources
 

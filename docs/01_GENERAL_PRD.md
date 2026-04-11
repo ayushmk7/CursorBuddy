@@ -1,7 +1,7 @@
-# WaveClick — General Product Requirements Document
+# CursorBuddy — General Product Requirements Document
 
-**Project:** WaveClick — Realtime Voice + Visual Companion for Visual Studio Code  
-**Codename:** WaveClick (internal)  
+**Project:** CursorBuddy — Realtime Voice + Visual Companion for Visual Studio Code  
+**Codename:** CursorBuddy (internal)  
 **Version:** 1.0  
 **Date:** April 2026  
 
@@ -11,7 +11,7 @@
 
 ## 1. Product Overview
 
-WaveClick is a **VS Code extension ecosystem** optimized for **minimum end-to-end latency** from speech (or text) to editor action. It pairs **realtime multimodal inference** (speech in, optional vision in, speech and/or text out) with **deterministic editor automation** via the **Visual Studio Code Extension API**. **OpenClaw is a hard dependency:** all reasoning, workflow orchestration, tool routing, and policy-aware planning run **inside an OpenClaw runtime** (local or org-hosted). The VS Code stack is the **actuator and sensor**; it does **not** replace OpenClaw with a “direct to LLM” shortcut in production.
+CursorBuddy is a **VS Code extension ecosystem** optimized for **minimum end-to-end latency** from speech (or text) to editor action. It pairs **realtime multimodal inference** (speech in, optional vision in, speech and/or text out) with **deterministic editor automation** via the **Visual Studio Code Extension API**. **OpenClaw is a hard dependency:** all reasoning, workflow orchestration, tool routing, and policy-aware planning run **inside an OpenClaw runtime** (local or org-hosted). The VS Code stack is the **actuator and sensor**; it does **not** replace OpenClaw with a “direct to LLM” shortcut in production.
 
 **Inference speed is a first-class requirement:** deployment choices (**bridge vs direct sidecar→OpenClaw**, region placement, audio codec, batching) are selected to **minimize measured time-to-first-token and time-to-first-envelope**, subject only to security and compliance constraints—not dogma about topology.
 
@@ -32,7 +32,7 @@ The product deliberately **does not** attempt to be a general-purpose OS-level o
 
 | Rule | Detail |
 |------|--------|
-| **R1** | A **reachable OpenClaw instance** must be configured before **WaveClick: Start Session** succeeds (URL, token, or local socket—see Backend PRD). |
+| **R1** | A **reachable OpenClaw instance** must be configured before **CursorBuddy: Start Session** succeeds (URL, token, or local socket—see Backend PRD). |
 | **R2** | Production builds **must not** bypass OpenClaw to call provider APIs directly. A **developer-only** mock flag may exist for UI tests; it is **disabled** in release artifacts. |
 | **R3** | Envelopes executed in VS Code **must** originate from OpenClaw (or from OpenClaw-sanctioned bridge code that applies the **same** schema validation). |
 
@@ -65,7 +65,7 @@ Competing approaches:
 | Generic LLM chat | May hallucinate command IDs; cannot safely act without tool grounding |
 | OS-level “move my mouse” automation | Fragile across themes, scaling, DPI, multi-monitor; high privacy risk |
 
-WaveClick’s wedge: **OpenClaw-orchestrated agents** + **tight integration with VS Code APIs** + **realtime conversational layer** + **explicit safety gates** for mutating operations.
+CursorBuddy’s wedge: **OpenClaw-orchestrated agents** + **tight integration with VS Code APIs** + **realtime conversational layer** + **explicit safety gates** for mutating operations.
 
 ---
 
@@ -80,7 +80,7 @@ WaveClick’s wedge: **OpenClaw-orchestrated agents** + **tight integration with
 ### 3.2 Secondary
 
 - Educators demonstrating workflows (**step-by-step mode** with confirmations).
-- Users with **temporary accessibility preferences** (voice input for hands-busy scenarios); WaveClick is **not** a certified assistive technology substitute but may align with user workflows.
+- Users with **temporary accessibility preferences** (voice input for hands-busy scenarios); CursorBuddy is **not** a certified assistive technology substitute but may align with user workflows.
 
 ### 3.3 Non-target (v1)
 
@@ -111,8 +111,8 @@ Secondary value:
    - That **mutating Git actions** require explicit confirmation unless user opts into **“guided auto-run”** for a subset of safe commands.
    - That **audio and session metadata** flow through **OpenClaw** (and from there to configured models/providers per org policy).
 3. User configures **OpenClaw endpoint** (base URL or IPC descriptor) and **authentication** (PAT, OAuth device flow, or mTLS client cert—see Backend PRD). Provider keys for LLMs live **in OpenClaw** (or its bridge), not as a shortcut around OpenClaw.
-4. User stores **WaveClick ↔ OpenClaw** credentials in VS Code **SecretStorage** (e.g. session token issued by org bridge).
-5. User runs **WaveClick: Start Session** from the Command Palette; extension **health-checks OpenClaw** before enabling the mic.
+4. User stores **CursorBuddy ↔ OpenClaw** credentials in VS Code **SecretStorage** (e.g. session token issued by org bridge).
+5. User runs **CursorBuddy: Start Session** from the Command Palette; extension **health-checks OpenClaw** before enabling the mic.
 6. Extension performs **capability probe**: VS Code version, built-in Git extension presence, optional GitLens detection (soft dependency), remote kind (local, SSH, WSL, Codespaces).
 
 ### 5.2 Voice Session (Happy Path)
@@ -153,7 +153,7 @@ User-configurable **mode**:
 ### 5.5 Failure & Degradation
 
 1. **OpenClaw unreachable** (HTTP 5xx, TLS failure, auth): session **cannot start**; show remediation (check URL, token, VPN). **No** silent fallback to direct provider.
-2. **OpenClaw alive but model/realtime offline**: OpenClaw may fall back per **its** config (e.g. REST completion); WaveClick still only accepts **envelopes** from OpenClaw.
+2. **OpenClaw alive but model/realtime offline**: OpenClaw may fall back per **its** config (e.g. REST completion); CursorBuddy still only accepts **envelopes** from OpenClaw.
 3. **No microphone permission**: text input only in webview; typed text is sent to **OpenClaw** as a user message on the same session.
 4. **Command ID mismatch** across VS Code versions: executor logs failure; error returned to **OpenClaw** as tool result so the agent can replan; user sees **retry with palette search** suggestion.
 5. **Conflicting extension** (e.g. custom SCM UI): system explains limitation and falls back to **command palette** navigation.
@@ -169,7 +169,7 @@ User-configurable **mode**:
 
 ### 6.1 Must-have (v1)
 
-- **OpenClaw** runtime deployed and reachable; **WaveClick OpenClaw skill/workflow** package installed on that instance (defines tools, guardrails, and envelope emission).
+- **OpenClaw** runtime deployed and reachable; **CursorBuddy OpenClaw skill/workflow** package installed on that instance (defines tools, guardrails, and envelope emission).
 - **Latency profiling** artifact: documented baseline TTFT / time-to-envelope for the chosen OpenClaw + model path (include at least one **Gemini Live** vs alternative comparison where applicable).
 - VS Code extension package, activation events scoped to avoid slowing editor.
 - Sidecar (or equivalent) with **OpenClaw session client**: reconnect/backoff, auth rotation, health probes; transport chosen for **minimum RTT** to OpenClaw.
@@ -245,9 +245,9 @@ User-configurable **mode**:
 
 ## 12. Competitive Landscape (Contextual)
 
-| Category | Examples | WaveClick differentiation |
+| Category | Examples | CursorBuddy differentiation |
 |----------|----------|---------------------------|
-| In-editor AI chat | Copilot Chat, Cursor | WaveClick is **OpenClaw-orchestrated**, **goal-directed workbench navigation** with **executable allowlist**, not free-form codegen-first |
+| In-editor AI chat | Copilot Chat, Cursor | CursorBuddy is **OpenClaw-orchestrated**, **goal-directed workbench navigation** with **executable allowlist**, not free-form codegen-first |
 | Screen recording tutors | Loom, docs sites | **Live**, **state-aware**, **interactive** |
 | OS automation | AutoHotkey, macOS Shortcuts | **VS Code-native**, fewer fragile pixel assumptions |
 | Voice assistants | Siri, Alexa | **Deep editor API integration** via OpenClaw tools |
