@@ -4,42 +4,75 @@
   "description": "Voice + visual companion for VS Code",
   "version": "0.1.0",
   "publisher": "waveclick",
-  "engines": { "vscode": "^1.98.0" },
-  "categories": ["Other"],
-  "activationEvents": ["onCommand:waveclick.startSession"],
+  "engines": {
+    "vscode": "^1.98.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:waveclick.startSession",
+    "onView:waveclick.sidebar"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      { "command": "waveclick.startSession", "title": "WaveClick: Start Session" },
-      { "command": "waveclick.stopSession", "title": "WaveClick: Stop Session" }
+      {
+        "command": "waveclick.startSession",
+        "title": "WaveClick: Start Session"
+      },
+      {
+        "command": "waveclick.stopSession",
+        "title": "WaveClick: Stop Session"
+      },
+      {
+        "command": "waveclick.setAuth",
+        "title": "WaveClick: Set Auth Token"
+      }
     ],
     "viewsContainers": {
       "activitybar": [
-        { "id": "waveclick", "title": "WaveClick", "icon": "resources/icon.svg" }
+        {
+          "id": "waveclick",
+          "title": "WaveClick",
+          "icon": "resources/icon.svg"
+        }
       ]
     },
     "views": {
       "waveclick": [
-        { "type": "webview", "id": "waveclick.sidebar", "name": "WaveClick" }
+        {
+          "type": "webview",
+          "id": "waveclick.sidebar",
+          "name": "WaveClick"
+        }
       ]
     },
     "configuration": {
       "title": "WaveClick",
       "properties": {
         "waveclick.connectionMode": {
-          "type": "string", "enum": ["direct", "bridge"], "default": "direct",
+          "type": "string",
+          "enum": [
+            "direct",
+            "bridge"
+          ],
+          "default": "direct",
           "description": "Connection mode: direct to OpenClaw or via bridge"
         },
         "waveclick.openclaw.baseUrl": {
-          "type": "string", "default": "ws://localhost:9090",
+          "type": "string",
+          "default": "ws://localhost:9090",
           "description": "OpenClaw WebSocket base URL"
         },
         "waveclick.openclaw.workflow": {
-          "type": "string", "default": "waveclick_session",
+          "type": "string",
+          "default": "waveclick_session",
           "description": "OpenClaw workflow name"
         },
         "waveclick.openclaw.auth": {
-          "type": "string", "default": "",
+          "type": "string",
+          "default": "",
           "description": "OpenClaw auth token (stored in SecretStorage in production)"
         }
       }
@@ -49,14 +82,18 @@
     "build": "node esbuild.config.js",
     "watch": "node esbuild.config.js --watch",
     "compile": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "node esbuild.config.js && tsc -p tsconfig.json && node dist/test/runTests.js",
+    "package": "vsce package --out ../../dist/waveclick.vsix"
   },
   "devDependencies": {
-    "@types/vscode": "^1.98.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.0.0",
-    "typescript": "^5.4.0",
+    "@types/vscode": "^1.98.0",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.0.0",
     "esbuild": "^0.21.0",
-    "vitest": "^1.6.0"
+    "mocha": "^10.8.2",
+    "typescript": "^5.4.0"
   },
   "dependencies": {
     "@waveclick/shared": "*"
