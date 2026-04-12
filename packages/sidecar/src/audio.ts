@@ -1,4 +1,5 @@
 let recording: any = null;
+let speaker: any = null;
 
 export interface AudioOptions {
   sampleRate?: number;
@@ -30,4 +31,38 @@ export function startRecording(opts: AudioOptions): void {
 export function stopRecording(): void {
   recording?.stop();
   recording = null;
+}
+
+export function playPcmChunk(pcmBuffer: Buffer, sampleRate: number): void {
+  if (process.env.NODE_ENV === 'test' || process.env.VITEST === 'true') {
+    return;
+  }
+  try {
+    if (!speaker) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const Speaker = require('speaker');
+      speaker = new Speaker({
+        channels: 1,
+        bitDepth: 16,
+        sampleRate,
+        signed: true,
+      });
+      speaker.on('error', () => {
+        speaker = null;
+      });
+      speaker.on('close', () => {
+        speaker = null;
+      });
+    }
+    speaker.write(pcmBuffer);
+  } catch {
+    // Playback remains best-effort so session flow still works without local audio output.
+  }
+}
+
+export function endPlayback(): void {
+  if (speaker) {
+    speaker.end();
+    speaker = null;
+  }
 }

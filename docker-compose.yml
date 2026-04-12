@@ -12,17 +12,16 @@ services:
       timeout: 3s
       retries: 5
 
-  # Mock OpenClaw stub for CI: echoes back a canned AssistantEnvelopeV1
-  # via WebSocket. NOT for production use.
-  mock-openclaw:
+  openclaw:
     image: node:20-alpine
     working_dir: /app
     volumes:
-      - ./scripts/mock-openclaw.js:/app/mock-openclaw.js:ro
-    command: node mock-openclaw.js
+      - ./:/app
+    command: sh -lc "npm install && npm run build --workspace=packages/openclaw && node packages/openclaw/dist/index.js"
     ports:
       - "9090:9090"
     environment:
-      PORT: "9090"
-    profiles:
-      - ci  # only start in CI: docker compose --profile ci up
+      OPENCLAW_LISTEN_PORT: "9090"
+      OPENCLAW_SERVICE_TOKEN: "change-me-openclaw-service-token"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      OPENAI_REALTIME_MODEL: "gpt-realtime"

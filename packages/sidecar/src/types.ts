@@ -8,9 +8,11 @@ export interface IpcMessage {
 
 export interface SessionStartPayload {
   openclawBaseUrl: string;
+  bridgeBaseUrl?: string;
+  connectionMode?: "direct" | "bridge";
   workflow: string;
   authRef: string;
-  bridgeJwt?: string;
+  locale?: string;
 }
 
 export interface SessionStopPayload {

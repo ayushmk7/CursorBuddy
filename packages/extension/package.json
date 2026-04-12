@@ -54,16 +54,21 @@
         "cursorbuddy.connectionMode": {
           "type": "string",
           "enum": [
-            "direct",
-            "bridge"
+            "bridge",
+            "direct"
           ],
-          "default": "direct",
-          "description": "Connection mode: direct to OpenClaw or via bridge"
+          "default": "bridge",
+          "description": "Connection mode: recommended bridge mode; direct mode is for advanced local testing."
+        },
+        "cursorbuddy.bridge.baseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8787",
+          "description": "Bridge HTTP base URL used to mint realtime sessions"
         },
         "cursorbuddy.openclaw.baseUrl": {
           "type": "string",
           "default": "ws://localhost:9090",
-          "description": "OpenClaw WebSocket base URL"
+          "description": "OpenClaw WebSocket URL for direct mode only"
         },
         "cursorbuddy.openclaw.workflow": {
           "type": "string",

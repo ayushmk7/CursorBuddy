@@ -55,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const sidecarManager = new SidecarManager(
     sidecarPath,
-    process.env.WAVECLICK_MOCK_OPENCLAW === '1' ? { WAVECLICK_MOCK_OPENCLAW: '1' } : {},
+    {},
     async (eventMethod, payload) => {
       if (eventMethod === 'provider.envelope') {
         const parsed = AssistantEnvelopeV1Schema.safeParse(payload);
@@ -80,10 +80,28 @@ export function activate(context: vscode.ExtensionContext): void {
             await sidecarManager.request('tool_call.result', { session_handle: sessionHandle, call_id, result });
           } catch (err) {
             log('[tool_call error] ' + String(err));
+            await sidecarManager.request('tool_call.result', {
+              session_handle: sessionHandle,
+              call_id,
+              result: { ok: false, error: String(err) },
+            }).catch(() => undefined);
           }
         } else {
           log('[tool_call] unknown tool: ' + name);
+          await sidecarManager.request('tool_call.result', {
+            session_handle: sessionHandle,
+            call_id,
+            result: { ok: false, error: `unknown tool: ${name}` },
+          }).catch(() => undefined);
         }
+      } else if (eventMethod === 'sidecar.error') {
+        const errorPayload = payload as { code?: string; message?: string };
+        const message = `[sidecar runtime] ${errorPayload.code ?? 'E_RUNTIME'}: ${errorPayload.message ?? 'unknown error'}`;
+        log(message);
+        sessionManager.markBlocked(message);
+      } else if (eventMethod === 'sidecar.closed') {
+        log('[sidecar runtime] upstream session closed');
+        sessionManager.markBlocked('upstream session closed');
       } else {
         log(`[sidecar event] ${eventMethod}: ${JSON.stringify(payload)}`);
       }

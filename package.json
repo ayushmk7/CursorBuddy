@@ -3,14 +3,16 @@
   "private": true,
   "workspaces": [
     "packages/openclaw-pack",
+    "packages/openclaw",
     "packages/shared",
     "packages/sidecar",
-    "packages/extension",
-    "packages/mock-openclaw"
+    "packages/extension"
   ],
   "scripts": {
+    "build:openclaw": "npm run build --workspace=packages/openclaw",
     "test:shared": "npm test --workspace=packages/shared",
+    "test:sidecar": "npm test --workspace=packages/sidecar",
     "test:pack": "npm test --workspace=packages/openclaw-pack",
-    "test": "npm run test:pack && npm run test:shared"
+    "test": "npm run test:pack && npm run test:shared && npm run test:sidecar"
   }
 }

@@ -4,7 +4,7 @@
     {
       "label": "build-all",
       "type": "shell",
-      "command": "npm run build --workspace=packages/shared && npm run build --workspace=packages/sidecar && npm run build --workspace=packages/extension",
+      "command": "npm run build --workspace=packages/shared && npm run build --workspace=packages/openclaw && npm run build --workspace=packages/sidecar && npm run build --workspace=packages/extension",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -18,9 +18,9 @@
       "problemMatcher": []
     },
     {
-      "label": "start-mock-openclaw",
+      "label": "start-openclaw",
       "type": "shell",
-      "command": "npm run build --workspace=packages/mock-openclaw && node packages/mock-openclaw/dist/index.js",
+      "command": "npm run build --workspace=packages/openclaw && node packages/openclaw/dist/index.js",
       "isBackground": true,
       "presentation": {
         "echo": true,
@@ -31,21 +31,52 @@
       "problemMatcher": {
         "pattern": [
           {
-            "regexp": "^\\[mock-openclaw\\]",
+            "regexp": "^\\[openclaw\\]",
             "message": 1
           }
         ],
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "\\[mock-openclaw\\]",
+          "beginsPattern": "\\[openclaw\\]",
           "endsPattern": "listening on ws://"
         }
       }
     },
     {
-      "label": "build-and-start-mock",
+      "label": "build-and-start-openclaw",
       "dependsOrder": "sequence",
-      "dependsOn": ["build-all", "start-mock-openclaw"],
+      "dependsOn": ["build-all", "start-openclaw"],
+      "problemMatcher": []
+    },
+    {
+      "label": "start-bridge",
+      "type": "shell",
+      "command": "go run ./packages/bridge/cmd/bridge",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": "^\\{.*\"msg\":\"bridge starting\".*\\}$",
+            "message": 0
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "bridge starting",
+          "endsPattern": "bridge starting"
+        }
+      }
+    },
+    {
+      "label": "build-start-real-stack",
+      "dependsOrder": "sequence",
+      "dependsOn": ["build-and-start-openclaw", "start-bridge"],
       "problemMatcher": []
     }
   ]

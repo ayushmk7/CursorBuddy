@@ -53,7 +53,7 @@ describe('processLine — real session handler', () => {
     const { handler, write, responses } = makeCtx();
     await processLine(
       JSON.stringify({ v: 1, kind: 'request', id: 'r1', method: 'session.start',
-        payload: { openclawBaseUrl: url, workflow: 'cursorbuddy_session', authRef: 'token' } }),
+        payload: { connectionMode: 'direct', openclawBaseUrl: url, workflow: 'cursorbuddy_session', authRef: 'token' } }),
       write, handler,
     );
     expect(responses[0].kind).toBe('response');
@@ -71,7 +71,7 @@ describe('processLine — real session handler', () => {
     const { handler, write, responses } = makeCtx();
     await processLine(
       JSON.stringify({ v: 1, kind: 'request', id: 'r1', method: 'session.start',
-        payload: { openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
+        payload: { connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
       write, handler,
     );
     const sessionHandle = responses[0].payload.sessionHandle;
@@ -88,7 +88,7 @@ describe('processLine — real session handler', () => {
     const { handler, write, responses } = makeCtx();
     await processLine(
       JSON.stringify({ v: 1, kind: 'request', id: 'r1', method: 'session.start',
-        payload: { openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
+        payload: { connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
       write, handler,
     );
     const sessionHandle = responses[0].payload.sessionHandle;
@@ -138,7 +138,7 @@ describe('processLine — real session handler', () => {
     const { handler, write, responses } = makeCtx();
     await processLine(
       JSON.stringify({ v: 1, kind: 'request', id: 'r1', method: 'session.start',
-        payload: { openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
+        payload: { connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' } }),
       write, handler,
     );
     const sessionHandle = responses[0].payload.sessionHandle;

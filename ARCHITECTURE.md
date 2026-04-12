@@ -104,7 +104,7 @@ Before the real Larry path can run end to end, the user must still provide:
 Do not follow older docs that assume any of the following:
 
 - direct sidecar -> OpenClaw is the preferred production topology
-- `mock-openclaw` is the intended end-to-end development path
+- mock-only runtime paths are not part of the supported product architecture
 - OpenClaw is an already-existing third-party deployment you must discover elsewhere
 - sidebar-first UI is the intended primary v1 product surface
 - Ollama or local-model-first architecture is the intended default path

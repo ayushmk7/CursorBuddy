@@ -2,27 +2,25 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run Extension (mock OpenClaw)",
+      "name": "Run Extension (real OpenClaw)",
       "type": "extensionHost",
       "request": "launch",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/extension"],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
-      "preLaunchTask": "build-and-start-mock",
+      "preLaunchTask": "build-start-real-stack",
       "env": {
-        "WAVECLICK_MOCK_OPENCLAW": "1",
         "WAVECLICK_LOG_LEVEL": "debug"
       },
       "sourceMaps": true
     },
     {
-      "name": "Run Extension Only (mock already running)",
+      "name": "Run Extension Only (real backend already running)",
       "type": "extensionHost",
       "request": "launch",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}/packages/extension"],
       "outFiles": ["${workspaceFolder}/packages/extension/dist/**/*.js"],
       "preLaunchTask": "build-all",
       "env": {
-        "WAVECLICK_MOCK_OPENCLAW": "1",
         "WAVECLICK_LOG_LEVEL": "debug"
       },
       "sourceMaps": true

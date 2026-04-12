@@ -28,7 +28,9 @@ export class SessionManager {
       return;
     }
     const cfg = vscode.workspace.getConfiguration('cursorbuddy');
-    let openclawBaseUrl = cfg.get<string>('openclaw.baseUrl', 'ws://localhost:9090');
+    const connectionMode = cfg.get<'direct' | 'bridge'>('connectionMode', 'bridge');
+    const openclawBaseUrl = cfg.get<string>('openclaw.baseUrl', 'ws://localhost:9090');
+    const bridgeBaseUrl = cfg.get<string>('bridge.baseUrl', 'http://127.0.0.1:8787');
     const workflow = cfg.get<string>('openclaw.workflow', 'cursorbuddy_session');
 
     // Try SecretStorage first, fall back to config for dev convenience
@@ -37,16 +39,20 @@ export class SessionManager {
       authRef = cfg.get<string>('openclaw.auth', '');
     }
 
-    if (process.env.WAVECLICK_MOCK_OPENCLAW === '1') {
-      openclawBaseUrl = 'ws://localhost:9090';
-    }
-
     this.state = 'connecting';
     this.onStateChange('connecting');
 
     try {
       await this.sidecarManager.start();
-      const startResult = await this.sidecarManager.request('session.start', { openclawBaseUrl, workflow, authRef }) as { sessionHandle: string };
+      const locale = vscode.env.language;
+      const startResult = await this.sidecarManager.request('session.start', {
+        connectionMode,
+        openclawBaseUrl,
+        bridgeBaseUrl,
+        workflow,
+        authRef,
+        locale,
+      }) as { sessionHandle: string };
       this._sessionHandle = startResult.sessionHandle;
       this.state = 'live';
       this.onStateChange('live');
@@ -78,5 +84,12 @@ export class SessionManager {
 
   getSessionHandle(): string {
     return this._sessionHandle;
+  }
+
+  markBlocked(reason: string): void {
+    if (this.state === 'inactive') return;
+    this.state = 'blocked';
+    this.onStateChange('blocked');
+    vscode.window.showErrorMessage(`CursorBuddy: ${reason}`);
   }
 }

@@ -95,8 +95,8 @@ func TestCreateSession(t *testing.T) {
 	if resp.Upstream.URL == "" {
 		t.Error("upstream.url is empty")
 	}
-	if !strings.HasPrefix(resp.Upstream.URL, "wss://") {
-		t.Errorf("upstream.url = %q; want wss:// prefix", resp.Upstream.URL)
+	if !(strings.HasPrefix(resp.Upstream.URL, "wss://") || strings.HasPrefix(resp.Upstream.URL, "ws://")) {
+		t.Errorf("upstream.url = %q; want ws:// or wss:// prefix", resp.Upstream.URL)
 	}
 	if resp.Policy.MaxSessionMinutes != 30 {
 		t.Errorf("max_session_minutes = %d want 30", resp.Policy.MaxSessionMinutes)
@@ -150,5 +150,24 @@ func TestAuthRefresh(t *testing.T) {
 	}
 	if resp.ExpiresIn <= 0 {
 		t.Errorf("expires_in = %d want > 0", resp.ExpiresIn)
+	}
+}
+
+func TestStreamSessionBindingMismatchDenied(t *testing.T) {
+	h := newTestHandler()
+	router := api.NewRouter(h)
+
+	token, err := auth.MintToken(testSecret, "session-A", "acme", 5*time.Minute)
+	if err != nil {
+		t.Fatalf("MintToken: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/stream/session-B", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("got %d want 401", w.Code)
 	}
 }

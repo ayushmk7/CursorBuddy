@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { WebSocketServer, WebSocket as WS } from 'ws';
 import { createSessionHandler } from '../session';
 import { defaultClientFactory } from '../openclaw-client';
@@ -36,52 +36,53 @@ describe('createSessionHandler — real WS', () => {
 
   it('start() establishes a real WebSocket connection', async () => {
     const handler = createSessionHandler(() => {}, defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' });
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' });
     expect(result).toHaveProperty('sessionHandle');
     expect(serverSockets).toHaveLength(1); // a real connection arrived
     await handler.stop(result);
     await waitMs(20);
   });
 
-  it('forces URL to ws://localhost:9090 when WAVECLICK_MOCK_OPENCLAW=1', async () => {
-    const wss9090 = new WebSocketServer({ port: 9090 });
-    await new Promise<void>(r => wss9090.once('listening', r));
-    const connected: boolean[] = [];
-    wss9090.on('connection', () => connected.push(true));
-    process.env.WAVECLICK_MOCK_OPENCLAW = '1';
-    let result: Record<string, unknown> = {};
-    try {
-      const handler = createSessionHandler(() => {}, defaultClientFactory);
-      result = await handler.start({
-        openclawBaseUrl: 'ws://real-upstream.example.com',
-        workflow: 'w',
-        authRef: 't',
-      });
-      expect(connected).toHaveLength(1); // connected to 9090, not real-upstream
-      await handler.stop(result);
-      await waitMs(20);
-    } finally {
-      delete process.env.WAVECLICK_MOCK_OPENCLAW;
-      await new Promise<void>(r => {
-        wss9090.clients.forEach(c => c.terminate());
-        wss9090.close(() => r());
-      });
-    }
+  it('bridge mode mints session and uses returned websocket URL + headers', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        session_id: '00000000-0000-0000-0000-000000000123',
+        upstream: {
+          type: 'websocket',
+          url,
+          headers: { Authorization: 'Bearer bridge-token' },
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const handler = createSessionHandler(() => {}, defaultClientFactory);
+    const result = await handler.start({
+      connectionMode: 'bridge',
+      bridgeBaseUrl: 'http://127.0.0.1:8787',
+      openclawBaseUrl: '',
+      workflow: 'cursorbuddy_session',
+      authRef: 'user-token',
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect((result as { sessionHandle: string }).sessionHandle).toBe('00000000-0000-0000-0000-000000000123');
+    await handler.stop(result);
+    vi.unstubAllGlobals();
   });
 
   it('emits provider.envelope IPC event when server sends a JSON frame', async () => {
     const emitted: IpcMessage[] = [];
     const handler = createSessionHandler((m) => emitted.push(m), defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' });
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' });
 
     const serverSocket = serverSockets[serverSockets.length - 1];
     serverSocket.send(JSON.stringify({
       schema_version: '1.0',
-      session_id: 'sid',
-      utterance_id: 'uid',
+      session_id: '00000000-0000-0000-0000-000000000010',
+      utterance_id: '00000000-0000-0000-0000-000000000011',
       assistant_text: 'hi',
       confidence: 0.9,
-      actions: [],
+      actions: [{ type: 'noop', id: 'noop-1', risk: 'low' }],
     }));
     await waitMs(50);
 
@@ -94,10 +95,10 @@ describe('createSessionHandler — real WS', () => {
   it('emits provider.tool_call IPC event when server sends a tool_call frame', async () => {
     const emitted: IpcMessage[] = [];
     const handler = createSessionHandler((m) => emitted.push(m), defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' });
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' });
 
     serverSockets[serverSockets.length - 1].send(
-      JSON.stringify({ type: 'tool_call', call_id: 'c1', name: 'open_file', input: { path: 'foo.ts' } }),
+      JSON.stringify({ type: 'tool_call', call_id: 'c1', name: 'vscode_probe_state', input: {} }),
     );
     await waitMs(50);
 
@@ -111,20 +112,20 @@ describe('createSessionHandler — real WS', () => {
   it('emits E_PROTOCOL error when server sends invalid JSON', async () => {
     const emitted: IpcMessage[] = [];
     const handler = createSessionHandler((m) => emitted.push(m), defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
 
     serverSockets[serverSockets.length - 1].send('not-valid-json{');
     await waitMs(50);
 
-    expect(emitted[0].kind).toBe('error');
-    expect(emitted[0].payload.code).toBe('E_PROTOCOL');
+    expect(emitted.some((m) => m.kind === 'event' && m.method === 'sidecar.error')).toBe(true);
+    expect(emitted.some((m) => m.kind === 'error' && m.payload.code === 'E_PROTOCOL')).toBe(true);
     await handler.stop(result);
     await waitMs(20);
   });
 
   it('toolResult sends a tool_result frame to the server', async () => {
     const handler = createSessionHandler(() => {}, defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
 
     await handler.toolResult({ session_handle: result.sessionHandle, call_id: 'c42', result: { found: true } });
     await waitMs(50);
@@ -139,7 +140,7 @@ describe('createSessionHandler — real WS', () => {
 
   it('audioStop sends an audio_end frame to the server', async () => {
     const handler = createSessionHandler(() => {}, defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
 
     await handler.audioStop({ session_handle: result.sessionHandle });
     await waitMs(50);
@@ -152,12 +153,45 @@ describe('createSessionHandler — real WS', () => {
 
   it('audioStart returns ok:true for a valid session handle', async () => {
     const handler = createSessionHandler(() => {}, defaultClientFactory);
-    const result = await handler.start({ openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
 
     const audioResult = await handler.audioStart({ session_handle: result.sessionHandle });
     expect(audioResult.ok).toBe(true);
 
     await handler.audioStop({ session_handle: result.sessionHandle });
+    await handler.stop(result);
+    await waitMs(20);
+  });
+
+  it('audio output frames do not emit protocol errors', async () => {
+    const emitted: IpcMessage[] = [];
+    const handler = createSessionHandler((m) => emitted.push(m), defaultClientFactory);
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+
+    const serverSocket = serverSockets[serverSockets.length - 1];
+    serverSocket.send(JSON.stringify({
+      type: 'audio_output_chunk',
+      data: Buffer.from('pcm').toString('base64'),
+      encoding: 'pcm16',
+      sample_rate: 24000,
+    }));
+    serverSocket.send(JSON.stringify({ type: 'audio_output_done' }));
+    await waitMs(30);
+
+    expect(emitted.some((m) => m.kind === 'error' && m.payload.code === 'E_PROTOCOL')).toBe(false);
+    await handler.stop(result);
+    await waitMs(20);
+  });
+
+  it('emits sidecar.error event when websocket protocol error occurs', async () => {
+    const emitted: IpcMessage[] = [];
+    const handler = createSessionHandler((m) => emitted.push(m), defaultClientFactory);
+    const result = await handler.start({ connectionMode: 'direct', openclawBaseUrl: url, workflow: 'w', authRef: 't' }) as { sessionHandle: string };
+
+    serverSockets[serverSockets.length - 1].send('broken-json');
+    await waitMs(30);
+
+    expect(emitted.some((m) => m.kind === 'event' && m.method === 'sidecar.error')).toBe(true);
     await handler.stop(result);
     await waitMs(20);
   });

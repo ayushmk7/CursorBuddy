@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/cursorbuddy/bridge/internal/auth"
@@ -78,7 +79,7 @@ func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
 		SessionID: sessionID,
 		Upstream: UpstreamWebsocket{
 			Type: "websocket",
-			URL:  fmt.Sprintf("wss://%s/v1/stream/%s", h.cfg.PublicHost, sessionID),
+			URL:  buildUpstreamURL(h.cfg.PublicHost, sessionID),
 			Headers: map[string]string{
 				"Authorization": "Bearer " + ephemeralToken,
 			},
@@ -145,4 +146,19 @@ func writeError(w http.ResponseWriter, code int, errCode, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(ErrorResponse{Error: msg, Code: errCode})
+}
+
+func buildUpstreamURL(publicHost, sessionID string) string {
+	normalized := publicHost
+	scheme := "wss"
+	if strings.HasPrefix(normalized, "http://") {
+		normalized = strings.TrimPrefix(normalized, "http://")
+		scheme = "ws"
+	} else if strings.HasPrefix(normalized, "https://") {
+		normalized = strings.TrimPrefix(normalized, "https://")
+		scheme = "wss"
+	} else if strings.HasPrefix(normalized, "127.0.0.1:") || strings.HasPrefix(normalized, "localhost:") {
+		scheme = "ws"
+	}
+	return fmt.Sprintf("%s://%s/v1/stream/%s", scheme, normalized, sessionID)
 }

@@ -13,7 +13,7 @@ Larry overlay in VS Code -> extension -> sidecar -> Go bridge -> OpenClaw servic
 
 Larry is the cursor-following guide inside CursorBuddy. For v1, Larry is VS Code only, uses `Control+Option+L` for wake/follow, `Control+Option+V` for voice, `Control+Option+C` for the secondary mini chat, answers with a short bubble plus TTS, and may perform safe navigation only.
 
-This document does not treat `mock-openclaw` as the product path.
+This document only treats the real OpenClaw runtime as the product path.
 
 Plain-English version: the thing we are trying to build is not "yet another chat panel." It should feel like a little guide that is actually with you while you work in VS Code. Larry follows your cursor while idle, then if you ask something simple like "how do I commit?", Larry moves on its own to the right place, explains the next move with a short bubble plus TTS, and only opens the secondary mini chat when you want a little more detail.
 
@@ -96,7 +96,7 @@ In short, the user still has to provide:
 
 The following should not define the project direction anymore:
 
-- `mock-openclaw` as the end-to-end product story
+- any mock-first end-to-end product story
 - docs that describe OpenClaw as an unspecified external dependency
 - docs that imply direct provider access from the extension or sidecar in production
 - docs that treat the sidebar as the primary v1 product surface
