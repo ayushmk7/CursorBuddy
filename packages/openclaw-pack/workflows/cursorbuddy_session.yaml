@@ -5,8 +5,8 @@ name: cursorbuddy_session
 version: "0.4.0"
 description: >
   Realtime voice/text session for CursorBuddy VS Code companion.
-  Ingests audio or text from the sidecar, runs a ReAct agent loop using
-  configured model path (fastest per env benchmark), and emits AssistantEnvelopeV1.
+  Ingests audio or text from the sidecar, runs a ReAct agent loop on the
+  local Go OpenClaw service using the configured OpenAI Realtime path, and emits AssistantEnvelopeV1.
 
 trigger:
   type: sidecar_connect
@@ -43,9 +43,9 @@ steps:
       snapshot. It may call tools (vscode_probe_state, web search if org enables)
       and produces a final AssistantEnvelopeV1 via cursorbuddy_emit_envelope.
     model_selection:
-      strategy: fastest_benchmarked  # OpenClaw selects: Gemini Live, OpenAI Realtime, REST fallback
-      tier_hint_from_client: true     # respect desired_model_tier_hint from session mint
-      fallback: rest_small            # if realtime path down, use fastest small REST model
+      strategy: openai_realtime_default
+      tier_hint_from_client: true
+      fallback: none
     max_iterations: 8
     tools:
       - vscode_probe_state
@@ -63,4 +63,4 @@ steps:
 policy:
   vision_allowed: false           # operator can override per org
   max_session_minutes: 30
-  fallback_mode: rest             # "none" to hard-fail on realtime unavailability
+  fallback_mode: none             # hard-fail on realtime unavailability for the real path

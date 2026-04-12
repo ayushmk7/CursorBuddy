@@ -37,9 +37,15 @@ func NewRouter(h *Handler) http.Handler {
 		r.Use(bearer)
 		r.Get("/v1/stream/{sessionId}", func(w http.ResponseWriter, r *http.Request) {
 			sessionID := chi.URLParam(r, "sessionId")
+			claims := auth.ClaimsFromContext(r.Context())
+			if claims == nil || claims.Sub != sessionID {
+				http.Error(w, `{"error":"session token does not match requested session","code":"E_AUTH"}`, http.StatusUnauthorized)
+				return
+			}
 			upstreamURL := h.cfg.OpenClawUpstreamURL + "/sessions/" + sessionID
-			p.ServeWS(w, r, upstreamURL, http.Header{
-				"Authorization": []string{"Bearer " + h.cfg.OpenClawServiceToken},
+			p.ServeWS(w, r, upstreamURL, sessionID, http.Header{
+				"Authorization":            []string{"Bearer " + h.cfg.OpenClawServiceToken},
+				"X-CursorBuddy-Session-Id": []string{sessionID},
 			})
 		})
 	})

@@ -8,12 +8,13 @@ import (
 )
 
 const testSecret = "test-secret-at-least-32-bytes-long!!"
+const testIssuer = "cursorbuddy-bridge"
 
 func TestValidator(t *testing.T) {
-	v := auth.NewValidator(testSecret)
+	v := auth.NewValidator(testSecret, testIssuer)
 
 	t.Run("validates a freshly minted token", func(t *testing.T) {
-		token, err := auth.MintToken(testSecret, "user-1", "acme", 10*time.Minute)
+		token, err := auth.MintToken(testSecret, testIssuer, "user-1", "acme", 10*time.Minute)
 		if err != nil {
 			t.Fatalf("MintToken error: %v", err)
 		}
@@ -30,7 +31,7 @@ func TestValidator(t *testing.T) {
 	})
 
 	t.Run("rejects expired token", func(t *testing.T) {
-		token, err := auth.MintToken(testSecret, "user-2", "acme", -1*time.Minute)
+		token, err := auth.MintToken(testSecret, testIssuer, "user-2", "acme", -1*time.Minute)
 		if err != nil {
 			t.Fatalf("MintToken error: %v", err)
 		}
@@ -41,7 +42,7 @@ func TestValidator(t *testing.T) {
 	})
 
 	t.Run("rejects token signed with wrong secret", func(t *testing.T) {
-		token, err := auth.MintToken("wrong-secret-padded-to-32-bytes!!", "user-3", "acme", 10*time.Minute)
+		token, err := auth.MintToken("wrong-secret-padded-to-32-bytes!!", testIssuer, "user-3", "acme", 10*time.Minute)
 		if err != nil {
 			t.Fatalf("MintToken error: %v", err)
 		}
@@ -55,6 +56,17 @@ func TestValidator(t *testing.T) {
 		_, err := v.Validate("not.a.token")
 		if err == nil {
 			t.Fatal("expected error for malformed token")
+		}
+	})
+
+	t.Run("rejects token with wrong issuer", func(t *testing.T) {
+		token, err := auth.MintToken(testSecret, "wrong-issuer", "user-4", "acme", 10*time.Minute)
+		if err != nil {
+			t.Fatalf("MintToken error: %v", err)
+		}
+		_, err = v.Validate(token)
+		if err == nil {
+			t.Fatal("expected error for wrong issuer")
 		}
 	})
 }

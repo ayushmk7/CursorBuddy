@@ -10,7 +10,7 @@ import (
 )
 
 func TestBearerMiddleware(t *testing.T) {
-	v := auth.NewValidator(testSecret)
+	v := auth.NewValidator(testSecret, testIssuer)
 
 	handler := auth.BearerMiddleware(v)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := auth.ClaimsFromContext(r.Context())
@@ -23,7 +23,7 @@ func TestBearerMiddleware(t *testing.T) {
 	}))
 
 	t.Run("passes valid bearer token", func(t *testing.T) {
-		token, _ := auth.MintToken(testSecret, "user-99", "acme", 5*time.Minute)
+		token, _ := auth.MintToken(testSecret, testIssuer, "user-99", "acme", 5*time.Minute)
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		w := httptest.NewRecorder()
@@ -46,7 +46,18 @@ func TestBearerMiddleware(t *testing.T) {
 	})
 
 	t.Run("rejects expired token", func(t *testing.T) {
-		token, _ := auth.MintToken(testSecret, "user-100", "acme", -1*time.Minute)
+		token, _ := auth.MintToken(testSecret, testIssuer, "user-100", "acme", -1*time.Minute)
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		w := httptest.NewRecorder()
+		handler.ServeHTTP(w, req)
+		if w.Code != http.StatusUnauthorized {
+			t.Errorf("got %d want 401", w.Code)
+		}
+	})
+
+	t.Run("rejects wrong issuer", func(t *testing.T) {
+		token, _ := auth.MintToken(testSecret, "unexpected-issuer", "user-101", "acme", 5*time.Minute)
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		w := httptest.NewRecorder()

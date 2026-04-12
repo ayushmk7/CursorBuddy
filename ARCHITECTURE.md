@@ -56,6 +56,7 @@ The intended real product path is:
 - Go bridge for low-overhead bridge mode
 - real OpenClaw service in this repo
 - OpenAI Realtime Mini as the default low-cost backend
+- local-first runtime defaults on `127.0.0.1:8787` for bridge and `127.0.0.1:9090` for OpenClaw
 
 ## V1 Behavior Limits
 
@@ -108,5 +109,6 @@ Do not follow older docs that assume any of the following:
 - OpenClaw is an already-existing third-party deployment you must discover elsewhere
 - sidebar-first UI is the intended primary v1 product surface
 - Ollama or local-model-first architecture is the intended default path
+- dynamic multi-provider selection or REST fallback is the canonical real-path backend story
 
 Those assumptions have been replaced by the architecture above.

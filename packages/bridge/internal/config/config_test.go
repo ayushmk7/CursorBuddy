@@ -17,9 +17,9 @@ func setEnv(t *testing.T, pairs ...string) {
 func setAllRequired(t *testing.T) {
 	t.Helper()
 	setEnv(t,
-		"OPENCLAW_UPSTREAM_URL", "https://openclaw.test",
+		"OPENCLAW_UPSTREAM_URL", "ws://127.0.0.1:9090",
 		"OPENCLAW_SERVICE_TOKEN", "test-token",
-		"JWT_ISSUER", "https://idp.test",
+		"JWT_ISSUER", "cursorbuddy-bridge",
 		"JWT_SECRET", "test-secret-at-least-32-bytes!!!!",
 	)
 }
@@ -30,7 +30,7 @@ func TestLoad_AllRequired(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Load() error: %v", err)
 	}
-	if cfg.OpenClawUpstreamURL != "https://openclaw.test" {
+	if cfg.OpenClawUpstreamURL != "ws://127.0.0.1:9090" {
 		t.Errorf("OpenClawUpstreamURL = %q", cfg.OpenClawUpstreamURL)
 	}
 	if cfg.JWTSecret != "test-secret-at-least-32-bytes!!!!" {

@@ -32,7 +32,7 @@ func New(cfg Config) *Proxy {
 // ServeWS upgrades the incoming request to WebSocket, dials upstreamURL,
 // and bidirectionally copies frames until either side closes or idle timeout fires.
 // extraHeaders are added to the upstream dial (e.g. Authorization).
-func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL string, extraHeaders http.Header) {
+func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL, sessionID string, extraHeaders http.Header) {
 	client, err := p.upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		slog.Error("proxy: upgrade client", "err", err)
@@ -42,7 +42,7 @@ func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL stri
 
 	upstream, _, err := websocket.DefaultDialer.Dial(upstreamURL, extraHeaders)
 	if err != nil {
-		slog.Error("proxy: dial upstream", "url", upstreamURL, "err", err)
+		slog.Error("proxy: dial upstream", "session_id", sessionID, "url", upstreamURL, "err", err)
 		client.WriteMessage(websocket.CloseMessage,
 			websocket.FormatCloseMessage(websocket.CloseInternalServerErr, "upstream unavailable"))
 		return
@@ -76,6 +76,6 @@ func (p *Proxy) ServeWS(w http.ResponseWriter, r *http.Request, upstreamURL stri
 	client.Close()
 	upstream.Close()
 	if err != nil && !websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-		slog.Debug("proxy: connection closed", "err", err)
+		slog.Debug("proxy: connection closed", "session_id", sessionID, "err", err)
 	}
 }

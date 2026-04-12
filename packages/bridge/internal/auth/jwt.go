@@ -19,11 +19,12 @@ type Claims struct {
 // Validator validates HS256 JWTs using a shared secret.
 type Validator struct {
 	secret []byte
+	issuer string
 }
 
 // NewValidator creates a Validator for the given HMAC secret.
-func NewValidator(secret string) *Validator {
-	return &Validator{secret: []byte(secret)}
+func NewValidator(secret, issuer string) *Validator {
+	return &Validator{secret: []byte(secret), issuer: issuer}
 }
 
 // Validate parses and validates a Bearer token string.
@@ -35,7 +36,7 @@ func (v *Validator) Validate(tokenStr string) (*Claims, error) {
 			return nil, errors.New("unexpected signing method")
 		}
 		return v.secret, nil
-	}, jwt.WithExpirationRequired())
+	}, jwt.WithExpirationRequired(), jwt.WithIssuer(v.issuer))
 	if err != nil {
 		return nil, err
 	}
@@ -44,12 +45,13 @@ func (v *Validator) Validate(tokenStr string) (*Claims, error) {
 
 // MintToken creates a signed HS256 JWT for the given subject and org.
 // ttl controls token lifetime. Used for ephemeral session tokens and tests.
-func MintToken(secret, sub, org string, ttl time.Duration) (string, error) {
+func MintToken(secret, issuer, sub, org string, ttl time.Duration) (string, error) {
 	now := time.Now()
 	claims := &Claims{
 		Sub: sub,
 		Org: org,
 		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    issuer,
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 		},

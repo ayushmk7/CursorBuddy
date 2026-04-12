@@ -12,17 +12,44 @@ services:
       timeout: 3s
       retries: 5
 
-  # Mock OpenClaw stub for CI: echoes back a canned AssistantEnvelopeV1
-  # via WebSocket. NOT for production use.
-  mock-openclaw:
-    image: node:20-alpine
-    working_dir: /app
+  openclaw-service:
+    image: golang:1.24
+    working_dir: /app/packages/openclaw-service
     volumes:
-      - ./scripts/mock-openclaw.js:/app/mock-openclaw.js:ro
-    command: node mock-openclaw.js
+      - .:/app
+    command: go run ./cmd/openclaw
     ports:
       - "9090:9090"
     environment:
-      PORT: "9090"
-    profiles:
-      - ci  # only start in CI: docker compose --profile ci up
+      OPENCLAW_LISTEN: "0.0.0.0:9090"
+      OPENCLAW_PUBLIC_HOST: "127.0.0.1:9090"
+      OPENAI_API_KEY: "OPENAI_API_KEY_PLACEHOLDER"
+      OPENAI_REALTIME_MODEL: "gpt-realtime"
+      OPENCLAW_SERVICE_TOKEN: "CHANGE_ME_OPENCLAW_SERVICE_TOKEN"
+      OPENCLAW_DEFAULT_VOICE: "alloy"
+      OPENCLAW_SESSION_TIMEOUT_MINUTES: "30"
+      LOG_LEVEL: "info"
+      OPENCLAW_VERSION: "dev"
+
+  bridge:
+    image: golang:1.24
+    working_dir: /app/packages/bridge
+    volumes:
+      - .:/app
+    command: go run ./cmd/bridge
+    ports:
+      - "8787:8787"
+    environment:
+      BRIDGE_LISTEN: "0.0.0.0:8787"
+      BRIDGE_PUBLIC_HOST: "127.0.0.1:8787"
+      OPENCLAW_UPSTREAM_URL: "ws://openclaw-service:9090"
+      OPENCLAW_SERVICE_TOKEN: "CHANGE_ME_OPENCLAW_SERVICE_TOKEN"
+      JWT_ISSUER: "cursorbuddy-bridge"
+      JWT_SECRET: "CHANGE_ME_BRIDGE_JWT_SECRET_MIN_32_CHARS"
+      REDIS_URL: "redis://redis:6379"
+      MAX_SESSION_MINUTES: "30"
+      LOG_LEVEL: "info"
+      BRIDGE_VERSION: "dev"
+    depends_on:
+      - redis
+      - openclaw-service

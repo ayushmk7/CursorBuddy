@@ -1,8 +1,8 @@
 package proxy_test
 
 import (
-	"net/http"
 	"net/http/httptest"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -17,6 +17,14 @@ var upgrader = websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { retu
 func startUpstream(t *testing.T) *httptest.Server {
 	t.Helper()
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("Authorization"); got != "Bearer service-token" {
+			http.Error(w, "missing service auth", http.StatusUnauthorized)
+			return
+		}
+		if got := r.Header.Get("X-CursorBuddy-Session-Id"); got != "session-123" {
+			http.Error(w, "missing session id", http.StatusBadRequest)
+			return
+		}
 		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			return
@@ -43,7 +51,10 @@ func TestProxy_EchosMessage(t *testing.T) {
 	// Start proxy server
 	p := proxy.New(proxy.Config{IdleTimeout: 5 * time.Second})
 	proxySrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		p.ServeWS(w, r, upstreamWS, nil)
+		p.ServeWS(w, r, upstreamWS, "session-123", http.Header{
+			"Authorization":            []string{"Bearer service-token"},
+			"X-CursorBuddy-Session-Id": []string{"session-123"},
+		})
 	}))
 	defer proxySrv.Close()
 

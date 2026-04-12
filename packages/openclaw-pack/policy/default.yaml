@@ -14,7 +14,7 @@ rate_limits:
   sessions_per_minute_burst: 5
   sessions_per_hour_sustain: 30
 
-fallback_mode: rest        # "none" = hard-fail on realtime unavailability
+fallback_mode: none        # hard-fail on realtime unavailability for the real path
 
 dlp:
   enabled: true
