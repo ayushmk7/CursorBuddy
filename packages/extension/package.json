@@ -1,7 +1,7 @@
 {
   "name": "cursorbuddy",
   "displayName": "CursorBuddy",
-  "description": "Voice + visual companion for VS Code",
+  "description": "Larry support UI and local runtime controls for VS Code",
   "version": "0.1.0",
   "publisher": "cursorbuddy",
   "engines": {
@@ -10,24 +10,20 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:cursorbuddy.startSession",
-    "onView:cursorbuddy.sidebar"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "cursorbuddy.startSession",
-        "title": "CursorBuddy: Start Session"
+        "title": "CursorBuddy: Start Larry Session"
       },
       {
         "command": "cursorbuddy.stopSession",
-        "title": "CursorBuddy: Stop Session"
+        "title": "CursorBuddy: Stop Larry Session"
       },
       {
         "command": "cursorbuddy.setAuth",
-        "title": "CursorBuddy: Set Auth Token"
+        "title": "CursorBuddy: Set Larry Auth Token"
       }
     ],
     "viewsContainers": {
@@ -44,7 +40,7 @@
         {
           "type": "webview",
           "id": "cursorbuddy.sidebar",
-          "name": "CursorBuddy"
+          "name": "Larry Support"
         }
       ]
     },
@@ -58,22 +54,22 @@
             "bridge"
           ],
           "default": "direct",
-          "description": "Connection mode: direct to OpenClaw or via bridge"
+          "description": "Local runtime connection mode for Larry support: direct to OpenClaw or via bridge"
         },
         "cursorbuddy.openclaw.baseUrl": {
           "type": "string",
           "default": "ws://localhost:9090",
-          "description": "OpenClaw WebSocket base URL"
+          "description": "OpenClaw WebSocket base URL used by the local Larry runtime"
         },
         "cursorbuddy.openclaw.workflow": {
           "type": "string",
           "default": "cursorbuddy_session",
-          "description": "OpenClaw workflow name"
+          "description": "OpenClaw workflow name for Larry sessions"
         },
         "cursorbuddy.openclaw.auth": {
           "type": "string",
           "default": "",
-          "description": "OpenClaw auth token (stored in SecretStorage in production)"
+          "description": "OpenClaw auth token for the local Larry runtime (stored in SecretStorage in production)"
         }
       }
     }

@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import { randomBytes } from 'crypto';
-import { SessionState } from './sessionManager';
+import { LocalClientUiState } from './localUiState';
 import { getWebviewHtml } from './webview/ui';
 
 export class CursorBuddyWebviewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'cursorbuddy.sidebar';
   private _view?: vscode.WebviewView;
 
-  private _currentState: SessionState = 'inactive';
+  private _snapshot?: LocalClientUiState;
   private _onPushToTalk?: (down: boolean) => void;
   private _onConfirmResult?: (id: string, confirmed: boolean) => void;
 
@@ -27,8 +27,9 @@ export class CursorBuddyWebviewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage((message: { type: string; [key: string]: unknown }) => {
       switch (message.type) {
         case 'ui_ready':
-          // Replay current state so the freshly loaded webview is in sync
-          this._view?.webview.postMessage({ type: 'state', state: this._currentState });
+          if (this._snapshot) {
+            this._view?.webview.postMessage({ type: 'snapshot', payload: this._snapshot });
+          }
           break;
         case 'push_to_talk':
           this._onPushToTalk?.(message.down as boolean);
@@ -48,37 +49,14 @@ export class CursorBuddyWebviewProvider implements vscode.WebviewViewProvider {
     this._onConfirmResult = opts.onConfirmResult;
   }
 
-  postState(state: { state: SessionState }): void {
-    this._currentState = state.state;
-    this._view?.webview.postMessage({ type: 'state', ...state });
+  postSnapshot(snapshot: LocalClientUiState): void {
+    this._snapshot = snapshot;
+    this._view?.webview.postMessage({ type: 'snapshot', payload: snapshot });
   }
 
-  postTranscript(msg: { role: 'user' | 'assistant'; text: string }): void {
-    this._view?.webview.postMessage({ type: 'transcript_delta', role: msg.role, text: msg.text });
-  }
-
-  postEnvelopeSteps(steps: Array<{ id: string; title: string; detail?: string }>): void {
-    this._view?.webview.postMessage({ type: 'envelope_steps', steps });
-  }
-
-  postStepStatus(id: string, status: 'pending' | 'running' | 'done' | 'blocked'): void {
-    this._view?.webview.postMessage({ type: 'step_status', id, status });
-  }
-
-  postConfirmRequest(id: string, title: string, details?: string): void {
-    this._view?.webview.postMessage({ type: 'confirm_request', id, title, details });
-  }
-
-  postConfirmClear(): void {
-    this._view?.webview.postMessage({ type: 'confirm_clear' });
-  }
-
-  postAudioLevel(level: number): void {
-    this._view?.webview.postMessage({ type: 'audio_level', level });
-  }
-
-  postLatency(ms: number): void {
-    this._view?.webview.postMessage({ type: 'latency_ms', ms });
+  postPatch(snapshot: LocalClientUiState): void {
+    this._snapshot = snapshot;
+    this._view?.webview.postMessage({ type: 'patch', payload: snapshot });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {

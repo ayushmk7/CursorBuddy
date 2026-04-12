@@ -6,6 +6,21 @@ import { SessionManager } from './sessionManager';
 import { CursorBuddyWebviewProvider } from './webviewProvider';
 import { executeEnvelope } from './executor';
 import { probeWorkspaceState } from './workspaceAdapter';
+import {
+  LocalClientUiState,
+  appendTranscriptEntry,
+  buildStepsFromEnvelope,
+  clearConfirmation,
+  createInitialLocalClientUiState,
+  replaceSteps,
+  setDegradedSupport,
+  setAudioLevel,
+  setConfirmation,
+  setLatency,
+  setListening,
+  setSessionState,
+  updateStepStatus,
+} from './localUiState';
 
 export function activate(context: vscode.ExtensionContext): void {
   const outputChannel = vscode.window.createOutputChannel('CursorBuddy');
@@ -17,18 +32,20 @@ export function activate(context: vscode.ExtensionContext): void {
   const pendingConfirms = new Map<string, (confirmed: boolean) => void>();
 
   const webviewProvider = new CursorBuddyWebviewProvider(context.extensionUri);
+  let uiState = createInitialLocalClientUiState();
+
+  function publishSnapshot(): void {
+    webviewProvider.postPatch(uiState);
+  }
+
+  function resetUiState(): void {
+    uiState = createInitialLocalClientUiState();
+  }
 
   function postEnvelopeToWebview(envelope: AssistantEnvelopeV1): void {
-    webviewProvider.postTranscript({ role: 'assistant', text: envelope.assistant_text });
-    webviewProvider.postEnvelopeSteps(
-      envelope.actions
-        .filter(a => a.type !== 'noop')
-        .map(a => ({
-          id: a.id,
-          title: actionTitle(a),
-          detail: actionDetail(a),
-        }))
-    );
+    uiState = appendTranscriptEntry(uiState, { role: 'assistant', text: envelope.assistant_text });
+    uiState = replaceSteps(uiState, buildStepsFromEnvelope(envelope));
+    publishSnapshot();
   }
 
   function actionTitle(a: CursorBuddyAction): string {
@@ -67,9 +84,13 @@ export function activate(context: vscode.ExtensionContext): void {
           log,
           requestConfirm: (id, title, details) => new Promise<boolean>((resolve) => {
             pendingConfirms.set(id, resolve);
-            webviewProvider.postConfirmRequest(id, title, details);
+            uiState = setConfirmation(uiState, { id, title, details });
+            publishSnapshot();
           }),
-          postStepStatus: (id, status) => webviewProvider.postStepStatus(id, status),
+          postStepStatus: (id, status) => {
+            uiState = updateStepStatus(uiState, id, status);
+            publishSnapshot();
+          },
         }).catch((err) => log('[executor error] ' + String(err)));
       } else if (eventMethod === 'provider.tool_call') {
         const { call_id, name, input } = payload as { call_id: string; name: string; input: Record<string, unknown>; session_handle?: string };
@@ -83,6 +104,8 @@ export function activate(context: vscode.ExtensionContext): void {
           }
         } else {
           log('[tool_call] unknown tool: ' + name);
+          uiState = setDegradedSupport(uiState, `The local runtime requested an unknown tool: ${name}.`);
+          publishSnapshot();
         }
       } else {
         log(`[sidecar event] ${eventMethod}: ${JSON.stringify(payload)}`);
@@ -90,6 +113,8 @@ export function activate(context: vscode.ExtensionContext): void {
     },
     (code, msg) => {
       log(`[sidecar error] ${code}: ${msg}`);
+      uiState = setDegradedSupport(uiState, msg);
+      publishSnapshot();
       vscode.window.showErrorMessage(`CursorBuddy: ${msg}`);
     },
     log
@@ -100,7 +125,11 @@ export function activate(context: vscode.ExtensionContext): void {
     sidecarManager,
     (state) => {
       log(`[session state] ${state}`);
-      webviewProvider.postState({ state });
+      if (state === 'inactive') {
+        resetUiState();
+      }
+      uiState = setSessionState(uiState, state);
+      webviewProvider.postSnapshot(uiState);
     },
     log
   );
@@ -110,18 +139,26 @@ export function activate(context: vscode.ExtensionContext): void {
       const sessionHandle = sessionManager.getSessionHandle();
       if (!sessionHandle) return;
       if (down) {
-        webviewProvider.postTranscript({ role: 'user', text: '...' });
+        uiState = appendTranscriptEntry(uiState, { role: 'user', text: '...' });
+        uiState = setListening(uiState, true);
+        publishSnapshot();
         await sidecarManager.request('audio.start', { session_handle: sessionHandle }).catch(err => log('[audio.start] ' + String(err)));
       } else {
+        uiState = setListening(uiState, false);
+        publishSnapshot();
         await sidecarManager.request('audio.stop', { session_handle: sessionHandle }).catch(err => log('[audio.stop] ' + String(err)));
       }
     },
     onConfirmResult: (id, confirmed) => {
       pendingConfirms.get(id)?.(confirmed);
       pendingConfirms.delete(id);
-      webviewProvider.postConfirmClear();
+      uiState = clearConfirmation(uiState);
+      publishSnapshot();
     },
   });
+
+  uiState = setAudioLevel(uiState, 0.18);
+  uiState = setLatency(uiState, undefined);
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(CursorBuddyWebviewProvider.viewType, webviewProvider),
